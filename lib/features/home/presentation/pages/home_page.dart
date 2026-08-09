@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../features/settings/presentation/pages/settings_page.dart';
 import '../../../recurring_transactions/application/recurring_service.dart';
 import '../../../recurring_transactions/presentation/pages/recurring_transactions_page.dart';
+import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -82,22 +83,118 @@ class _RecurringTransactionsView extends StatelessWidget {
     return const RecurringTransactionsPage();
   }
 }
+enum PeriodView { day, week, month }
+
+class PeriodViewNotifier extends Notifier<PeriodView> {
+  @override
+  PeriodView build() => PeriodView.month;
+
+  void updateView(PeriodView view) {
+    state = view;
+  }
+}
+
+final periodViewProvider = NotifierProvider<PeriodViewNotifier, PeriodView>(PeriodViewNotifier.new);
+
 class _TransactionsView extends ConsumerWidget {
   const _TransactionsView();
+
+  (DateTime start, DateTime end) _getCurrentPeriodBounds(PeriodView view, DateTime now) {
+    switch (view) {
+      case PeriodView.day:
+        return (DateTime(now.year, now.month, now.day), DateTime(now.year, now.month, now.day, 23, 59, 59, 999));
+      case PeriodView.week:
+        // Lunes a Domingo
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        final endOfWeek = startOfWeek.add(const Duration(days: 6));
+        return (
+          DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day),
+          DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59, 999)
+        );
+      case PeriodView.month:
+        final startOfMonth = DateTime(now.year, now.month, 1);
+        final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59, 999);
+        return (startOfMonth, endOfMonth);
+    }
+  }
+
+  (DateTime start, DateTime end) _getPreviousPeriodBounds(PeriodView view, DateTime currentStart, DateTime currentEnd) {
+    switch (view) {
+      case PeriodView.day:
+        final prevDay = currentStart.subtract(const Duration(days: 1));
+        return (prevDay, DateTime(prevDay.year, prevDay.month, prevDay.day, 23, 59, 59, 999));
+      case PeriodView.week:
+        final prevWeekStart = currentStart.subtract(const Duration(days: 7));
+        final prevWeekEnd = currentEnd.subtract(const Duration(days: 7));
+        return (prevWeekStart, prevWeekEnd);
+      case PeriodView.month:
+        final prevMonthStart = DateTime(currentStart.year, currentStart.month - 1, 1);
+        final prevMonthEnd = DateTime(currentStart.year, currentStart.month, 0, 23, 59, 59, 999);
+        return (prevMonthStart, prevMonthEnd);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionsState = ref.watch(transactionsProvider);
+    final periodView = ref.watch(periodViewProvider);
     final theme = Theme.of(context);
 
     return SafeArea(
       child: transactionsState.when(
-        data: (transactions) {
-          double totalGastado = 0;
-          for (var t in transactions) {
-            if (t.type == 'expense') {
-              totalGastado += t.amount;
+        data: (allTransactions) {
+          final now = DateTime.now();
+          final (curStart, curEnd) = _getCurrentPeriodBounds(periodView, now);
+          final (prevStart, prevEnd) = _getPreviousPeriodBounds(periodView, curStart, curEnd);
+
+          double currentTotal = 0;
+          double prevTotal = 0;
+          final currentPeriodTx = <TransactionEntity>[];
+
+          for (var t in allTransactions) {
+            final date = DateTime.parse(t.date);
+            
+            // Check if in current period
+            if (date.isAfter(curStart.subtract(const Duration(milliseconds: 1))) &&
+                date.isBefore(curEnd.add(const Duration(milliseconds: 1)))) {
+              currentPeriodTx.add(t);
+              if (t.type == 'expense') {
+                currentTotal += t.amount;
+              }
             }
+            
+            // Check if in previous period
+            if (date.isAfter(prevStart.subtract(const Duration(milliseconds: 1))) &&
+                date.isBefore(prevEnd.add(const Duration(milliseconds: 1)))) {
+              if (t.type == 'expense') {
+                prevTotal += t.amount;
+              }
+            }
+          }
+
+          // Sort current period tx by date descending
+          currentPeriodTx.sort((a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)));
+
+          // Calculate percentage change
+          double percentageChange = 0;
+          if (prevTotal > 0) {
+            percentageChange = ((currentTotal - prevTotal) / prevTotal) * 100;
+          } else if (currentTotal > 0) {
+            percentageChange = 100; // Increment from 0 to something is a 100% increase mathematically in this context
+          }
+
+          String titleStr = '';
+          switch (periodView) {
+            case PeriodView.day: titleStr = 'Gastado hoy'; break;
+            case PeriodView.week: titleStr = 'Gastado esta semana'; break;
+            case PeriodView.month: titleStr = 'Gastado este mes'; break;
+          }
+
+          String compStr = '';
+          switch (periodView) {
+            case PeriodView.day: compStr = 'que ayer'; break;
+            case PeriodView.week: compStr = 'que la sem. pasada'; break;
+            case PeriodView.month: compStr = 'que el mes pasado'; break;
           }
 
           return Column(
@@ -105,7 +202,7 @@ class _TransactionsView extends ConsumerWidget {
             children: [
               // Cabecera Resumen
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.only(top: 16, left: 24, right: 24, bottom: 24),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: const BorderRadius.only(
@@ -115,15 +212,47 @@ class _TransactionsView extends ConsumerWidget {
                 ),
                 child: Column(
                   children: [
-                    Text('Gastado este mes', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
+                    SegmentedButton<PeriodView>(
+                      segments: const [
+                        ButtonSegment(value: PeriodView.day, label: Text('Día')),
+                        ButtonSegment(value: PeriodView.week, label: Text('Semana')),
+                        ButtonSegment(value: PeriodView.month, label: Text('Mes')),
+                      ],
+                      selected: {periodView},
+                      onSelectionChanged: (val) {
+                        ref.read(periodViewProvider.notifier).updateView(val.first);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Text(titleStr, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
                     const SizedBox(height: 8),
                     Text(
-                      '\$${totalGastado.toStringAsFixed(2)}',
+                      '\$${currentTotal.toStringAsFixed(2)}',
                       style: theme.textTheme.displayMedium?.copyWith(
                         color: theme.colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    if (prevTotal > 0 || currentTotal > 0)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            percentageChange > 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                            color: percentageChange > 0 ? Colors.red : Colors.green,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${percentageChange.abs().toStringAsFixed(1)}% ${percentageChange > 0 ? 'más' : 'menos'} $compStr',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: percentageChange > 0 ? Colors.red : Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -136,17 +265,15 @@ class _TransactionsView extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Expanded(
-                child: transactions.isEmpty
-                    ? const Center(child: Text('No hay transacciones aún.'))
+                child: currentPeriodTx.isEmpty
+                    ? const Center(child: Text('No hay transacciones en este período.'))
                     : ListView.builder(
-                        itemCount: transactions.length,
+                        itemCount: currentPeriodTx.length,
                         itemBuilder: (context, index) {
-                          final t = transactions[index];
+                          final t = currentPeriodTx[index];
                           final isExpense = t.type == 'expense';
                           final isTransfer = t.type == 'transfer';
                           
-                          // TODO: Load Category Name and Icon from DB correctly by id.
-                          // For now, simple fallback UI:
                           return ListTile(
                             onTap: () {
                               context.push('/transaction_details', extra: t);
