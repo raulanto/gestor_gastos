@@ -4,20 +4,31 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../features/settings/presentation/pages/settings_page.dart';
+import '../../../recurring_transactions/application/recurring_service.dart';
+import '../../../recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(recurringServiceProvider).checkAndExecuteRecurring();
+    });
+  }
 
   final List<Widget> _pages = const [
     _TransactionsView(), // Gastos
+    _RecurringTransactionsView(), // Recurrentes
     SettingsPage(), // Configuración
   ];
 
@@ -38,15 +49,23 @@ class _HomePageState extends State<HomePage> {
             label: 'Gastos',
           ),
           NavigationDestination(
+            icon: Icon(Icons.autorenew),
+            label: 'Recurrentes',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.settings),
             label: 'Ajustes',
           ),
         ],
       ),
-      floatingActionButton: _currentIndex == 0 
+      floatingActionButton: _currentIndex < 2 
         ? FloatingActionButton(
             onPressed: () {
-              context.push('/add_transaction');
+              if (_currentIndex == 0) {
+                context.push('/add_transaction');
+              } else if (_currentIndex == 1) {
+                context.push('/add_recurring_transaction');
+              }
             },
             child: const Icon(Icons.add),
           )
@@ -55,6 +74,14 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+class _RecurringTransactionsView extends StatelessWidget {
+  const _RecurringTransactionsView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const RecurringTransactionsPage();
+  }
+}
 class _TransactionsView extends ConsumerWidget {
   const _TransactionsView();
 

@@ -6,6 +6,7 @@ import '../../features/categories/presentation/pages/categories_page.dart';
 import '../../features/transactions/domain/entities/transaction.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/transaction_details_page.dart';
+import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -66,6 +67,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/add_transaction',
         name: 'add_transaction',
         builder: (context, state) => const AddTransactionPage(),
+      ),
+      GoRoute(
+        path: '/add_recurring_transaction',
+        name: 'add_recurring_transaction',
+        builder: (context, state) => const AddRecurringTransactionPage(),
       ),
       GoRoute(
         path: '/edit_transaction',

@@ -22,12 +22,43 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE recurring_transactions(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          amount REAL NOT NULL,
+          account_id INTEGER NOT NULL,
+          category_id INTEGER,
+          note TEXT,
+          type TEXT NOT NULL,
+          periodicity TEXT NOT NULL, 
+          next_execution_date TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE recurring_transaction_splits(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          recurring_transaction_id INTEGER NOT NULL,
+          category_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
+          FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+        )
+      ''');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -88,6 +119,33 @@ class AppDatabase {
       )
     ''');
 
+    // Tablas de Gastos Recurrentes
+    await db.execute('''
+      CREATE TABLE recurring_transactions(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount REAL NOT NULL,
+        account_id INTEGER NOT NULL,
+        category_id INTEGER,
+        note TEXT,
+        type TEXT NOT NULL,
+        periodicity TEXT NOT NULL, 
+        next_execution_date TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE recurring_transaction_splits(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recurring_transaction_id INTEGER NOT NULL,
+        category_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+      )
+    ''');
+
     // PRE-CARGA DE DATOS POR DEFECTO
 
     // 1. Cuentas Base
@@ -115,5 +173,9 @@ class AppDatabase {
     final ocioId = await db.insert('categories', {'name': 'Entretenimiento', 'icon_code': Icons.movie.codePoint, 'color_code': Colors.purple.toARGB32()});
     await db.insert('categories', {'name': 'Suscripciones', 'icon_code': Icons.subscriptions.codePoint, 'color_code': Colors.purple.toARGB32(), 'parent_id': ocioId});
     await db.insert('categories', {'name': 'Salidas', 'icon_code': Icons.nightlife.codePoint, 'color_code': Colors.purple.toARGB32(), 'parent_id': ocioId});
+
+    // Trabajo / Ingresos
+    final trabajoId = await db.insert('categories', {'name': 'Trabajo', 'icon_code': Icons.work.codePoint, 'color_code': Colors.brown.toARGB32()});
+    await db.insert('categories', {'name': 'Pago Nómina', 'icon_code': Icons.attach_money.codePoint, 'color_code': Colors.brown.toARGB32(), 'parent_id': trabajoId});
   }
 }
