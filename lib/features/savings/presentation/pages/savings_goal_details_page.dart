@@ -23,7 +23,34 @@ class SavingsGoalDetailsPage extends ConsumerWidget {
             onPressed: () {
               context.push('/savings_rules', extra: goal);
             },
-          )
+          ),
+          PopupMenuButton<String>(
+            onSelected: (val) {
+              if (val == 'delete') {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Eliminar Meta'),
+                    content: const Text('¿Estás seguro de que deseas eliminar esta meta de ahorro? Se eliminará todo su historial.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+                      TextButton(
+                        onPressed: () {
+                          ref.read(savingsGoalsProvider.notifier).deleteGoal(goal.id!);
+                          Navigator.pop(ctx); // Close dialog
+                          context.pop(); // Go back
+                        },
+                        child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'delete', child: Text('Eliminar Meta', style: TextStyle(color: Colors.red))),
+            ],
+          ),
         ],
       ),
       body: txsAsync.when(
@@ -71,22 +98,26 @@ class SavingsGoalDetailsPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showTransactionModal(context, ref, true),
+      floatingActionButton: goal.status == 'completed' ? null : FloatingActionButton.extended(
+        onPressed: () {
+          final txs = txsAsync.value ?? [];
+          final savedAmount = txs.fold<double>(0, (sum, tx) => tx.type == 'deposit' ? sum + tx.amount : sum - tx.amount);
+          _showTransactionModal(context, ref, true, savedAmount);
+        },
         label: const Text('Aportar'),
         icon: const Icon(Icons.add),
       ),
     );
   }
 
-  void _showTransactionModal(BuildContext context, WidgetRef ref, bool isDeposit) {
+  void _showTransactionModal(BuildContext context, WidgetRef ref, bool isDeposit, double savedAmount) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, top: 16, left: 16, right: 16),
-          child: _TransactionForm(goalId: goal.id!, isDeposit: isDeposit),
+          child: _TransactionForm(goal: goal, savedAmount: savedAmount, isDeposit: isDeposit),
         );
       }
     );
@@ -94,9 +125,10 @@ class SavingsGoalDetailsPage extends ConsumerWidget {
 }
 
 class _TransactionForm extends ConsumerStatefulWidget {
-  final int goalId;
+  final SavingsGoalEntity goal;
+  final double savedAmount;
   final bool isDeposit;
-  const _TransactionForm({required this.goalId, required this.isDeposit});
+  const _TransactionForm({required this.goal, required this.savedAmount, required this.isDeposit});
 
   @override
   ConsumerState<_TransactionForm> createState() => _TransactionFormState();
@@ -137,7 +169,7 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
                 final tx = SavingsTransactionEntity(
-                  goalId: widget.goalId,
+                  goalId: widget.goal.id!,
                   accountId: 1, // FIX: Need real account selection in UI
                   amount: _amount,
                   date: DateTime.now().toIso8601String(),
@@ -148,8 +180,21 @@ class _TransactionFormState extends ConsumerState<_TransactionForm> {
                 final repo = ref.read(savingsRepositoryProvider);
                 await repo.createTransaction(tx);
                 
+                // Check for completion
+                if (widget.isDeposit) {
+                  final newTotal = widget.savedAmount + _amount;
+                  if (newTotal >= widget.goal.targetAmount && widget.goal.status != 'completed') {
+                    await ref.read(savingsGoalsProvider.notifier).updateGoal(
+                      widget.goal.copyWith(status: 'completed')
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Meta de ahorro cumplida!')));
+                    }
+                  }
+                }
+                
                 // Refresh list
-                ref.invalidate(savingsGoalTransactionsProvider(widget.goalId));
+                ref.invalidate(savingsGoalTransactionsProvider(widget.goal.id!));
                 
                 if (!context.mounted) return;
                 Navigator.of(context).pop();

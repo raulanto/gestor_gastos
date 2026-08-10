@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -95,6 +95,20 @@ class AppDatabase {
           value REAL NOT NULL,
           status TEXT NOT NULL DEFAULT 'active',
           FOREIGN KEY (goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
+        )
+      ''');
+    }
+    
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE budgets(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          category_id INTEGER,
+          savings_goal_id INTEGER,
+          amount REAL NOT NULL,
+          month_year TEXT NOT NULL,
+          FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+          FOREIGN KEY (savings_goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
         )
       ''');
     }
@@ -220,6 +234,19 @@ class AppDatabase {
         value REAL NOT NULL,
         status TEXT NOT NULL DEFAULT 'active',
         FOREIGN KEY (goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
+      )
+    ''');
+
+    // Tabla de Presupuestos
+    await db.execute('''
+      CREATE TABLE budgets(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER,
+        savings_goal_id INTEGER,
+        amount REAL NOT NULL,
+        month_year TEXT NOT NULL,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+        FOREIGN KEY (savings_goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
       )
     ''');
 

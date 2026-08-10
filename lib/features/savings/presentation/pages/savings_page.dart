@@ -15,17 +15,27 @@ class SavingsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Caja de Ahorros'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check_circle_outline),
+            tooltip: 'Metas Cumplidas',
+            onPressed: () {
+              context.push('/savings_completed');
+            },
+          ),
+        ],
       ),
       body: savingsState.when(
         data: (goals) {
-          if (goals.isEmpty) {
-            return const Center(child: Text('No tienes metas de ahorro todavía.'));
+          final activeGoals = goals.where((g) => g.status == 'active').toList();
+          if (activeGoals.isEmpty) {
+            return const Center(child: Text('No tienes metas de ahorro activas.'));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: goals.length,
+            itemCount: activeGoals.length,
             itemBuilder: (context, index) {
-              final goal = goals[index];
+              final goal = activeGoals[index];
               return SavingsGoalCard(goal: goal);
             },
           );

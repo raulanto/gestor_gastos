@@ -49,17 +49,17 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
               ListTile(
                 leading: const Icon(Icons.add_circle_outline),
                 title: const Text('Añadir Regla de Redondeo'),
-                onTap: () => _addRule('round_up', 0),
+                onTap: () => _addRule(rules, 'round_up', 0),
               ),
               ListTile(
                 leading: const Icon(Icons.percent),
                 title: const Text('Añadir Porcentaje (ej. 10%)'),
-                onTap: () => _addRule('fixed_percentage', 10),
+                onTap: () => _addRule(rules, 'fixed_percentage', 10),
               ),
               ListTile(
                 leading: const Icon(Icons.calendar_month),
                 title: const Text('Añadir Ahorro Programado (ej. \$50)'),
-                onTap: () => _addRule('scheduled', 50),
+                onTap: () => _addRule(rules, 'scheduled', 50),
               ),
             ],
           );
@@ -70,7 +70,15 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
     );
   }
 
-  Future<void> _addRule(String type, double value) async {
+  Future<void> _addRule(List<SavingsRuleEntity> rules, String type, double value) async {
+    final exists = rules.any((r) => r.ruleType == type);
+    if (exists) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Esta regla ya está configurada para esta meta')));
+      }
+      return;
+    }
+
     final repo = ref.read(savingsRepositoryProvider);
     await repo.createRule(SavingsRuleEntity(
       goalId: widget.goal.id!,

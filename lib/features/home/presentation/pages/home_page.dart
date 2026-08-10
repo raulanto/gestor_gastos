@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../features/settings/presentation/pages/settings_page.dart';
+
+import '../../../budgets/presentation/pages/budgets_page.dart';
 import '../../../recurring_transactions/application/recurring_service.dart';
 import '../../../recurring_transactions/presentation/pages/recurring_transactions_page.dart';
 import '../../../savings/application/savings_schedule_service.dart';
@@ -34,6 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     _TransactionsView(), // Gastos
     _RecurringTransactionsView(), // Recurrentes
     _SavingsView(), // Ahorro
+    BudgetsPage(),
     SettingsPage(), // Configuración
   ];
 
@@ -50,16 +53,24 @@ class _HomePageState extends ConsumerState<HomePage> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.receipt_long),
-            label: 'Gastos',
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Icons.autorenew),
+            icon: Icon(Icons.autorenew_outlined),
+            selectedIcon: Icon(Icons.autorenew),
             label: 'Recurrentes',
           ),
           NavigationDestination(
-            icon: Icon(Icons.savings),
+            icon: Icon(Icons.savings_outlined),
+            selectedIcon: Icon(Icons.savings),
             label: 'Ahorro',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.pie_chart_outline),
+            selectedIcon: Icon(Icons.pie_chart),
+            label: 'Presupuesto',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings),
@@ -67,7 +78,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: _currentIndex < 3 
+      floatingActionButton: [0, 1, 2].contains(_currentIndex)
         ? FloatingActionButton(
             onPressed: () {
               if (_currentIndex == 0) {

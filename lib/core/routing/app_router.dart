@@ -15,8 +15,10 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/onboarding/presentation/pages/welcome_page.dart';
 import '../../features/savings/domain/entities/savings_goal.dart';
 import '../../features/savings/presentation/pages/add_savings_goal_page.dart';
+import '../../features/savings/presentation/pages/savings_completed_page.dart';
 import '../../features/savings/presentation/pages/savings_goal_details_page.dart';
 import '../../features/savings/presentation/pages/savings_rules_page.dart';
+import '../../features/budgets/presentation/pages/add_budget_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -116,6 +118,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final goal = state.extra as SavingsGoalEntity;
           return SavingsRulesPage(goal: goal);
+        },
+      ),
+      GoRoute(
+        path: '/savings_completed',
+        name: 'savings_completed',
+        builder: (context, state) => const SavingsCompletedPage(),
+      ),
+      GoRoute(
+        path: '/add_budget',
+        name: 'add_budget',
+        builder: (context, state) {
+          final monthYear = state.extra as String;
+          return AddBudgetPage(monthYear: monthYear);
         },
       ),
     ],
