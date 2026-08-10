@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
+import '../../../savings/application/savings_service.dart';
 import '../../domain/entities/transaction.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../data/datasources/transaction_local_data_source.dart';
@@ -34,6 +36,12 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionEntity>> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final newT = await _repository.createTransaction(transaction);
+      
+      // Process savings rules in the background
+      ref.read(savingsServiceProvider).processTransactionRules(newT).catchError((e) {
+        debugPrint('Error processing savings rules: $e');
+      });
+      
       return [newT, ...?previousState];
     });
   }

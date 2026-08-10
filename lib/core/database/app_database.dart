@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -56,6 +56,45 @@ class AppDatabase {
           amount REAL NOT NULL,
           FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
           FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+        )
+      ''');
+    }
+    
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE savings_goals(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          target_amount REAL NOT NULL,
+          deadline_date TEXT,
+          icon_code INTEGER NOT NULL,
+          color_code INTEGER NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active'
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE savings_transactions(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          goal_id INTEGER NOT NULL,
+          account_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          date TEXT NOT NULL,
+          type TEXT NOT NULL,
+          reason TEXT,
+          FOREIGN KEY (goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE,
+          FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE savings_rules(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          goal_id INTEGER NOT NULL,
+          rule_type TEXT NOT NULL,
+          value REAL NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          FOREIGN KEY (goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
         )
       ''');
     }
@@ -143,6 +182,44 @@ class AppDatabase {
         amount REAL NOT NULL,
         FOREIGN KEY (recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+      )
+    ''');
+
+    // Tablas de Ahorro
+    await db.execute('''
+      CREATE TABLE savings_goals(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        target_amount REAL NOT NULL,
+        deadline_date TEXT,
+        icon_code INTEGER NOT NULL,
+        color_code INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active'
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE savings_transactions(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_id INTEGER NOT NULL,
+        account_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        type TEXT NOT NULL,
+        reason TEXT,
+        FOREIGN KEY (goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE savings_rules(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_id INTEGER NOT NULL,
+        rule_type TEXT NOT NULL,
+        value REAL NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        FOREIGN KEY (goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
       )
     ''');
 

@@ -18,7 +18,9 @@ const periodicityMap = {
 };
 
 class AddRecurringTransactionPage extends ConsumerStatefulWidget {
-  const AddRecurringTransactionPage({super.key});
+  final RecurringTransactionEntity? transactionToEdit;
+
+  const AddRecurringTransactionPage({super.key, this.transactionToEdit});
 
   @override
   ConsumerState<AddRecurringTransactionPage> createState() => _AddRecurringTransactionPageState();
@@ -38,6 +40,25 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
   final List<RecurringTransactionSplit> _splits = [];
 
   final List<String> _periodicities = ['daily', 'weekly', 'biweekly', 'monthly', 'yearly'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.transactionToEdit != null) {
+      final t = widget.transactionToEdit!;
+      _amountController.text = t.amount.toString();
+      _noteController.text = t.note ?? '';
+      _selectedAccountId = t.accountId;
+      _selectedCategoryId = t.categoryId;
+      _transactionType = t.type;
+      _periodicity = t.periodicity;
+      _nextExecutionDate = DateTime.parse(t.nextExecutionDate);
+      if (t.splits.isNotEmpty) {
+        _isSplitMode = true;
+        _splits.addAll(t.splits);
+      }
+    }
+  }
 
   Future<void> _selectCategory(BuildContext context, Function(Category) onSelected) async {
     final categoriesState = ref.read(categoriesProvider);
@@ -188,18 +209,34 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
       }
     }
 
-    final rt = RecurringTransactionEntity(
-      amount: amount,
-      accountId: _selectedAccountId!,
-      categoryId: _isSplitMode ? null : _selectedCategoryId!,
-      note: _noteController.text,
-      type: _transactionType,
-      periodicity: _periodicity,
-      nextExecutionDate: _nextExecutionDate.toIso8601String(),
-      splits: _isSplitMode ? _splits : [],
-    );
-
-    await ref.read(recurringTransactionsProvider.notifier).add(rt);
+    if (widget.transactionToEdit != null) {
+      final updatedRt = RecurringTransactionEntity(
+        id: widget.transactionToEdit!.id,
+        amount: amount,
+        accountId: _selectedAccountId!,
+        categoryId: _isSplitMode ? null : _selectedCategoryId!,
+        note: _noteController.text,
+        type: _transactionType,
+        periodicity: _periodicity,
+        nextExecutionDate: _nextExecutionDate.toIso8601String(),
+        splits: _isSplitMode ? _splits : [],
+        status: widget.transactionToEdit!.status,
+      );
+      await ref.read(recurringTransactionsProvider.notifier).updateRecurringTransaction(updatedRt);
+    } else {
+      final rt = RecurringTransactionEntity(
+        amount: amount,
+        accountId: _selectedAccountId!,
+        categoryId: _isSplitMode ? null : _selectedCategoryId!,
+        note: _noteController.text,
+        type: _transactionType,
+        periodicity: _periodicity,
+        nextExecutionDate: _nextExecutionDate.toIso8601String(),
+        splits: _isSplitMode ? _splits : [],
+      );
+      await ref.read(recurringTransactionsProvider.notifier).add(rt);
+    }
+    
     if (mounted) {
       context.pop();
     }
@@ -224,7 +261,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nuevo Gasto Recurrente')),
+      appBar: AppBar(title: Text(widget.transactionToEdit != null ? 'Editar Gasto Recurrente' : 'Nuevo Gasto Recurrente')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

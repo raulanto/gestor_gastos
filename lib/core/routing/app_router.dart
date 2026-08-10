@@ -6,12 +6,17 @@ import '../../features/categories/presentation/pages/categories_page.dart';
 import '../../features/transactions/domain/entities/transaction.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/transaction_details_page.dart';
+import '../../features/recurring_transactions/domain/entities/recurring_transaction.dart';
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/onboarding/presentation/pages/welcome_page.dart';
+import '../../features/savings/domain/entities/savings_goal.dart';
+import '../../features/savings/presentation/pages/add_savings_goal_page.dart';
+import '../../features/savings/presentation/pages/savings_goal_details_page.dart';
+import '../../features/savings/presentation/pages/savings_rules_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -71,7 +76,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add_recurring_transaction',
         name: 'add_recurring_transaction',
-        builder: (context, state) => const AddRecurringTransactionPage(),
+        builder: (context, state) {
+          final tx = state.extra as RecurringTransactionEntity?;
+          return AddRecurringTransactionPage(transactionToEdit: tx);
+        },
       ),
       GoRoute(
         path: '/edit_transaction',
@@ -87,6 +95,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final transaction = state.extra as TransactionEntity;
           return TransactionDetailsPage(transaction: transaction);
+        },
+      ),
+      GoRoute(
+        path: '/add_savings_goal',
+        name: 'add_savings_goal',
+        builder: (context, state) => const AddSavingsGoalPage(),
+      ),
+      GoRoute(
+        path: '/savings_goal_details',
+        name: 'savings_goal_details',
+        builder: (context, state) {
+          final goal = state.extra as SavingsGoalEntity;
+          return SavingsGoalDetailsPage(goal: goal);
+        },
+      ),
+      GoRoute(
+        path: '/savings_rules',
+        name: 'savings_rules',
+        builder: (context, state) {
+          final goal = state.extra as SavingsGoalEntity;
+          return SavingsRulesPage(goal: goal);
         },
       ),
     ],

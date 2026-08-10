@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../providers/recurring_transaction_provider.dart';
@@ -76,6 +77,35 @@ class RecurringTransactionsPage extends ConsumerWidget {
                             onChanged: (val) {
                               ref.read(recurringTransactionsProvider.notifier).toggleStatus(rt.id!);
                             },
+                          ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                context.push('/add_recurring_transaction', extra: rt);
+                              } else if (value == 'delete') {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Eliminar Gasto Recurrente'),
+                                    content: const Text('¿Estás seguro de que deseas eliminar este gasto recurrente? No se eliminarán los cobros ya generados.'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+                                      TextButton(
+                                        onPressed: () {
+                                          ref.read(recurringTransactionsProvider.notifier).remove(rt.id!);
+                                          Navigator.pop(ctx);
+                                        },
+                                        child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                                      ),
+                                    ],
+                                  )
+                                );
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(value: 'edit', child: Text('Editar')),
+                              const PopupMenuItem(value: 'delete', child: Text('Eliminar', style: TextStyle(color: Colors.red))),
+                            ],
                           ),
                         ],
                       ),

@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../features/settings/presentation/pages/settings_page.dart';
 import '../../../recurring_transactions/application/recurring_service.dart';
 import '../../../recurring_transactions/presentation/pages/recurring_transactions_page.dart';
+import '../../../savings/application/savings_schedule_service.dart';
+import '../../../savings/presentation/pages/savings_page.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
 
@@ -24,12 +26,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(recurringServiceProvider).checkAndExecuteRecurring();
+      ref.read(savingsScheduleServiceProvider).checkAndExecuteScheduledSavings();
     });
   }
 
   final List<Widget> _pages = const [
     _TransactionsView(), // Gastos
     _RecurringTransactionsView(), // Recurrentes
+    _SavingsView(), // Ahorro
     SettingsPage(), // Configuración
   ];
 
@@ -54,18 +58,24 @@ class _HomePageState extends ConsumerState<HomePage> {
             label: 'Recurrentes',
           ),
           NavigationDestination(
+            icon: Icon(Icons.savings),
+            label: 'Ahorro',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.settings),
             label: 'Ajustes',
           ),
         ],
       ),
-      floatingActionButton: _currentIndex < 2 
+      floatingActionButton: _currentIndex < 3 
         ? FloatingActionButton(
             onPressed: () {
               if (_currentIndex == 0) {
                 context.push('/add_transaction');
               } else if (_currentIndex == 1) {
                 context.push('/add_recurring_transaction');
+              } else if (_currentIndex == 2) {
+                context.push('/add_savings_goal');
               }
             },
             child: const Icon(Icons.add),
@@ -81,6 +91,15 @@ class _RecurringTransactionsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const RecurringTransactionsPage();
+  }
+}
+
+class _SavingsView extends StatelessWidget {
+  const _SavingsView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SavingsPage();
   }
 }
 enum PeriodView { day, week, month }
