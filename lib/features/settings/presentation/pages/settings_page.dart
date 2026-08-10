@@ -1,48 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
+import '../widgets/settings_user_profile.dart';
+import '../widgets/settings_theme_card.dart';
+import '../widgets/settings_management_card.dart';
 
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authNotifierProvider).value;
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configuración'),
+        centerTitle: false,
       ),
-      body: ListView(
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(user?.username ?? 'Usuario'),
-            accountEmail: const Text('Gestor de Gastos'),
-            currentAccountPicture: const CircleAvatar(
-              child: Icon(Icons.person),
-            ),
+      body: const SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SettingsUserProfile(),
+              SettingsThemeCard(),
+              SizedBox(height: 24),
+              SettingsManagementCard(),
+              SizedBox(height: 32),
+            ],
           ),
-          ListTile(
-            leading: const Icon(Icons.account_balance_wallet),
-            title: const Text('Mis Cuentas'),
-            subtitle: const Text('Administrar cuentas de efectivo, bancos...'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              context.push('/accounts');
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.category),
-            title: const Text('Mis Categorías'),
-            subtitle: const Text('Administrar categorías de gastos'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              context.push('/categories');
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
