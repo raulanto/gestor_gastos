@@ -38,10 +38,6 @@ class AccountLocalDataSource {
 
   Future<void> deleteAccount(int id) async {
     final db = await _appDatabase.database;
-    await db.delete(
-      'accounts',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('accounts', where: 'id = ?', whereArgs: [id]);
   }
 }
