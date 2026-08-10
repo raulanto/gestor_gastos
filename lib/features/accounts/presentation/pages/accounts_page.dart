@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/account_provider.dart';
+import '../widgets/add_edit_account_dialog.dart';
 
 class AccountsPage extends ConsumerWidget {
   const AccountsPage({super.key});
@@ -24,14 +25,32 @@ class AccountsPage extends ConsumerWidget {
                 leading: CircleAvatar(
                   backgroundColor: Color(account.colorCode).withValues(alpha: 0.2),
                   child: Icon(
-                    // ignore: non_const_argument_for_const_parameter
                     IconData(account.iconCode, fontFamily: 'MaterialIcons'),
                     color: Color(account.colorCode),
                   ),
                 ),
                 title: Text(account.name),
                 subtitle: Text('Saldo: \$${account.balance.toStringAsFixed(2)}'),
-                trailing: const Icon(Icons.more_vert),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AddEditAccountDialog(account: account),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        ref.read(accountsProvider.notifier).deleteAccount(account.id);
+                      },
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -41,7 +60,10 @@ class AccountsPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Añadir cuenta nueva
+          showDialog(
+            context: context,
+            builder: (_) => const AddEditAccountDialog(),
+          );
         },
         child: const Icon(Icons.add),
       ),

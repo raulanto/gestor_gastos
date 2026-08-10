@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/category_provider.dart';
+import '../widgets/add_edit_category_dialog.dart';
 
 class CategoriesPage extends ConsumerWidget {
   const CategoriesPage({super.key});
@@ -17,7 +18,6 @@ class CategoriesPage extends ConsumerWidget {
             return const Center(child: Text('No hay categorías configuradas.'));
           }
 
-          // Agrupar categorías
           final mainCategories = categories.where((c) => c.parentId == null).toList();
           final subCategories = categories.where((c) => c.parentId != null).toList();
 
@@ -27,33 +27,69 @@ class CategoriesPage extends ConsumerWidget {
               final mainCategory = mainCategories[index];
               final children = subCategories.where((c) => c.parentId == mainCategory.id).toList();
 
+              final editButton = IconButton(
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                onPressed: () {
+                  showDialog(context: context, builder: (_) => AddEditCategoryDialog(category: mainCategory));
+                },
+              );
+              final deleteButton = IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  ref.read(categoriesProvider.notifier).deleteCategory(mainCategory.id);
+                },
+              );
+
+              final mainActions = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [editButton, deleteButton],
+              );
+
               if (children.isEmpty) {
                 return ListTile(
-                  leading: Icon(
-                    // ignore: non_const_argument_for_const_parameter
-                    IconData(mainCategory.iconCode, fontFamily: 'MaterialIcons'),
-                    color: Color(mainCategory.colorCode),
+                  leading: CircleAvatar(
+                    backgroundColor: Color(mainCategory.colorCode).withValues(alpha: 0.2),
+                    child: Icon(IconData(mainCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(mainCategory.colorCode)),
                   ),
                   title: Text(mainCategory.name),
+                  trailing: mainActions,
                 );
               }
 
               return ExpansionTile(
-                leading: Icon(
-                  // ignore: non_const_argument_for_const_parameter
-                  IconData(mainCategory.iconCode, fontFamily: 'MaterialIcons'),
-                  color: Color(mainCategory.colorCode),
+                controlAffinity: ListTileControlAffinity.leading,
+                leading: CircleAvatar(
+                  backgroundColor: Color(mainCategory.colorCode).withValues(alpha: 0.2),
+                  child: Icon(IconData(mainCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(mainCategory.colorCode)),
                 ),
                 title: Text(mainCategory.name),
+                trailing: mainActions,
                 children: children.map((child) {
                   return ListTile(
                     contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
-                    leading: Icon(
-                      // ignore: non_const_argument_for_const_parameter
-                      IconData(child.iconCode, fontFamily: 'MaterialIcons'),
-                      color: Color(child.colorCode),
+                    leading: CircleAvatar(
+                      backgroundColor: Color(child.colorCode).withValues(alpha: 0.2),
+                      child: Icon(IconData(child.iconCode, fontFamily: 'MaterialIcons'), color: Color(child.colorCode), size: 18),
+                      radius: 16,
                     ),
                     title: Text(child.name),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            showDialog(context: context, builder: (_) => AddEditCategoryDialog(category: child));
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            ref.read(categoriesProvider.notifier).deleteCategory(child.id);
+                          },
+                        ),
+                      ],
+                    ),
                   );
                 }).toList(),
               );
@@ -65,7 +101,7 @@ class CategoriesPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Añadir categoría nueva
+          showDialog(context: context, builder: (_) => const AddEditCategoryDialog());
         },
         child: const Icon(Icons.add),
       ),
