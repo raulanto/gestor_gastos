@@ -43,18 +43,15 @@ final monthlyBudgetsProvider = FutureProvider.family<List<BudgetProgress>, Strin
 });
 
 final globalBudgetProvider = FutureProvider.family<Map<String, double>, String>((ref, monthYear) async {
-  ref.watch(transactionsProvider);
-  final repo = ref.watch(budgetRepositoryProvider);
-  final budgets = await repo.getBudgetsByMonth(monthYear);
+  final progressList = await ref.watch(monthlyBudgetsProvider(monthYear).future);
   
   double totalBudgeted = 0.0;
   double totalSpent = 0.0;
   
-  for (var b in budgets) {
-    // Solo sumamos los de gastos para el presupuesto global de gastos, no los de ahorro
-    if (b.categoryId != null) {
-      totalBudgeted += b.amount;
-      totalSpent += await repo.getActualSpendForCategory(b.categoryId!, monthYear);
+  for (var p in progressList) {
+    if (p.budget.categoryId != null) {
+      totalBudgeted += p.budget.amount;
+      totalSpent += p.actualAmount;
     }
   }
   

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/budget.dart';
 import '../providers/budgets_provider.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
@@ -87,13 +88,24 @@ class BudgetListView extends ConsumerWidget {
                     ),
                   ],
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    ref.read(budgetRepositoryProvider).deleteBudget(b.id!);
-                    ref.invalidate(monthlyBudgetsProvider(monthYearKey));
-                    ref.invalidate(globalBudgetProvider(monthYearKey));
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        _showEditBudgetDialog(context, ref, b, monthYearKey);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        ref.read(budgetRepositoryProvider).deleteBudget(b.id!);
+                        ref.invalidate(monthlyBudgetsProvider(monthYearKey));
+                        ref.invalidate(globalBudgetProvider(monthYearKey));
+                      },
+                    ),
+                  ],
                 ),
                 isThreeLine: true,
               ),
@@ -103,6 +115,42 @@ class BudgetListView extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, st) => Center(child: Text('Error: $e')),
+    );
+  }
+
+  void _showEditBudgetDialog(BuildContext context, WidgetRef ref, BudgetEntity budget, String monthYearKey) {
+    final controller = TextEditingController(text: budget.amount.toStringAsFixed(2));
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Editar Presupuesto'),
+          content: TextField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(labelText: 'Monto Límite', border: OutlineInputBorder()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final newAmount = double.tryParse(controller.text);
+                if (newAmount != null && newAmount > 0) {
+                  final updatedBudget = budget.copyWith(amount: newAmount);
+                  await ref.read(budgetRepositoryProvider).updateBudget(updatedBudget);
+                  ref.invalidate(monthlyBudgetsProvider(monthYearKey));
+                  ref.invalidate(globalBudgetProvider(monthYearKey));
+                  if (context.mounted) Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
