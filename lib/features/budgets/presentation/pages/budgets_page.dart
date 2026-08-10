@@ -34,31 +34,54 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Presupuestos'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              context.push('/add_budget', extra: _monthYearKey);
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          BudgetMonthSelector(
-            displayMonth: _displayMonth,
-            onPrevMonth: _prevMonth,
-            onNextMonth: _nextMonth,
-          ),
-          BudgetGlobalCard(monthYearKey: _monthYearKey),
-          const SizedBox(height: 16),
-          Expanded(
-            child: BudgetListView(monthYearKey: _monthYearKey),
-          ),
-        ],
+    final theme = Theme.of(context);
+    
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        color: theme.colorScheme.primary,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Presupuestos', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
+                    icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+                    onPressed: () {
+                      context.push('/add_budget', extra: _monthYearKey);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            BudgetMonthSelector(
+              displayMonth: _displayMonth,
+              onPrevMonth: _prevMonth,
+              onNextMonth: _nextMonth,
+            ),
+            BudgetGlobalCard(monthYearKey: _monthYearKey),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: BudgetListView(monthYearKey: _monthYearKey),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

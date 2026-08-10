@@ -28,36 +28,40 @@ class BudgetGlobalCard extends ConsumerWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Card(
-            elevation: 0,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Presupuesto Global',
+                style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Presupuesto Global (Gastos)',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: progress,
-                    color: progressColor,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    minHeight: 8,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Gastado: \$${spent.toStringAsFixed(2)}'),
-                      Text('Límite: \$${budgeted.toStringAsFixed(2)}'),
-                    ],
-                  ),
+                  Text('\$${spent.toStringAsFixed(2)}', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  Text('${(progress * 100).toStringAsFixed(0)}%', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
                 ],
               ),
-            ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  color: progressColor,
+                  backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+                  minHeight: 12,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Límite: \$${budgeted.toStringAsFixed(2)}',
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
+                textAlign: TextAlign.right,
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         );
       },

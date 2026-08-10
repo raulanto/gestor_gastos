@@ -21,12 +21,12 @@ class BudgetMonthSelector extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.chevron_left),
+            icon: Icon(Icons.chevron_left, color: theme.colorScheme.onPrimary),
             onPressed: onPrevMonth,
           ),
-          Text(displayMonth, style: theme.textTheme.titleLarge),
+          Text(displayMonth, style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
           IconButton(
-            icon: const Icon(Icons.chevron_right),
+            icon: Icon(Icons.chevron_right, color: theme.colorScheme.onPrimary),
             onPressed: onNextMonth,
           ),
         ],

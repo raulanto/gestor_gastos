@@ -3,6 +3,7 @@ import '../../domain/entities/budget.dart';
 
 class BudgetLocalDataSource {
   final AppDatabase appDb;
+  final Set<String> _cloningMonths = {};
 
   BudgetLocalDataSource(this.appDb);
 
@@ -15,27 +16,42 @@ class BudgetLocalDataSource {
     );
 
     if (maps.isEmpty) {
-      // Intentar copiar del mes anterior
-      final prevMonthYear = _getPreviousMonthYear(monthYear);
-      final prevMaps = await db.query(
-        'budgets',
-        where: 'month_year = ?',
-        whereArgs: [prevMonthYear],
-      );
+      if (_cloningMonths.contains(monthYear)) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        return getBudgetsByMonth(monthYear);
+      }
+      _cloningMonths.add(monthYear);
 
-      if (prevMaps.isNotEmpty) {
-        // Clonar para el mes actual
-        List<BudgetEntity> cloned = [];
-        await db.transaction((txn) async {
-          for (var map in prevMaps) {
-            final newMap = Map<String, dynamic>.from(map);
-            newMap.remove('id');
-            newMap['month_year'] = monthYear;
-            final id = await txn.insert('budgets', newMap);
-            cloned.add(BudgetEntity.fromMap({...newMap, 'id': id}));
+      try {
+        final checkMaps = await db.query('budgets', where: 'month_year = ?', whereArgs: [monthYear]);
+        if (checkMaps.isEmpty) {
+          // Intentar copiar del mes anterior
+          final prevMonthYear = _getPreviousMonthYear(monthYear);
+          final prevMaps = await db.query(
+            'budgets',
+            where: 'month_year = ?',
+            whereArgs: [prevMonthYear],
+          );
+
+          if (prevMaps.isNotEmpty) {
+            // Clonar para el mes actual
+            List<BudgetEntity> cloned = [];
+            await db.transaction((txn) async {
+              for (var map in prevMaps) {
+                final newMap = Map<String, dynamic>.from(map);
+                newMap.remove('id');
+                newMap['month_year'] = monthYear;
+                final id = await txn.insert('budgets', newMap);
+                cloned.add(BudgetEntity.fromMap({...newMap, 'id': id}));
+              }
+            });
+            return cloned;
           }
-        });
-        return cloned;
+        } else {
+          return checkMaps.map((m) => BudgetEntity.fromMap(m)).toList();
+        }
+      } finally {
+        _cloningMonths.remove(monthYear);
       }
     }
 

@@ -27,7 +27,7 @@ class BudgetListView extends ConsumerWidget {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.only(bottom: 100),
           itemCount: progressList.length,
           itemBuilder: (context, index) {
             final item = progressList[index];
@@ -63,51 +63,77 @@ class BudgetListView extends ConsumerWidget {
               barColor = Colors.orange;
             }
 
-            return Card(
-              elevation: 0,
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: color,
-                  child: Icon(iconData, color: Colors.white),
-                ),
-                title: Text(title),
-                subtitle: Column(
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: color.withValues(alpha: 0.2),
+                          child: Icon(iconData, color: color),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                              Text('\$${item.actualAmount.toStringAsFixed(2)} / \$${b.amount.toStringAsFixed(2)}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                            ],
+                          ),
+                        ),
+                        PopupMenuButton<String>(
+                          icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurfaceVariant),
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _showEditBudgetDialog(context, ref, b, monthYearKey);
+                            } else if (value == 'delete') {
+                              ref.read(budgetRepositoryProvider).deleteBudget(b.id!);
+                              ref.invalidate(monthlyBudgetsProvider(monthYearKey));
+                              ref.invalidate(globalBudgetProvider(monthYearKey));
+                            }
+                          },
+                          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                            const PopupMenuItem<String>(
+                              value: 'edit',
+                              child: Text('Editar Límite'),
+                            ),
+                            const PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Text('Eliminar', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Consumido', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                        Text('${(prog * 100).toStringAsFixed(0)}%', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: barColor)),
+                      ],
+                    ),
                     const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: prog.clamp(0.0, 1.0),
-                      color: barColor,
-                      backgroundColor:
-                          theme.colorScheme.surfaceContainerHighest,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '\$${item.actualAmount.toStringAsFixed(2)} de \$${b.amount.toStringAsFixed(2)}',
-                    ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        _showEditBudgetDialog(context, ref, b, monthYearKey);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        ref.read(budgetRepositoryProvider).deleteBudget(b.id!);
-                        ref.invalidate(monthlyBudgetsProvider(monthYearKey));
-                        ref.invalidate(globalBudgetProvider(monthYearKey));
-                      },
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: prog.clamp(0.0, 1.0),
+                        minHeight: 8,
+                        backgroundColor: barColor.withValues(alpha: 0.15),
+                        valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                      ),
                     ),
                   ],
                 ),
-                isThreeLine: true,
               ),
             );
           },
