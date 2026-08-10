@@ -10,7 +10,11 @@ import '../../features/recurring_transactions/domain/entities/recurring_transact
 import '../../features/recurring_transactions/presentation/pages/add_recurring_transaction_page.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/providers/pin_provider.dart';
+import '../../features/auth/presentation/providers/session_provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/pin_setup_page.dart';
+import '../../features/auth/presentation/pages/pin_login_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/onboarding/presentation/pages/welcome_page.dart';
 import '../../features/savings/domain/entities/savings_goal.dart';
@@ -22,24 +26,37 @@ import '../../features/budgets/presentation/pages/add_budget_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
+  final pinState = ref.watch(pinProvider);
+  final sessionState = ref.watch(sessionProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      // Si la carga de autenticación está en progreso, esperar.
-      if (authState.isLoading) return null;
+      if (authState.isLoading || pinState.isLoading) return null;
 
       final isAuth = authState.value != null;
+      final hasPin = pinState.value != null;
+      final isUnlocked = sessionState;
+
       final isGoingToAuthPages = state.matchedLocation == '/' || state.matchedLocation == '/login';
+      final isGoingToPinSetup = state.matchedLocation == '/pin_setup';
+      final isGoingToPinLogin = state.matchedLocation == '/pin_login';
 
-      // Si el usuario está autenticado y está en páginas de inicio/login, mandarlo a /home
-      if (isAuth && isGoingToAuthPages) {
-        return '/home';
-      }
-
-      // Si NO está autenticado e intenta ir a cualquier lugar que no sea inicio/login, mandarlo a /
       if (!isAuth && !isGoingToAuthPages) {
         return '/';
+      }
+
+      if (isAuth) {
+        if (!hasPin && !isGoingToPinSetup) {
+          return '/pin_setup';
+        }
+        if (hasPin && !isUnlocked && !isGoingToPinLogin) {
+          return '/pin_login';
+        }
+        
+        if (hasPin && isUnlocked && (isGoingToAuthPages || isGoingToPinSetup || isGoingToPinLogin)) {
+          return '/home';
+        }
       }
 
       return null;
@@ -54,6 +71,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/pin_setup',
+        name: 'pin_setup',
+        builder: (context, state) => const PinSetupPage(),
+      ),
+      GoRoute(
+        path: '/pin_login',
+        name: 'pin_login',
+        builder: (context, state) => const PinLoginPage(),
       ),
       GoRoute(
         path: '/home',

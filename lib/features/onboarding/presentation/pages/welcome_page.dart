@@ -6,15 +6,16 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return Scaffold(
       // Evitamos el color de fondo por defecto para que se vea el gradiente
       backgroundColor: Colors.transparent,
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          color: Color(0xFF8BB5F8), // Azul claro
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary,
         ),
         child: SafeArea(
           child: Padding(
@@ -24,7 +25,7 @@ class WelcomePage extends StatelessWidget {
               children: [
                 const SizedBox(height: 24),
                 Text(
-                  'Gestor\nVisual',
+                  'Gestor\nde Gastos',
                   style: textTheme.displayLarge?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -47,8 +48,8 @@ class WelcomePage extends StatelessWidget {
                       context.go('/login');
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
+                      backgroundColor: theme.colorScheme.onPrimary,
+                      foregroundColor: theme.colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(28),
                       ),
