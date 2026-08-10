@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/account_provider.dart';
 import '../widgets/add_edit_account_dialog.dart';
 
@@ -51,6 +52,9 @@ class AccountsPage extends ConsumerWidget {
                     ),
                   ],
                 ),
+                onTap: () {
+                  context.push('/account_details', extra: account);
+                },
               );
             },
           );

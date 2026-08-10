@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/accounts/domain/entities/account.dart';
 import '../../features/accounts/presentation/pages/accounts_page.dart';
+import '../../features/accounts/presentation/pages/account_details_page.dart';
 import '../../features/categories/presentation/pages/categories_page.dart';
 import '../../features/transactions/domain/entities/transaction.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
@@ -91,6 +93,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/accounts',
         name: 'accounts',
         builder: (context, state) => const AccountsPage(),
+      ),
+      GoRoute(
+        path: '/account_details',
+        name: 'account_details',
+        builder: (context, state) {
+          final account = state.extra as Account;
+          return AccountDetailsPage(account: account);
+        },
       ),
       GoRoute(
         path: '/categories',
