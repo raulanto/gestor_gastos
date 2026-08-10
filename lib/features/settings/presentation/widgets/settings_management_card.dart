@@ -30,7 +30,6 @@ class SettingsManagementCard extends StatelessWidget {
                 subtitle: 'Administrar cuentas de efectivo, bancos...',
                 onTap: () => context.push('/accounts'),
               ),
-              const Divider(height: 1, indent: 56, endIndent: 16),
               SettingsTile(
                 icon: Icons.category,
                 title: 'Mis Categorías',
