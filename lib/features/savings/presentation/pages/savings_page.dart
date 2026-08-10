@@ -12,36 +12,68 @@ class SavingsPage extends ConsumerWidget {
     final savingsState = ref.watch(savingsGoalsProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Caja de Ahorros'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check_circle_outline),
-            tooltip: 'Metas Cumplidas',
-            onPressed: () {
-              context.push('/savings_completed');
-            },
-          ),
-        ],
-      ),
-      body: savingsState.when(
-        data: (goals) {
-          final activeGoals = goals.where((g) => g.status == 'active').toList();
-          if (activeGoals.isEmpty) {
-            return const Center(child: Text('No tienes metas de ahorro activas.'));
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: activeGoals.length,
-            itemBuilder: (context, index) {
-              final goal = activeGoals[index];
-              return SavingsGoalCard(goal: goal);
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+    return SafeArea(
+      bottom: false,
+      child: Container(
+        color: theme.colorScheme.primary,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Ahorros', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  Row(
+                    children: [
+                      IconButton(
+                        style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
+                        icon: Icon(Icons.check_circle_outline, color: theme.colorScheme.onPrimary),
+                        onPressed: () => context.push('/savings_completed'),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
+                        icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+                        onPressed: () => context.push('/add_savings_goal'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                ),
+                child: savingsState.when(
+                  data: (goals) {
+                    final activeGoals = goals.where((g) => g.status == 'active').toList();
+                    if (activeGoals.isEmpty) {
+                      return const Center(child: Text('No tienes metas de ahorro activas.'));
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.only(top: 24, bottom: 100),
+                      itemCount: activeGoals.length,
+                      itemBuilder: (context, index) {
+                        final goal = activeGoals[index];
+                        return SavingsGoalCard(goal: goal);
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Center(child: Text('Error: $e')),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -57,36 +89,41 @@ class SavingsGoalCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final txsAsync = ref.watch(savingsGoalTransactionsProvider(goal.id!));
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: InkWell(
+        borderRadius: BorderRadius.circular(24),
         onTap: () {
           context.push('/savings_goal_details', extra: goal);
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Color(goal.colorCode),
-                    child: Icon(IconData(goal.iconCode, fontFamily: 'MaterialIcons'), color: Colors.white),
+                    backgroundColor: Color(goal.colorCode).withValues(alpha: 0.2),
+                    child: Icon(IconData(goal.iconCode, fontFamily: 'MaterialIcons'), color: Color(goal.colorCode)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(goal.name, style: theme.textTheme.titleMedium),
-                        Text('Meta: \$${goal.targetAmount.toStringAsFixed(2)}', style: theme.textTheme.bodyMedium),
+                        Text(goal.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text('Meta: \$${goal.targetAmount.toStringAsFixed(2)}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               txsAsync.when(
                 data: (txs) {
                   final savedAmount = txs.fold<double>(0, (sum, tx) => tx.type == 'deposit' ? sum + tx.amount : sum - tx.amount);
@@ -95,16 +132,33 @@ class SavingsGoalCard extends ConsumerWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('\$${savedAmount.toStringAsFixed(2)}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                          Text('${(progress * 100).toStringAsFixed(0)}%', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                        ],
                       ),
                       const SizedBox(height: 8),
-                      Text('Progreso: \$${savedAmount.toStringAsFixed(2)} (${(progress * 100).toStringAsFixed(1)}%)', style: theme.textTheme.bodySmall),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 8,
+                          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                        ),
+                      ),
                     ],
                   );
                 },
-                loading: () => const LinearProgressIndicator(),
+                loading: () => ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    minHeight: 8,
+                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  ),
+                ),
                 error: (e, st) => Text('Error al cargar progreso', style: theme.textTheme.bodySmall?.copyWith(color: Colors.red)),
               ),
             ],

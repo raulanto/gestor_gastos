@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum PeriodView { day, week, month }
+enum PeriodView { day, week, month, year }
 
 class PeriodViewNotifier extends Notifier<PeriodView> {
   @override

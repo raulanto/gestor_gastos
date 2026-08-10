@@ -41,55 +41,50 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: _pages[_currentIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Inicio',
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onSurface,
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildNavItem(Icons.home, Icons.home_outlined, 0),
+                _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 1),
+                _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
+                _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
+                _buildNavItem(Icons.settings, Icons.settings_outlined, 4),
+              ],
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.autorenew_outlined),
-            selectedIcon: Icon(Icons.autorenew),
-            label: 'Recurrentes',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.savings_outlined),
-            selectedIcon: Icon(Icons.savings),
-            label: 'Ahorro',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.pie_chart_outline),
-            selectedIcon: Icon(Icons.pie_chart),
-            label: 'Presupuesto',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Ajustes',
-          ),
-        ],
+        ),
       ),
-      floatingActionButton: [0, 1, 2].contains(_currentIndex)
-        ? FloatingActionButton(
-            onPressed: () {
-              if (_currentIndex == 0) {
-                context.push('/add_transaction');
-              } else if (_currentIndex == 1) {
-                context.push('/add_recurring_transaction');
-              } else if (_currentIndex == 2) {
-                context.push('/add_savings_goal');
-              }
-            },
-            child: const Icon(Icons.add),
-          )
-        : null,
+    );
+  }
+
+  Widget _buildNavItem(IconData selectedIcon, IconData unselectedIcon, int index) {
+    final isSelected = _currentIndex == index;
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? theme.colorScheme.surface : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isSelected ? selectedIcon : unselectedIcon,
+          color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.surface.withValues(alpha: 0.6),
+        ),
+      ),
     );
   }
 }

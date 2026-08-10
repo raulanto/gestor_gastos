@@ -15,8 +15,9 @@ import '../widgets/custom_numeric_keyboard.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final TransactionEntity? existingTransaction;
+  final String? initialType;
 
-  const AddTransactionPage({super.key, this.existingTransaction});
+  const AddTransactionPage({super.key, this.existingTransaction, this.initialType});
 
   @override
   ConsumerState<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -29,6 +30,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   String _note = '';
   File? _receiptImage;
   String _transactionType = 'expense';
+  DateTime _selectedDate = DateTime.now();
   
   bool _isSplitMode = false;
   List<TransactionSplit> _splits = [];
@@ -37,6 +39,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialType != null) {
+      _transactionType = widget.initialType!;
+    }
     if (widget.existingTransaction != null) {
       final t = widget.existingTransaction!;
       _expression = t.amount.toStringAsFixed(2);
@@ -47,6 +52,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       _selectedCategoryId = t.categoryId;
       _note = t.note ?? '';
       _noteController.text = _note;
+      _selectedDate = DateTime.parse(t.date);
       if (t.receiptImagePath != null) {
         _receiptImage = File(t.receiptImagePath!);
       }
@@ -294,7 +300,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       accountId: _selectedAccountId!,
       categoryId: _isSplitMode ? null : _selectedCategoryId!,
       amount: amount,
-      date: widget.existingTransaction?.date ?? DateTime.now().toIso8601String(),
+      date: _selectedDate.toIso8601String(),
       note: _note,
       receiptImagePath: _receiptImage?.path,
       type: _transactionType,
@@ -465,6 +471,32 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         )
                       ],
                     ),
+
+                  const SizedBox(height: 16),
+                  
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() => _selectedDate = picked);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(labelText: 'Fecha', border: OutlineInputBorder()),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_today),
+                          const SizedBox(width: 8),
+                          Text("${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}"),
+                        ],
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(height: 16),
 

@@ -73,7 +73,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add_transaction',
         name: 'add_transaction',
-        builder: (context, state) => const AddTransactionPage(),
+        builder: (context, state) {
+          final type = state.uri.queryParameters['type'];
+          return AddTransactionPage(initialType: type);
+        },
       ),
       GoRoute(
         path: '/add_recurring_transaction',
