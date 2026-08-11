@@ -19,6 +19,60 @@ class SavingsRulesPage extends ConsumerStatefulWidget {
 }
 
 class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
+  Future<void> _toggleRule(SavingsRuleEntity? existingRule, String type, bool isEnabled) async {
+    final repo = ref.read(savingsRepositoryProvider);
+    if (existingRule != null) {
+      await repo.updateRule(existingRule.copyWith(status: isEnabled ? 'active' : 'paused'));
+    } else if (isEnabled) {
+      double defaultValue = 0;
+      if (type == 'fixed_percentage') defaultValue = 10;
+      if (type == 'scheduled') defaultValue = 50;
+      
+      await repo.createRule(SavingsRuleEntity(
+        goalId: widget.goal.id!,
+        ruleType: type,
+        value: defaultValue,
+        status: 'active',
+      ));
+    }
+    ref.invalidate(savingsRulesProvider(widget.goal.id!));
+  }
+
+  Future<void> _editRuleValue(SavingsRuleEntity rule, String title) async {
+    final controller = TextEditingController(text: rule.value.toStringAsFixed(rule.ruleType == 'fixed_percentage' ? 0 : 2));
+    final newValue = await showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: rule.ruleType == 'fixed_percentage' ? 'Porcentaje (%)' : 'Monto (\$)',
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () {
+              final val = double.tryParse(controller.text);
+              if (val != null && val > 0) {
+                Navigator.pop(ctx, val);
+              }
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+
+    if (newValue != null) {
+      final repo = ref.read(savingsRepositoryProvider);
+      await repo.updateRule(rule.copyWith(value: newValue));
+      ref.invalidate(savingsRulesProvider(widget.goal.id!));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final rulesAsync = ref.watch(savingsRulesProvider(widget.goal.id!));
@@ -27,39 +81,37 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
       appBar: AppBar(title: const Text('Reglas de Ahorro')),
       body: rulesAsync.when(
         data: (rules) {
+          final roundUp = rules.where((r) => r.ruleType == 'round_up').firstOrNull;
+          final percentage = rules.where((r) => r.ruleType == 'fixed_percentage').firstOrNull;
+          final scheduled = rules.where((r) => r.ruleType == 'scheduled').firstOrNull;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('Reglas Activas para ${widget.goal.name}', style: Theme.of(context).textTheme.titleLarge),
+              Text('Configuración para ${widget.goal.name}', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
-              if (rules.isEmpty) const Text('No hay reglas configuradas para esta meta.'),
-              ...rules.map((r) => ListTile(
-                title: Text(r.ruleType == 'round_up' ? 'Redondeo de Gastos' : (r.ruleType == 'fixed_percentage' ? 'Porcentaje de Ingresos' : 'Ahorro Programado')),
-                subtitle: Text(r.ruleType == 'fixed_percentage' ? '${r.value}% de cada ingreso' : (r.ruleType == 'scheduled' ? '\$${r.value} mensuales' : 'Redondea tus gastos a la siguiente decena')),
-                trailing: Switch(
-                  value: r.status == 'active',
-                  onChanged: (val) async {
-                    final repo = ref.read(savingsRepositoryProvider);
-                    await repo.updateRule(r.copyWith(status: val ? 'active' : 'paused'));
-                    ref.invalidate(savingsRulesProvider(widget.goal.id!));
-                  },
-                ),
-              )),
+              _buildRuleTile(
+                title: 'Redondeo de Gastos',
+                subtitle: 'Redondea tus gastos a la siguiente decena',
+                icon: Icons.pie_chart_outline,
+                rule: roundUp,
+                type: 'round_up',
+              ),
               const Divider(),
-              ListTile(
-                leading: const Icon(Icons.add_circle_outline),
-                title: const Text('Añadir Regla de Redondeo'),
-                onTap: () => _addRule(rules, 'round_up', 0),
+              _buildRuleTile(
+                title: 'Porcentaje de Ingresos',
+                subtitle: percentage != null ? '${percentage.value.toStringAsFixed(0)}% de cada ingreso' : 'Desactivado',
+                icon: Icons.percent,
+                rule: percentage,
+                type: 'fixed_percentage',
               ),
-              ListTile(
-                leading: const Icon(Icons.percent),
-                title: const Text('Añadir Porcentaje (ej. 10%)'),
-                onTap: () => _addRule(rules, 'fixed_percentage', 10),
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: const Text('Añadir Ahorro Programado (ej. \$50)'),
-                onTap: () => _addRule(rules, 'scheduled', 50),
+              const Divider(),
+              _buildRuleTile(
+                title: 'Ahorro Programado',
+                subtitle: scheduled != null ? '\$${scheduled.value.toStringAsFixed(2)} mensuales' : 'Desactivado',
+                icon: Icons.calendar_month,
+                rule: scheduled,
+                type: 'scheduled',
               ),
             ],
           );
@@ -70,21 +122,37 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
     );
   }
 
-  Future<void> _addRule(List<SavingsRuleEntity> rules, String type, double value) async {
-    final exists = rules.any((r) => r.ruleType == type);
-    if (exists) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Esta regla ya está configurada para esta meta')));
-      }
-      return;
-    }
+  Widget _buildRuleTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required SavingsRuleEntity? rule,
+    required String type,
+  }) {
+    final isActive = rule?.status == 'active';
+    final hasValueConfig = type != 'round_up';
 
-    final repo = ref.read(savingsRepositoryProvider);
-    await repo.createRule(SavingsRuleEntity(
-      goalId: widget.goal.id!,
-      ruleType: type,
-      value: value,
-    ));
-    ref.invalidate(savingsRulesProvider(widget.goal.id!));
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: isActive ? Theme.of(context).colorScheme.primaryContainer : Colors.grey.shade200,
+        child: Icon(icon, color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text(subtitle),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isActive && hasValueConfig)
+            IconButton(
+              icon: const Icon(Icons.edit, size: 20),
+              onPressed: () => _editRuleValue(rule!, 'Editar $title'),
+            ),
+          Switch(
+            value: isActive,
+            onChanged: (val) => _toggleRule(rule, type, val),
+          ),
+        ],
+      ),
+    );
   }
 }
