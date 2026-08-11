@@ -2,25 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../features/settings/presentation/pages/settings_page.dart';
-import '../../../budgets/presentation/pages/budgets_page.dart';
-import '../../../recurring_transactions/application/recurring_service.dart';
-import '../../../recurring_transactions/presentation/pages/recurring_transactions_page.dart';
-import '../../../savings/application/savings_schedule_service.dart';
-import '../../../savings/presentation/pages/savings_page.dart';
+import '../../../features/recurring_transactions/application/recurring_service.dart';
+import '../../../features/savings/application/savings_schedule_service.dart';
 
-import '../widgets/transactions_view.dart';
+class MainLayout extends ConsumerStatefulWidget {
+  const MainLayout({
+    super.key,
+    required this.navigationShell,
+  });
 
-class HomePage extends ConsumerStatefulWidget {
-  const HomePage({super.key});
+  final StatefulNavigationShell navigationShell;
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  ConsumerState<MainLayout> createState() => _MainLayoutState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
-  int _currentIndex = 0;
-
+class _MainLayoutState extends ConsumerState<MainLayout> {
   @override
   void initState() {
     super.initState();
@@ -30,19 +27,18 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
-  final List<Widget> _pages = const [
-    TransactionsView(), // Gastos
-    RecurringTransactionsPage(), // Recurrentes
-    SavingsPage(), // Ahorro
-    BudgetsPage(), // Presupuesto
-    SettingsPage(), // Configuración
-  ];
+  void _goBranch(int index) {
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: _pages[_currentIndex],
+      body: widget.navigationShell,
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -69,10 +65,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildNavItem(IconData selectedIcon, IconData unselectedIcon, int index) {
-    final isSelected = _currentIndex == index;
+    final isSelected = widget.navigationShell.currentIndex == index;
     final theme = Theme.of(context);
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () => _goBranch(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(12),
@@ -88,4 +84,3 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
-

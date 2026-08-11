@@ -5,6 +5,7 @@ import '../../domain/entities/savings_transaction.dart';
 import '../providers/savings_provider.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
+import '../../../accounts/presentation/providers/account_provider.dart';
 
 class SavingsTransactionForm extends ConsumerStatefulWidget {
   final SavingsGoalEntity goal;
@@ -26,9 +27,12 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
   final _formKey = GlobalKey<FormState>();
   double _amount = 0.0;
   String _reason = '';
+  int? _selectedAccountId;
 
   @override
   Widget build(BuildContext context) {
+    final accountsState = ref.watch(accountsProvider);
+
     return Form(
       key: _formKey,
       child: Column(
@@ -58,6 +62,41 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
             onSaved: (v) => _amount = double.parse(v!),
           ),
           const SizedBox(height: 16),
+          accountsState.when(
+            data: (accounts) {
+              if (accounts.isEmpty) return const Text('No hay cuentas disponibles.');
+              // Si solo hay una cuenta, seleccionarla por defecto
+              if (_selectedAccountId == null && accounts.isNotEmpty) {
+                _selectedAccountId = accounts.first.id;
+              }
+              return DropdownButtonFormField<int>(
+                decoration: const InputDecoration(
+                  labelText: 'Cuenta',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.account_balance_wallet),
+                ),
+                value: _selectedAccountId,
+                items: accounts.map((acc) {
+                  return DropdownMenuItem<int>(
+                    value: acc.id,
+                    child: Text(acc.name),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedAccountId = val;
+                  });
+                },
+                validator: (val) {
+                  if (val == null) return 'Seleccione una cuenta';
+                  return null;
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, st) => Text('Error al cargar cuentas: $err'),
+          ),
+          const SizedBox(height: 16),
           TextFormField(
             decoration: InputDecoration(
               labelText: widget.isDeposit ? 'Motivo (opcional)' : 'Motivo del retiro (obligatorio)',
@@ -80,6 +119,13 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
                 
+                if (_selectedAccountId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Por favor, seleccione una cuenta.'))
+                  );
+                  return;
+                }
+
                 if (!widget.isDeposit && widget.goal.isProtected) {
                   final confirm = await showDialog<bool>(
                     context: context,
@@ -100,7 +146,7 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
 
                 final tx = SavingsTransactionEntity(
                   goalId: widget.goal.id!,
-                  accountId: 1, // TODO: Permitir selección de cuenta
+                  accountId: _selectedAccountId!,
                   amount: _amount,
                   date: DateTime.now().toIso8601String(),
                   type: widget.isDeposit ? 'deposit' : 'withdrawal',
@@ -113,7 +159,7 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                 // Si la meta está vinculada al saldo real, reflejar la transacción manual
                 if (widget.goal.deductFromBalance) {
                   final realTx = TransactionEntity(
-                    accountId: 1, // TODO: Permitir selección de cuenta
+                    accountId: _selectedAccountId!,
                     amount: _amount,
                     date: DateTime.now().toIso8601String(),
                     note: widget.isDeposit ? 'Aportación a ${widget.goal.name}' : 'Retiro de ${widget.goal.name}',
@@ -122,6 +168,8 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                   await ref.read(transactionRepositoryProvider).createTransaction(realTx);
                   // Opcional: Invalidar proveedores de transacciones para que el Home se actualice
                   ref.invalidate(transactionsProvider);
+                  // Invalidar también accountsProvider para que el saldo se actualice si es necesario
+                  ref.invalidate(accountsProvider);
                 }
                 
                 // Evaluar completitud

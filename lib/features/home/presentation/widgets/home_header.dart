@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/providers/date_filter_provider.dart';
 
-class HomeHeader extends StatelessWidget {
+class HomeHeader extends ConsumerWidget {
   final double totalBalance;
 
   const HomeHeader({super.key, required this.totalBalance});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final selectedMonth = ref.watch(selectedMonthProvider);
+    
+    String monthStr = DateFormat('MMMM yyyy').format(selectedMonth);
+    monthStr = monthStr[0].toUpperCase() + monthStr.substring(1);
+
     return Padding(
       padding: const EdgeInsets.only(top: 16, left: 24, right: 24, bottom: 16),
       child: Column(
@@ -26,7 +34,30 @@ class HomeHeader extends StatelessWidget {
                   Text('Gestor de Gastos', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
                 ],
               ),
-              Icon(Icons.search, color: theme.colorScheme.onPrimary),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.chevron_left, color: theme.colorScheme.onPrimary),
+                    onPressed: () {
+                      ref.read(selectedMonthProvider.notifier).updateMonth(
+                        DateTime(selectedMonth.year, selectedMonth.month - 1)
+                      );
+                    },
+                  ),
+                  Text(
+                    monthStr,
+                    style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.onPrimary),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.chevron_right, color: theme.colorScheme.onPrimary),
+                    onPressed: () {
+                      ref.read(selectedMonthProvider.notifier).updateMonth(
+                        DateTime(selectedMonth.year, selectedMonth.month + 1)
+                      );
+                    },
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 24),

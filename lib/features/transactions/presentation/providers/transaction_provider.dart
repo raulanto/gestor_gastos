@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../../core/providers/date_filter_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
@@ -61,3 +62,16 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionEntity>> {
     });
   }
 }
+
+final filteredTransactionsProvider = Provider<AsyncValue<List<TransactionEntity>>>((ref) {
+  final transactionsState = ref.watch(transactionsProvider);
+  final selectedMonth = ref.watch(selectedMonthProvider);
+
+  return transactionsState.whenData((transactions) {
+    return transactions.where((t) {
+      final tDate = DateTime.parse(t.date);
+      return tDate.year == selectedMonth.year && tDate.month == selectedMonth.month;
+    }).toList();
+  });
+});
+

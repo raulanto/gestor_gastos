@@ -24,7 +24,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (username.isNotEmpty) {
       ref.read(authNotifierProvider.notifier).login(username).then((_) {
         // Al terminar, la UI o el router se encarga de redirigir
-        if (mounted) context.go('/home');
+        if (mounted) context.go('/transactions');
       });
     }
   }

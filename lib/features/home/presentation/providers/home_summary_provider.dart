@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
+import '../../../../core/providers/date_filter_provider.dart';
 import 'period_view_provider.dart';
 
 class HomeSummary {
@@ -23,23 +24,32 @@ class HomeSummary {
 final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
   final transactionsAsync = ref.watch(transactionsProvider);
   final periodView = ref.watch(periodViewProvider);
+  final selectedMonth = ref.watch(selectedMonthProvider);
 
   return transactionsAsync.whenData((allTransactions) {
-    final now = DateTime.now();
     List<TransactionEntity> txs = [];
     
     for (var t in allTransactions) {
       final date = DateTime.parse(t.date);
       bool include = false;
       if (periodView == PeriodView.day) {
-        include = date.year == now.year && date.month == now.month && date.day == now.day;
+        // Today relative to the selected month? Or actual today?
+        // Let's assume if they select a past month, 'day' means the 1st of that month, or maybe the same day. 
+        // Actually, let's keep 'now' as actual now if selectedMonth is current month, else 1st of month.
+        final referenceDate = (selectedMonth.year == DateTime.now().year && selectedMonth.month == DateTime.now().month) 
+            ? DateTime.now() 
+            : DateTime(selectedMonth.year, selectedMonth.month, 1);
+        include = date.year == referenceDate.year && date.month == referenceDate.month && date.day == referenceDate.day;
       } else if (periodView == PeriodView.week) {
-        final weekStart = now.subtract(Duration(days: now.weekday - 1));
-        include = date.isAfter(weekStart.subtract(const Duration(days: 1)));
+        final referenceDate = (selectedMonth.year == DateTime.now().year && selectedMonth.month == DateTime.now().month) 
+            ? DateTime.now() 
+            : DateTime(selectedMonth.year, selectedMonth.month, 1);
+        final weekStart = referenceDate.subtract(Duration(days: referenceDate.weekday - 1));
+        include = date.isAfter(weekStart.subtract(const Duration(days: 1))) && date.isBefore(weekStart.add(const Duration(days: 7)));
       } else if (periodView == PeriodView.month) {
-        include = date.year == now.year && date.month == now.month;
+        include = date.year == selectedMonth.year && date.month == selectedMonth.month;
       } else if (periodView == PeriodView.year) {
-        include = date.year == now.year;
+        include = date.year == selectedMonth.year;
       }
       if (include) txs.add(t);
     }
