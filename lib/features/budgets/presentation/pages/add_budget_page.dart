@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/budget.dart';
 import '../providers/budgets_provider.dart';
+import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
 
@@ -70,10 +71,84 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
     }
   }
 
+  Future<void> _selectCategory(BuildContext context, Function(Category) onSelected) async {
+    final categoriesState = ref.read(categoriesProvider);
+    if (categoriesState.value == null) return;
+    
+    final categories = categoriesState.value!;
+    final mainCategories = categories.where((c) => c.parentId == null).toList();
+    final subCategories = categories.where((c) => c.parentId != null).toList();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('Seleccionar Categoría', style: Theme.of(context).textTheme.titleLarge),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: mainCategories.length,
+                    itemBuilder: (context, index) {
+                      final main = mainCategories[index];
+                      final children = subCategories.where((c) => c.parentId == main.id).toList();
+
+                      if (children.isEmpty) {
+                        return ListTile(
+                          // ignore: non_const_argument_for_const_parameter
+                          leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
+                          title: Text(main.name),
+                          onTap: () {
+                            onSelected(main);
+                            Navigator.pop(context);
+                          },
+                        );
+                      }
+                      return ExpansionTile(
+                        // ignore: non_const_argument_for_const_parameter
+                        leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
+                        title: Text(main.name),
+                        children: children.map((child) => ListTile(
+                          contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
+                          // ignore: non_const_argument_for_const_parameter
+                          leading: Icon(IconData(child.iconCode, fontFamily: 'MaterialIcons'), color: Color(child.colorCode)),
+                          title: Text(child.name),
+                          onTap: () {
+                            onSelected(child);
+                            Navigator.pop(context);
+                          },
+                        )).toList(),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider);
     final savingsState = ref.watch(savingsGoalsProvider);
+
+    Category? selectedCategory;
+    if (_selectedCategoryId != null && categoriesState.value != null) {
+      selectedCategory = categoriesState.value!.where((c) => c.id == _selectedCategoryId).firstOrNull;
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Nuevo Presupuesto')),
@@ -97,18 +172,24 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
             const SizedBox(height: 24),
             
             if (!_isSavings)
-              categoriesState.when(
-                data: (cats) => DropdownButtonFormField<int>(
+              InkWell(
+                onTap: () {
+                  _selectCategory(context, (cat) {
+                    setState(() => _selectedCategoryId = cat.id);
+                  });
+                },
+                child: InputDecorator(
                   decoration: const InputDecoration(labelText: 'Categoría', border: OutlineInputBorder()),
-                  value: _selectedCategoryId,
-                  items: cats.map((c) => DropdownMenuItem(
-                    value: c.id,
-                    child: Text(c.name),
-                  )).toList(),
-                  onChanged: (val) => setState(() => _selectedCategoryId = val),
+                  child: Row(
+                    children: [
+                      if (selectedCategory != null)
+                        // ignore: non_const_argument_for_const_parameter
+                        Icon(IconData(selectedCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(selectedCategory.colorCode)),
+                      const SizedBox(width: 8),
+                      Text(selectedCategory != null ? selectedCategory.name : 'Seleccionar Categoría'),
+                    ],
+                  ),
                 ),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, st) => Text('Error: $e'),
               )
             else
               savingsState.when(
