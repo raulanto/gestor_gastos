@@ -57,7 +57,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         _receiptImage = File(t.receiptImagePath!);
       }
       _transactionType = t.type;
-      if (t.splits.isNotEmpty) {
+      if (t.splits.length > 1) {
         _isSplitMode = true;
         _splits = List.from(t.splits);
       }

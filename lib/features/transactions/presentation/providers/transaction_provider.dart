@@ -32,7 +32,6 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionEntity>> {
   }
 
   Future<void> addTransaction(TransactionEntity transaction) async {
-    final previousState = state.value;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final newT = await _repository.createTransaction(transaction);
@@ -42,26 +41,23 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionEntity>> {
         debugPrint('Error processing savings rules: $e');
       });
       
-      return [newT, ...?previousState];
+      return await _repository.getTransactions();
     });
   }
 
   Future<void> removeTransaction(int id) async {
-    final previousState = state.value;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await _repository.deleteTransaction(id);
-      return previousState?.where((t) => t.id != id).toList() ?? [];
+      return await _repository.getTransactions();
     });
   }
 
   Future<void> updateTransaction(TransactionEntity transaction) async {
-    final previousState = state.value;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final updatedT = await _repository.updateTransaction(transaction);
-      if (previousState == null) return [updatedT];
-      return previousState.map((t) => t.id == updatedT.id ? updatedT : t).toList();
+      await _repository.updateTransaction(transaction);
+      return await _repository.getTransactions();
     });
   }
 }
