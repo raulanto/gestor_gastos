@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -111,6 +111,12 @@ class AppDatabase {
           FOREIGN KEY (savings_goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
         )
       ''');
+    }
+
+    if (oldVersion < 5) {
+      await db.execute('ALTER TABLE savings_goals ADD COLUMN is_protected INTEGER NOT NULL DEFAULT 0');
+      await db.execute('ALTER TABLE savings_goals ADD COLUMN priority INTEGER NOT NULL DEFAULT 0');
+      await db.execute('ALTER TABLE savings_goals ADD COLUMN deduct_from_balance INTEGER NOT NULL DEFAULT 1');
     }
   }
 
@@ -208,7 +214,10 @@ class AppDatabase {
         deadline_date TEXT,
         icon_code INTEGER NOT NULL,
         color_code INTEGER NOT NULL,
-        status TEXT NOT NULL DEFAULT 'active'
+        status TEXT NOT NULL DEFAULT 'active',
+        is_protected INTEGER NOT NULL DEFAULT 0,
+        priority INTEGER NOT NULL DEFAULT 0,
+        deduct_from_balance INTEGER NOT NULL DEFAULT 1
       )
     ''');
 

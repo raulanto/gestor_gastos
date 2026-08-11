@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/savings_goal.dart';
 import '../../domain/entities/savings_transaction.dart';
 import '../providers/savings_provider.dart';
+import '../../../transactions/domain/entities/transaction.dart';
+import '../../../transactions/presentation/providers/transaction_provider.dart';
 
 class SavingsTransactionForm extends ConsumerStatefulWidget {
   final SavingsGoalEntity goal;
@@ -77,6 +79,25 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
+                
+                if (!widget.isDeposit && widget.goal.isProtected) {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Meta Protegida'),
+                      content: const Text('Esta meta está protegida. ¿Estás seguro de que deseas retirar fondos de ella?'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true), 
+                          child: const Text('Sí, retirar', style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm != true) return;
+                }
+
                 final tx = SavingsTransactionEntity(
                   goalId: widget.goal.id!,
                   accountId: 1, // TODO: Permitir selección de cuenta
@@ -88,6 +109,20 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                 
                 final repo = ref.read(savingsRepositoryProvider);
                 await repo.createTransaction(tx);
+                
+                // Si la meta está vinculada al saldo real, reflejar la transacción manual
+                if (widget.goal.deductFromBalance) {
+                  final realTx = TransactionEntity(
+                    accountId: 1, // TODO: Permitir selección de cuenta
+                    amount: _amount,
+                    date: DateTime.now().toIso8601String(),
+                    note: widget.isDeposit ? 'Aportación a ${widget.goal.name}' : 'Retiro de ${widget.goal.name}',
+                    type: widget.isDeposit ? 'expense' : 'income', // Un depósito al ahorro es un gasto en la cuenta principal
+                  );
+                  await ref.read(transactionRepositoryProvider).createTransaction(realTx);
+                  // Opcional: Invalidar proveedores de transacciones para que el Home se actualice
+                  ref.invalidate(transactionsProvider);
+                }
                 
                 // Evaluar completitud
                 if (widget.isDeposit) {
@@ -105,7 +140,7 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                 ref.invalidate(savingsGoalTransactionsProvider(widget.goal.id!));
                 
                 if (context.mounted) {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(true);
                 }
               }
             },

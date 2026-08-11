@@ -6,6 +6,9 @@ class SavingsGoalEntity {
   final int iconCode;
   final int colorCode;
   final String status; // 'active', 'completed', 'archived'
+  final bool isProtected;
+  final int priority;
+  final bool deductFromBalance;
 
   SavingsGoalEntity({
     this.id,
@@ -15,6 +18,9 @@ class SavingsGoalEntity {
     required this.iconCode,
     required this.colorCode,
     this.status = 'active',
+    this.isProtected = false,
+    this.priority = 0,
+    this.deductFromBalance = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +32,9 @@ class SavingsGoalEntity {
       'icon_code': iconCode,
       'color_code': colorCode,
       'status': status,
+      'is_protected': isProtected ? 1 : 0,
+      'priority': priority,
+      'deduct_from_balance': deductFromBalance ? 1 : 0,
     };
   }
 
@@ -38,6 +47,9 @@ class SavingsGoalEntity {
       iconCode: map['icon_code'],
       colorCode: map['color_code'],
       status: map['status'] ?? 'active',
+      isProtected: (map['is_protected'] ?? 0) == 1,
+      priority: map['priority'] ?? 0,
+      deductFromBalance: (map['deduct_from_balance'] ?? 1) == 1,
     );
   }
 
@@ -49,6 +61,9 @@ class SavingsGoalEntity {
     int? iconCode,
     int? colorCode,
     String? status,
+    bool? isProtected,
+    int? priority,
+    bool? deductFromBalance,
   }) {
     return SavingsGoalEntity(
       id: id ?? this.id,
@@ -58,6 +73,9 @@ class SavingsGoalEntity {
       iconCode: iconCode ?? this.iconCode,
       colorCode: colorCode ?? this.colorCode,
       status: status ?? this.status,
+      isProtected: isProtected ?? this.isProtected,
+      priority: priority ?? this.priority,
+      deductFromBalance: deductFromBalance ?? this.deductFromBalance,
     );
   }
 }

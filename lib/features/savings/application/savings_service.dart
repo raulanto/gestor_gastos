@@ -22,13 +22,30 @@ class SavingsService {
   Future<void> processTransactionRules(TransactionEntity tx) async {
     final allRules = await _savingsRepository.getRules();
     if (allRules.isEmpty) return;
+    
+    // Fetch all active goals to get their priorities and configurations
+    final allGoals = await _savingsRepository.getSavingsGoals();
+    final goalMap = { for (var g in allGoals) g.id! : g };
 
-    for (var rule in allRules) {
-      if (rule.status != 'active') continue;
+    // Filter active rules and map them to their goals
+    final activeRules = allRules.where((r) => r.status == 'active' && goalMap.containsKey(r.goalId)).toList();
+    
+    // Sort rules based on their goal's priority (lowest number = highest priority)
+    activeRules.sort((a, b) {
+      final pA = goalMap[a.goalId]!.priority;
+      final pB = goalMap[b.goalId]!.priority;
+      return pA.compareTo(pB);
+    });
 
+    double remainingIncome = tx.amount;
+
+    for (var rule in activeRules) {
+      final goal = goalMap[rule.goalId]!;
+      
       if (tx.type == 'expense' && rule.ruleType == 'round_up') {
-        // Redondeo al siguiente entero o decena? Asumamos redondeo al entero superior
-        final rounded = tx.amount.ceilToDouble();
+        // Redondeo configurable
+        final roundingTarget = rule.value > 0 ? rule.value : 10.0;
+        final rounded = (tx.amount / roundingTarget).ceil() * roundingTarget;
         final difference = rounded - tx.amount;
 
         if (difference > 0) {
@@ -37,20 +54,28 @@ class SavingsService {
             accountId: tx.accountId,
             amount: difference,
             reason: 'Redondeo automático',
+            deductFromBalance: goal.deductFromBalance,
           );
         }
-      } else if (tx.type == 'income' && rule.ruleType == 'fixed_percentage') {
+      } else if (tx.type == 'income' && rule.ruleType == 'fixed_percentage' && remainingIncome > 0) {
         // Porcentaje sobre el ingreso
         final percentage = rule.value;
-        final amountToSave = tx.amount * (percentage / 100);
+        double amountToSave = tx.amount * (percentage / 100);
+        
+        // Limitar la cantidad a ahorrar al ingreso restante
+        if (amountToSave > remainingIncome) {
+          amountToSave = remainingIncome;
+        }
 
         if (amountToSave > 0) {
           await _executeAutomaticSaving(
             goalId: rule.goalId,
             accountId: tx.accountId,
             amount: amountToSave,
-            reason: 'Ahorro programado ($percentage%)',
+            reason: 'Ahorro automático ($percentage%)',
+            deductFromBalance: goal.deductFromBalance,
           );
+          remainingIncome -= amountToSave;
         }
       }
     }
@@ -61,6 +86,7 @@ class SavingsService {
     required int accountId,
     required double amount,
     required String reason,
+    required bool deductFromBalance,
   }) async {
     // 1. Create a Savings Transaction (deposit)
     final savingsTx = SavingsTransactionEntity(
@@ -73,15 +99,16 @@ class SavingsService {
     );
     await _savingsRepository.createTransaction(savingsTx);
 
-    // 2. Create a normal expense transaction to reflect the real money leaving the account
-    final realTx = TransactionEntity(
-      accountId: accountId,
-      amount: amount,
-      date: DateTime.now().toIso8601String(),
-      note: reason,
-      type: 'expense', // It's an expense from the normal account's perspective
-      // Optionally link to a special "Savings" category
-    );
-    await _transactionRepository.createTransaction(realTx);
+    // 2. Create a normal expense transaction to reflect the real money leaving the account, if configured
+    if (deductFromBalance) {
+      final realTx = TransactionEntity(
+        accountId: accountId,
+        amount: amount,
+        date: DateTime.now().toIso8601String(),
+        note: reason,
+        type: 'expense',
+      );
+      await _transactionRepository.createTransaction(realTx);
+    }
   }
 }

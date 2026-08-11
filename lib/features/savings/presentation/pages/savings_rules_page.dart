@@ -27,6 +27,7 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
       double defaultValue = 0;
       if (type == 'fixed_percentage') defaultValue = 10;
       if (type == 'scheduled') defaultValue = 50;
+      if (type == 'round_up') defaultValue = 10;
       
       await repo.createRule(SavingsRuleEntity(
         goalId: widget.goal.id!,
@@ -92,7 +93,7 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
               const SizedBox(height: 16),
               _buildRuleTile(
                 title: 'Redondeo de Gastos',
-                subtitle: 'Redondea tus gastos a la siguiente decena',
+                subtitle: roundUp != null ? 'Redondea tus gastos a múltiplos de \$${roundUp.value.toStringAsFixed(0)}' : 'Desactivado',
                 icon: Icons.pie_chart_outline,
                 rule: roundUp,
                 type: 'round_up',
@@ -130,7 +131,7 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
     required String type,
   }) {
     final isActive = rule?.status == 'active';
-    final hasValueConfig = type != 'round_up';
+    final hasValueConfig = true; // Permitir edición para todas las reglas
 
     return ListTile(
       leading: CircleAvatar(
