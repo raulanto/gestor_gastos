@@ -105,7 +105,7 @@ class TransactionDetailsPage extends ConsumerWidget {
             const Divider(),
 
             // Categoría o Splits
-            if (transaction.splits.isEmpty && transaction.categoryId != null) ...[
+            if (transaction.splits.length <= 1 && transaction.categoryId != null) ...[
               Builder(builder: (context) {
                 final cat = categoriesState.value?.where((c) => c.id == transaction.categoryId).firstOrNull;
                 return ListTile(
@@ -115,7 +115,7 @@ class TransactionDetailsPage extends ConsumerWidget {
                   subtitle: Text(cat?.name ?? 'Desconocida', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 );
               }),
-            ] else if (transaction.splits.isNotEmpty) ...[
+            ] else if (transaction.splits.length > 1) ...[
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text('Divisiones (Splits)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),

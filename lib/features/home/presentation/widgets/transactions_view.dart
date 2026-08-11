@@ -28,6 +28,11 @@ class TransactionsView extends ConsumerWidget {
           Map<String, List<TransactionEntity>> groupedTransactions = {};
           final now = DateTime.now();
           for (var t in summary.transactions) {
+            // Filtrar aportaciones/retiros de metas de ahorro (no tienen categoría ni splits)
+            if (t.categoryId == null && t.splits.isEmpty) {
+              continue;
+            }
+
             final date = DateTime.parse(t.date);
             final diff = DateTime(now.year, now.month, now.day).difference(DateTime(date.year, date.month, date.day)).inDays;
             
@@ -46,17 +51,47 @@ class TransactionsView extends ConsumerWidget {
             groupedTransactions[key]!.add(t);
           }
 
-          return Container(
-            color: theme.colorScheme.primary,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                HomeHeader(totalBalance: summary.totalBalance),
-                const PeriodSelector(),
-                Expanded(
+          return Stack(
+            children: [
+              // Imagen de fondo con degradado
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 350,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/home_bg.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          theme.colorScheme.primary.withValues(alpha: 0.4),
+                          theme.colorScheme.primary,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Contenido principal
+              Container(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    HomeHeader(totalBalance: summary.totalBalance),
+                    const PeriodSelector(),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(32),
                         topRight: Radius.circular(32),
@@ -123,6 +158,8 @@ class TransactionsView extends ConsumerWidget {
                 ),
               ],
             ),
+              ),
+            ],
           );
         },
         loading: () => Center(child: CircularProgressIndicator(color: theme.colorScheme.onPrimary)),

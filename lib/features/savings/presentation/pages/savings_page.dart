@@ -14,66 +14,96 @@ class SavingsPage extends ConsumerWidget {
 
     return SafeArea(
       bottom: false,
-      child: Container(
-        color: theme.colorScheme.primary,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Ahorros', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
-                  Row(
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 350,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.transparent,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
-                        icon: Icon(Icons.check_circle_outline, color: theme.colorScheme.onPrimary),
-                        onPressed: () => context.push('/savings_completed'),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
-                        icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
-                        onPressed: () => context.push('/add_savings_goal'),
+                      Text('Ahorros', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          IconButton(
+                            style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
+                            icon: Icon(Icons.check_circle_outline, color: theme.colorScheme.onPrimary),
+                            onPressed: () => context.push('/savings_completed'),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
+                            icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+                            onPressed: () => context.push('/add_savings_goal'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
+                      ),
+                    ),
+                    child: savingsState.when(
+                      data: (goals) {
+                        final activeGoals = goals.where((g) => g.status == 'active').toList();
+                        if (activeGoals.isEmpty) {
+                          return const Center(child: Text('No tienes metas de ahorro activas.'));
+                        }
+                        return ListView.builder(
+                          padding: const EdgeInsets.only(top: 24, bottom: 100),
+                          itemCount: activeGoals.length,
+                          itemBuilder: (context, index) {
+                            final goal = activeGoals[index];
+                            return SavingsGoalCard(goal: goal);
+                          },
+                        );
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, st) => Center(child: Text('Error: $e')),
+                    ),
                   ),
                 ),
-                child: savingsState.when(
-                  data: (goals) {
-                    final activeGoals = goals.where((g) => g.status == 'active').toList();
-                    if (activeGoals.isEmpty) {
-                      return const Center(child: Text('No tienes metas de ahorro activas.'));
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.only(top: 24, bottom: 100),
-                      itemCount: activeGoals.length,
-                      itemBuilder: (context, index) {
-                        final goal = activeGoals[index];
-                        return SavingsGoalCard(goal: goal);
-                      },
-                    );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => Center(child: Text('Error: $e')),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

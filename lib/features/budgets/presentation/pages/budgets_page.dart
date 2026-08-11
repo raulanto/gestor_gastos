@@ -38,26 +38,54 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
     
     return SafeArea(
       bottom: false,
-      child: Container(
-        color: theme.colorScheme.primary,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Presupuestos', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
-                  IconButton(
-                    style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
-                    icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
-                    onPressed: () {
-                      context.push('/add_budget', extra: _monthYearKey);
-                    },
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 350,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary,
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
+          ),
+          Container(
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Presupuestos', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                      IconButton(
+                        style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
+                        icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+                        onPressed: () {
+                          context.push('/add_budget', extra: _monthYearKey);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
             BudgetMonthSelector(
               displayMonth: _displayMonth,
               onPrevMonth: _prevMonth,
@@ -83,6 +111,8 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
           ],
         ),
       ),
-    );
+    ],
+  ),
+);
   }
 }

@@ -8,34 +8,40 @@ class SettingsUserProfile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authNotifierProvider).value;
+    final theme = Theme.of(context);
 
     return Center(
       child: Column(
         children: [
-          const SizedBox(height: 16),
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: theme.colorScheme.onPrimary, width: 3),
+            ),
+            child: CircleAvatar(
+              radius: 40,
+              backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+              child: Icon(
+                Icons.person,
+                size: 40,
+                color: theme.colorScheme.onPrimary,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             user?.username ?? 'Usuario',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onPrimary,
+            ),
           ),
           Text(
             'Gestor de Gastos',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
             ),
           ),
-          const SizedBox(height: 32),
         ],
       ),
     );
