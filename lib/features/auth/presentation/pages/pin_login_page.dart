@@ -109,41 +109,93 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 60),
-              Icon(Icons.lock, size: 64, color: theme.colorScheme.primary),
-              const SizedBox(height: 24),
-              Text(
-                'Ingresa tu PIN',
-                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Desbloquea Gestor de Gastos',
-                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              _buildPinDots(),
-              const SizedBox(height: 24),
-              if (_error.isNotEmpty)
-                Text(
-                  _error,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 350,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
                 ),
-              const Spacer(),
-              _buildNumpad(),
-              const SizedBox(height: 48),
-            ],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary,
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
+                  child: Text('Bienvenido de nuevo', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Icon(Icons.lock, size: 48, color: theme.colorScheme.primary),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Ingresa tu PIN',
+                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Desbloquea Gestor de Gastos',
+                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 32),
+                          _buildPinDots(),
+                          const SizedBox(height: 16),
+                          if (_error.isNotEmpty)
+                            Text(
+                              _error,
+                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            )
+                          else
+                            const SizedBox(height: 16), // Placeholder para mantener el tamaño
+                          const SizedBox(height: 48), // Espaciador antes del teclado
+                          _buildNumpad(),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

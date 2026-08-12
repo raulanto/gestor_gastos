@@ -10,14 +10,32 @@ class WelcomePage extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      // Evitamos el color de fondo por defecto para que se vea el gradiente
-      backgroundColor: Colors.transparent,
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary,
-        ),
-        child: SafeArea(
+      backgroundColor: theme.colorScheme.surface,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary.withValues(alpha: 0.9),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
             child: Column(
@@ -64,7 +82,8 @@ class WelcomePage extends StatelessWidget {
               ],
             ),
           ),
-        ),
+          ),
+        ],
       ),
     );
   }
