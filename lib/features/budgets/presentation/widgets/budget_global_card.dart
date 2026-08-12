@@ -16,6 +16,7 @@ class BudgetGlobalCard extends ConsumerWidget {
       data: (global) {
         final budgeted = global['budgeted'] ?? 0.0;
         final spent = global['spent'] ?? 0.0;
+        final available = global['available'] ?? 0.0;
         final progress = budgeted > 0
             ? (spent / budgeted).clamp(0.0, 1.0)
             : 0.0;
@@ -54,11 +55,33 @@ class BudgetGlobalCard extends ConsumerWidget {
                   minHeight: 12,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Límite: \$${budgeted.toStringAsFixed(2)}',
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
-                textAlign: TextAlign.right,
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.account_balance_wallet, size: 16, color: theme.colorScheme.onPrimary),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Disponible real: \$${available.toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    'Límite: \$${budgeted.toStringAsFixed(2)}',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
+                    textAlign: TextAlign.right,
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
             ],

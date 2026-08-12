@@ -47,16 +47,21 @@ final globalBudgetProvider = FutureProvider.family<Map<String, double>, String>(
   
   double totalBudgeted = 0.0;
   double totalSpent = 0.0;
+  double totalAvailable = 0.0;
   
   for (var p in progressList) {
     if (p.budget.categoryId != null) {
       totalBudgeted += p.budget.amount;
       totalSpent += p.actualAmount;
+      if (p.budget.amount > p.actualAmount) {
+        totalAvailable += (p.budget.amount - p.actualAmount);
+      }
     }
   }
   
   return {
     'budgeted': totalBudgeted,
     'spent': totalSpent,
+    'available': totalAvailable,
   };
 });
