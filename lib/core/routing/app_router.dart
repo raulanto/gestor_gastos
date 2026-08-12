@@ -30,6 +30,13 @@ import '../../features/budgets/presentation/pages/add_budget_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/home/presentation/widgets/transactions_view.dart';
+import '../../features/loans/presentation/pages/loans_page.dart';
+import '../../features/loans/presentation/pages/add_loan_page.dart';
+import '../../features/loans/presentation/pages/loan_details_page.dart';
+import '../../features/loans/domain/entities/loan.dart';
+import '../../features/persons/domain/entities/person.dart';
+import '../../features/persons/presentation/pages/add_edit_person_page.dart';
+import '../../features/persons/presentation/pages/persons_catalog_page.dart';
 import '../presentation/layouts/main_layout.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -37,6 +44,7 @@ final GlobalKey<NavigatorState> _shellNavigatorTransactionsKey = GlobalKey<Navig
 final GlobalKey<NavigatorState> _shellNavigatorRecurringKey = GlobalKey<NavigatorState>(debugLabel: 'shellRecurring');
 final GlobalKey<NavigatorState> _shellNavigatorSavingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSavings');
 final GlobalKey<NavigatorState> _shellNavigatorBudgetsKey = GlobalKey<NavigatorState>(debugLabel: 'shellBudgets');
+final GlobalKey<NavigatorState> _shellNavigatorLoansKey = GlobalKey<NavigatorState>(debugLabel: 'shellLoans');
 final GlobalKey<NavigatorState> _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -144,6 +152,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
+            navigatorKey: _shellNavigatorLoansKey,
+            routes: [
+              GoRoute(
+                path: '/loans',
+                name: 'loans',
+                builder: (context, state) => const LoansPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
             navigatorKey: _shellNavigatorSettingsKey,
             routes: [
               GoRoute(
@@ -237,6 +255,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final monthYear = state.extra as String;
           return AddBudgetPage(monthYear: monthYear);
+        },
+      ),
+      GoRoute(
+        path: '/add_loan',
+        name: 'add_loan',
+        builder: (context, state) => const AddLoanPage(),
+      ),
+      GoRoute(
+        path: '/loan_details',
+        name: 'loan_details',
+        builder: (context, state) {
+          final loan = state.extra as LoanEntity;
+          return LoanDetailsPage(loan: loan);
+        },
+      ),
+      GoRoute(
+        path: '/persons',
+        name: 'persons',
+        builder: (context, state) {
+          final select = state.uri.queryParameters['select'] == 'true';
+          return PersonsCatalogPage(isSelectionMode: select);
+        },
+      ),
+      GoRoute(
+        path: '/add_person',
+        name: 'add_person',
+        builder: (context, state) => const AddEditPersonPage(),
+      ),
+      GoRoute(
+        path: '/edit_person',
+        name: 'edit_person',
+        builder: (context, state) {
+          final person = state.extra as PersonEntity;
+          return AddEditPersonPage(personToEdit: person);
         },
       ),
     ],

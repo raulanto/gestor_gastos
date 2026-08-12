@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 5,
+      version: 7,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -117,6 +117,58 @@ class AppDatabase {
       await db.execute('ALTER TABLE savings_goals ADD COLUMN is_protected INTEGER NOT NULL DEFAULT 0');
       await db.execute('ALTER TABLE savings_goals ADD COLUMN priority INTEGER NOT NULL DEFAULT 0');
       await db.execute('ALTER TABLE savings_goals ADD COLUMN deduct_from_balance INTEGER NOT NULL DEFAULT 1');
+    }
+
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE loans(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          person_name TEXT NOT NULL,
+          type TEXT NOT NULL,
+          amount REAL NOT NULL,
+          account_id INTEGER NOT NULL,
+          date TEXT NOT NULL,
+          due_date TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        )
+      ''');
+
+      await db.execute('''
+        CREATE TABLE loan_payments(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          loan_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          date TEXT NOT NULL,
+          FOREIGN KEY (loan_id) REFERENCES loans(id) ON DELETE CASCADE
+        )
+      ''');
+
+      // Add "Préstamos" category if not exists
+      final result = await db.query('categories', where: 'name = ?', whereArgs: ['Préstamos']);
+      if (result.isEmpty) {
+        await db.insert('categories', {
+          'name': 'Préstamos',
+          'icon_code': Icons.handshake.codePoint,
+          'color_code': Colors.indigo.toARGB32()
+        });
+      }
+    }
+
+    if (oldVersion < 7) {
+      await db.execute('''
+        CREATE TABLE persons(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          phone TEXT,
+          photo_path TEXT
+        )
+      ''');
+      
+      await db.execute('ALTER TABLE loans ADD COLUMN person_id INTEGER');
+      await db.execute('''
+        CREATE INDEX idx_loans_person_id ON loans(person_id);
+      ''');
     }
   }
 
@@ -259,6 +311,42 @@ class AppDatabase {
       )
     ''');
 
+    // Tabla de Personas
+    await db.execute('''
+      CREATE TABLE persons(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT,
+        photo_path TEXT
+      )
+    ''');
+
+    // Tabla de Préstamos
+    await db.execute('''
+      CREATE TABLE loans(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        person_name TEXT NOT NULL,
+        person_id INTEGER,
+        type TEXT NOT NULL,
+        amount REAL NOT NULL,
+        account_id INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        due_date TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE loan_payments(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        loan_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        date TEXT NOT NULL,
+        FOREIGN KEY (loan_id) REFERENCES loans(id) ON DELETE CASCADE
+      )
+    ''');
+
     // PRE-CARGA DE DATOS POR DEFECTO
 
     // 1. Cuentas Base
@@ -290,5 +378,8 @@ class AppDatabase {
     // Trabajo / Ingresos
     final trabajoId = await db.insert('categories', {'name': 'Trabajo', 'icon_code': Icons.work.codePoint, 'color_code': Colors.brown.toARGB32()});
     await db.insert('categories', {'name': 'Pago Nómina', 'icon_code': Icons.attach_money.codePoint, 'color_code': Colors.brown.toARGB32(), 'parent_id': trabajoId});
+    
+    // Préstamos
+    await db.insert('categories', {'name': 'Préstamos', 'icon_code': Icons.handshake.codePoint, 'color_code': Colors.indigo.toARGB32()});
   }
 }
