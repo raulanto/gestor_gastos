@@ -7,8 +7,19 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 
 class HomeHeader extends ConsumerWidget {
   final double totalBalance;
+  final double totalIncome;
+  final double totalExpense;
+  final bool isMinimized;
+  final VoidCallback onToggleMinimize;
 
-  const HomeHeader({super.key, required this.totalBalance});
+  const HomeHeader({
+    super.key,
+    required this.totalBalance,
+    required this.totalIncome,
+    required this.totalExpense,
+    required this.isMinimized,
+    required this.onToggleMinimize,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,107 +34,201 @@ class HomeHeader extends ConsumerWidget {
       padding: const EdgeInsets.only(top: 16, left: 24, right: 24, bottom: 16),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.colorScheme.onPrimary, width: 2),
-                    ),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
-                      child: Icon(
-                        Icons.person,
-                        size: 24,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          // Sección superior animada (se oculta al minimizar)
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: isMinimized
+                ? const SizedBox.shrink()
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Bienvenido de vuelta,',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.onPrimary,
+                                width: 2,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: theme.colorScheme.onPrimary
+                                  .withValues(alpha: 0.2),
+                              child: Icon(
+                                Icons.person,
+                                size: 24,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bienvenido,',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onPrimary.withValues(
+                                    alpha: 0.8,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                user?.username ?? 'Usuario',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      Text(
-                        user?.username ?? 'Usuario',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.chevron_left,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(selectedMonthProvider.notifier)
+                                  .updateMonth(
+                                    DateTime(
+                                      selectedMonth.year,
+                                      selectedMonth.month - 1,
+                                    ),
+                                  );
+                            },
+                          ),
+                          Text(
+                            monthStr,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.chevron_right,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(selectedMonthProvider.notifier)
+                                  .updateMonth(
+                                    DateTime(
+                                      selectedMonth.year,
+                                      selectedMonth.month + 1,
+                                    ),
+                                  );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-              Row(
+          ),
+          SizedBox(height: isMinimized ? 0 : 24),
+          // Sección de balance
+          GestureDetector(
+            onTap: onToggleMinimize,
+            behavior: HitTestBehavior.opaque,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: Alignment.center,
+              padding: isMinimized
+                  ? const EdgeInsets.all(16.0)
+                  : EdgeInsets.zero,
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_left,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(selectedMonthProvider.notifier)
-                          .updateMonth(
-                            DateTime(
-                              selectedMonth.year,
-                              selectedMonth.month - 1,
-                            ),
-                          );
-                    },
-                  ),
                   Text(
-                    monthStr,
+                    'Balance General',
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color: theme.colorScheme.onPrimary,
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_right,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(selectedMonthProvider.notifier)
-                          .updateMonth(
-                            DateTime(
-                              selectedMonth.year,
-                              selectedMonth.month + 1,
+                  const SizedBox(height: 8),
+                  Text(
+                    '\$${totalBalance.toStringAsFixed(2)}',
+                    style:
+                        (isMinimized
+                                ? theme.textTheme.displayLarge
+                                : theme.textTheme.displayLarge)
+                            ?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: isMinimized ? 48 : null,
                             ),
-                          );
-                    },
+                  ),
+                  // Indicadores minimalistas (solo visibles al minimizar)
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: isMinimized
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildMinimalistIndicator(
+                                  context,
+                                  Icons.arrow_upward_rounded,
+                                  theme.colorScheme.tertiary,
+                                  totalIncome,
+                                ),
+                                const SizedBox(width: 32),
+                                _buildMinimalistIndicator(
+                                  context,
+                                  Icons.arrow_downward_rounded,
+                                  theme.colorScheme.error,
+                                  totalExpense,
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Balance General',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
-            ),
-          ),
-          Text(
-            '\$${totalBalance.toStringAsFixed(2)}',
-            style: theme.textTheme.displayLarge?.copyWith(
-              color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.bold,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMinimalistIndicator(
+    BuildContext context,
+    IconData icon,
+    Color color,
+    double amount,
+  ) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '\$${amount.toStringAsFixed(2)}',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

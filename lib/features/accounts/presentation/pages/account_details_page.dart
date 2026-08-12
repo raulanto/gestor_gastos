@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 
 import '../../domain/entities/account.dart';
 import '../providers/account_transactions_provider.dart';
-
+import '../../../home/presentation/providers/period_view_provider.dart';
+import '../../../home/presentation/widgets/period_selector.dart';
+import '../../../../core/providers/date_filter_provider.dart';
 class AccountDetailsPage extends ConsumerWidget {
   final Account account;
 
@@ -16,10 +18,14 @@ class AccountDetailsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final filterMap = ref.watch(accountDateFilterProvider);
-    final filter = filterMap[account.id] ?? DateRangeFilter.monthly;
+    final filter = filterMap[account.id] ?? PeriodView.month;
     final summaryAsync = ref.watch(accountTransactionsSummaryProvider(account.id));
+    final selectedMonth = ref.watch(selectedMonthProvider);
+    String monthStr = DateFormat('MMMM yyyy').format(selectedMonth);
+    monthStr = monthStr[0].toUpperCase() + monthStr.substring(1);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: theme.colorScheme.primary,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -42,12 +48,40 @@ class AccountDetailsPage extends ConsumerWidget {
           )
         ],
       ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Balance
-            Padding(
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 350,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary.withValues(alpha: 1.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // Balance
+                Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
               child: Column(
                 children: [
@@ -63,24 +97,59 @@ class AccountDetailsPage extends ConsumerWidget {
             
             // Filtros
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: SegmentedButton<DateRangeFilter>(
-                segments: const [
-                  ButtonSegment(value: DateRangeFilter.days7, label: Text('7 Días')),
-                  ButtonSegment(value: DateRangeFilter.monthly, label: Text('Mes')),
-                  ButtonSegment(value: DateRangeFilter.trimester, label: Text('Trimestre')),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                children: [
+                  PeriodSelector(
+                    selectedPeriod: filter,
+                    onPeriodChanged: (value) {
+                      ref.read(accountDateFilterProvider.notifier).updateFilter(account.id, value);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(selectedMonthProvider.notifier)
+                              .updateMonth(
+                                DateTime(
+                                  selectedMonth.year,
+                                  selectedMonth.month - 1,
+                                ),
+                              );
+                        },
+                      ),
+                      Text(
+                        monthStr,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(selectedMonthProvider.notifier)
+                              .updateMonth(
+                                DateTime(
+                                  selectedMonth.year,
+                                  selectedMonth.month + 1,
+                                ),
+                              );
+                        },
+                      ),
+                    ],
+                  ),
                 ],
-                selected: {filter},
-                onSelectionChanged: (Set<DateRangeFilter> newSelection) {
-                  ref.read(accountDateFilterProvider.notifier).updateFilter(account.id, newSelection.first);
-                },
-                style: SegmentedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  selectedBackgroundColor: theme.colorScheme.onPrimary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                  selectedForegroundColor: theme.colorScheme.primary,
-                  side: BorderSide(color: theme.colorScheme.onPrimary.withValues(alpha: 0.3)),
-                ),
               ),
             ),
 
@@ -181,6 +250,8 @@ class AccountDetailsPage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+      ],
       ),
     );
   }

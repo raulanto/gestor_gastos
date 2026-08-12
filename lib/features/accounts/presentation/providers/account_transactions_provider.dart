@@ -2,19 +2,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
 import 'package:intl/intl.dart';
-
-enum DateRangeFilter { days7, monthly, trimester }
-
-class AccountDateFilterNotifier extends Notifier<Map<int, DateRangeFilter>> {
+import '../../../home/presentation/providers/period_view_provider.dart';
+import '../../../../core/providers/date_filter_provider.dart';
+class AccountDateFilterNotifier extends Notifier<Map<int, PeriodView>> {
   @override
-  Map<int, DateRangeFilter> build() => {};
+  Map<int, PeriodView> build() => {};
 
-  void updateFilter(int accountId, DateRangeFilter filter) {
+  void updateFilter(int accountId, PeriodView filter) {
     state = {...state, accountId: filter};
   }
 }
 
-final accountDateFilterProvider = NotifierProvider<AccountDateFilterNotifier, Map<int, DateRangeFilter>>(() {
+final accountDateFilterProvider = NotifierProvider<AccountDateFilterNotifier, Map<int, PeriodView>>(() {
   return AccountDateFilterNotifier();
 });
 
@@ -35,28 +34,36 @@ class AccountTransactionsSummary {
 final accountTransactionsSummaryProvider = Provider.family<AsyncValue<AccountTransactionsSummary>, int>((ref, accountId) {
   final transactionsAsync = ref.watch(transactionsProvider);
   final filterMap = ref.watch(accountDateFilterProvider);
-  final filter = filterMap[accountId] ?? DateRangeFilter.monthly;
+  final filter = filterMap[accountId] ?? PeriodView.month;
+  final selectedMonth = ref.watch(selectedMonthProvider);
 
   return transactionsAsync.whenData((allTransactions) {
     var accountTxs = allTransactions.where((t) => t.accountId == accountId).toList();
 
-    final now = DateTime.now();
-    DateTime startDate;
-    if (filter == DateRangeFilter.days7) {
-      startDate = now.subtract(const Duration(days: 6));
-      startDate = DateTime(startDate.year, startDate.month, startDate.day);
-    } else if (filter == DateRangeFilter.monthly) {
-      startDate = DateTime(now.year, now.month, 1);
-    } else { // trimester
-      startDate = DateTime(now.year, now.month - 2, 1);
-    }
-
-    accountTxs = accountTxs.where((t) {
+    List<TransactionEntity> filteredTxs = [];
+    for (var t in accountTxs) {
       final date = DateTime.parse(t.date);
-      return date.isAfter(startDate.subtract(const Duration(seconds: 1)));
-    }).toList();
+      bool include = false;
+      if (filter == PeriodView.day) {
+        final referenceDate = (selectedMonth.year == DateTime.now().year && selectedMonth.month == DateTime.now().month) 
+            ? DateTime.now() 
+            : DateTime(selectedMonth.year, selectedMonth.month, 1);
+        include = date.year == referenceDate.year && date.month == referenceDate.month && date.day == referenceDate.day;
+      } else if (filter == PeriodView.week) {
+        final referenceDate = (selectedMonth.year == DateTime.now().year && selectedMonth.month == DateTime.now().month) 
+            ? DateTime.now() 
+            : DateTime(selectedMonth.year, selectedMonth.month, 1);
+        final weekStart = referenceDate.subtract(Duration(days: referenceDate.weekday - 1));
+        include = date.isAfter(weekStart.subtract(const Duration(days: 1))) && date.isBefore(weekStart.add(const Duration(days: 7)));
+      } else if (filter == PeriodView.month) {
+        include = date.year == selectedMonth.year && date.month == selectedMonth.month;
+      } else if (filter == PeriodView.year) {
+        include = date.year == selectedMonth.year;
+      }
+      if (include) filteredTxs.add(t);
+    }
     
-    accountTxs.sort((a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)));
+    filteredTxs.sort((a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)));
 
     double totalIncome = 0;
     double totalExpense = 0;
@@ -64,7 +71,7 @@ final accountTransactionsSummaryProvider = Provider.family<AsyncValue<AccountTra
     // Grouping for chart
     Map<String, Map<String, double>> chartData = {};
 
-    for (var tx in accountTxs) {
+    for (var tx in filteredTxs) {
       if (tx.type == 'income') {
         totalIncome += tx.amount;
       } else if (tx.type == 'expense') {
@@ -73,13 +80,12 @@ final accountTransactionsSummaryProvider = Provider.family<AsyncValue<AccountTra
       
       final date = DateTime.parse(tx.date);
       String key;
-      if (filter == DateRangeFilter.trimester) {
-        // Group by week for trimester to avoid too many bars
-        final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
-        key = DateFormat('MMM dd').format(startOfWeek);
-      } else {
-        // Group by day for 7 days or monthly
+      if (filter == PeriodView.year) {
+        key = DateFormat('MMM yyyy').format(date);
+      } else if (filter == PeriodView.month) {
         key = DateFormat('MMM dd').format(date);
+      } else {
+        key = DateFormat('EEE dd').format(date);
       }
 
       if (!chartData.containsKey(key)) {
@@ -93,7 +99,7 @@ final accountTransactionsSummaryProvider = Provider.family<AsyncValue<AccountTra
     }
 
     return AccountTransactionsSummary(
-      transactions: accountTxs,
+      transactions: filteredTxs,
       totalIncome: totalIncome,
       totalExpense: totalExpense,
       chartData: chartData,
