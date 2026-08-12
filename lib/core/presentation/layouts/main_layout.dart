@@ -54,9 +54,10 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                 _buildNavItem(Icons.home, Icons.home_outlined, 0),
                 _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 1),
                 _buildNavItem(Icons.handshake, Icons.handshake_outlined, 4),
-                _buildAddButton(context),
+
                 _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
                 _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
+                                _buildAddButton(context),
               ],
             ),
           ),
