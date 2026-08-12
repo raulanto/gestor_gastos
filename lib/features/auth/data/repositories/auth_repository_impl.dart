@@ -16,4 +16,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> saveUser(String username) async {
     return await _localDataSource.saveUser(username);
   }
+
+  @override
+  Future<User> updateProfile(int id, String username, String? photoPath) async {
+    return await _localDataSource.updateProfile(id, username, photoPath);
+  }
 }

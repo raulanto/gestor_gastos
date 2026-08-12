@@ -44,7 +44,7 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
             top: 0,
             left: 0,
             right: 0,
-            height: 350,
+            height: 370,
             child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(

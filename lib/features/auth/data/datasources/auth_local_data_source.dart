@@ -34,4 +34,17 @@ class AuthLocalDataSource {
 
     return User(id: id, username: username);
   }
+  Future<User> updateProfile(int id, String username, String? photoPath) async {
+    final db = await _appDatabase.database;
+    await db.update(
+      'users',
+      {
+        'username': username,
+        'photo_path': photoPath,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return User(id: id, username: username, photoPath: photoPath);
+  }
 }

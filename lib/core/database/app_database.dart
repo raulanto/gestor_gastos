@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -170,13 +170,18 @@ class AppDatabase {
         CREATE INDEX idx_loans_person_id ON loans(person_id);
       ''');
     }
+
+    if (oldVersion < 8) {
+      await db.execute('ALTER TABLE users ADD COLUMN photo_path TEXT');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL
+        username TEXT UNIQUE NOT NULL,
+        photo_path TEXT
       )
     ''');
     

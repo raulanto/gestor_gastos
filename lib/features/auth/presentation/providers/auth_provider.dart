@@ -38,4 +38,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
       return await _repository.saveUser(username);
     });
   }
+
+  Future<void> updateProfile(int id, String username, String? photoPath) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      return await _repository.updateProfile(id, username, photoPath);
+    });
+  }
 }
