@@ -9,6 +9,7 @@ environment:
 dependencies:
   confetti: ^0.8.0
   fl_chart: ^1.2.0
+  flex_color_scheme: ^8.4.0
   flutter:
     sdk: flutter
   flutter_native_splash: ^2.4.8

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import '../../../../../core/theme/theme_provider.dart';
+
+
 
 class SettingsThemeCard extends ConsumerWidget {
   const SettingsThemeCard({super.key});
@@ -8,59 +11,135 @@ class SettingsThemeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final colorScheme = ref.watch(colorSchemeProvider);
+    final theme = Theme.of(context);
+
+    // Paleta curada de esquemas de color
+    final List<Map<String, dynamic>> predefinedSchemes = [
+      {'name': 'Original', 'scheme': 'original', 'color': const Color(0xff415f91)},
+      {'name': 'Predeterminado', 'scheme': FlexScheme.materialBaseline.toString(), 'color': FlexColor.materialBaselineLightPrimary},
+      {'name': 'Índigo', 'scheme': FlexScheme.indigo.toString(), 'color': FlexColor.indigoLightPrimary},
+      {'name': 'Verde', 'scheme': FlexScheme.green.toString(), 'color': FlexColor.greenLightPrimary},
+      {'name': 'Rosa', 'scheme': FlexScheme.sakura.toString(), 'color': FlexColor.sakuraLightPrimary},
+      {'name': 'Naranja', 'scheme': FlexScheme.mango.toString(), 'color': FlexColor.mangoLightPrimary},
+      {'name': 'Rojo', 'scheme': FlexScheme.mandyRed.toString(), 'color': FlexColor.mandyRedLightPrimary},
+      {'name': 'Aqua', 'scheme': FlexScheme.aquaBlue.toString(), 'color': FlexColor.aquaBlueLightPrimary},
+      {'name': 'Azul Profundo', 'scheme': FlexScheme.deepBlue.toString(), 'color': FlexColor.deepBlueLightPrimary},
+      {'name': 'Berenjena', 'scheme': FlexScheme.ebonyClay.toString(), 'color': FlexColor.ebonyClayLightPrimary},
+      {'name': 'Oro', 'scheme': FlexScheme.gold.toString(), 'color': FlexColor.goldLightPrimary},
+      {'name': 'Wasabi', 'scheme': FlexScheme.wasabi.toString(), 'color': FlexColor.wasabiLightPrimary},
+      {'name': 'Tiburón', 'scheme': FlexScheme.shark.toString(), 'color': FlexColor.sharkLightPrimary},
+      {'name': 'Expreso', 'scheme': FlexScheme.espresso.toString(), 'color': FlexColor.espressoLightPrimary},
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Apariencia',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
+          style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
         ),
         const SizedBox(height: 8),
         Card(
           elevation: 0,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.brightness_6, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    Icon(Icons.brightness_6, color: theme.colorScheme.onSurfaceVariant),
                     const SizedBox(width: 16),
                     Text(
-                      'Tema',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      'Modo',
+                      style: theme.textTheme.titleMedium,
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                SegmentedButton<ThemeMode>(
-                  segments: const [
-                    ButtonSegment(
-                      value: ThemeMode.system,
-                      icon: Icon(Icons.settings_system_daydream),
-                      label: Text('Sistema'),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.light,
-                      icon: Icon(Icons.light_mode),
-                      label: Text('Claro'),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.dark,
-                      icon: Icon(Icons.dark_mode),
-                      label: Text('Oscuro'),
+                Center(
+                  child: SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        icon: Icon(Icons.settings_system_daydream),
+                        label: Text('Sistema'),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: Icon(Icons.light_mode),
+                        label: Text('Claro'),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: Icon(Icons.dark_mode),
+                        label: Text('Oscuro'),
+                      ),
+                    ],
+                    selected: {themeMode},
+                    onSelectionChanged: (Set<ThemeMode> newSelection) {
+                      ref.read(themeModeProvider.notifier).setThemeMode(newSelection.first);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Icon(Icons.color_lens, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Color',
+                      style: theme.textTheme.titleMedium,
                     ),
                   ],
-                  selected: {themeMode},
-                  onSelectionChanged: (Set<ThemeMode> newSelection) {
-                    ref.read(themeModeProvider.notifier).setThemeMode(newSelection.first);
-                  },
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 60,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: predefinedSchemes.length,
+                    itemBuilder: (context, index) {
+                      final item = predefinedSchemes[index];
+                      final isSelected = colorScheme == item['scheme'];
+                      final color = item['color'] as Color;
+
+                      return GestureDetector(
+                        onTap: () {
+                          ref.read(colorSchemeProvider.notifier).setScheme(item['scheme'] as String);
+                        },
+                        child: Container(
+                          width: 50,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? theme.colorScheme.onSurface : Colors.transparent,
+                              width: 3,
+                            ),
+                            boxShadow: [
+                              if (isSelected)
+                                BoxShadow(
+                                  color: color.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                  spreadRadius: 2,
+                                )
+                            ],
+                          ),
+                          child: isSelected
+                              ? Icon(Icons.check, color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
