@@ -1,6 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:confetti/confetti.dart';
 import '../../domain/entities/savings_goal.dart';
 import '../providers/savings_provider.dart';
 import '../widgets/edit_savings_goal_dialog.dart';
@@ -19,19 +21,29 @@ class SavingsGoalDetailsPage extends ConsumerStatefulWidget {
 
 class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage> {
   late SavingsGoalEntity _currentGoal;
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
     _currentGoal = widget.goal;
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final txsAsync = ref.watch(savingsGoalTransactionsProvider(_currentGoal.id!));
     
-    return Scaffold(
-      appBar: AppBar(
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
         title: Text(_currentGoal.name),
         actions: [
           IconButton(
@@ -111,7 +123,21 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
         label: const Text('Aportar'),
         icon: const Icon(Icons.add),
       ),
-    );
+    ),
+    Align(
+      alignment: Alignment.topCenter,
+      child: ConfettiWidget(
+        confettiController: _confettiController,
+        blastDirection: pi / 2, // shoot downwards
+        maxBlastForce: 5,
+        minBlastForce: 2,
+        emissionFrequency: 0.05,
+        numberOfParticles: 50,
+        gravity: 0.1,
+      ),
+    ),
+  ],
+);
   }
 
   void _showTransactionModal(BuildContext context, WidgetRef ref, bool isDeposit, double savedAmount) {
@@ -132,6 +158,9 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
         setState(() {
           _currentGoal = updatedDbGoal;
         });
+        if (_currentGoal.status == 'completed') {
+          _confettiController.play();
+        }
       }
     });
   }
