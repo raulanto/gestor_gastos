@@ -53,6 +53,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
               children: [
                 _buildNavItem(Icons.home, Icons.home_outlined, 0),
                 _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 1),
+                _buildAddButton(context),
                 _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
                 _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
                 _buildNavItem(Icons.settings, Icons.settings_outlined, 4),
@@ -79,6 +80,27 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         child: Icon(
           isSelected ? selectedIcon : unselectedIcon,
           color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.surface.withValues(alpha: 0.6),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: () {
+        context.push('/add_transaction?type=income');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.add,
+          color: theme.colorScheme.onPrimary,
+          size: 28,
         ),
       ),
     );
