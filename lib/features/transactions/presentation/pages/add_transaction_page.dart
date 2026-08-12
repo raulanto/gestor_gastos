@@ -6,12 +6,21 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
+import '../../../accounts/domain/entities/account.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../domain/entities/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../widgets/custom_numeric_keyboard.dart';
+
+import '../widgets/transaction_type_selector.dart';
+import '../widgets/transaction_account_selector.dart';
+import '../widgets/transaction_category_selector.dart';
+import '../widgets/transaction_split_list.dart';
+import '../widgets/transaction_date_selector.dart';
+import '../widgets/transaction_note_image_input.dart';
+import '../widgets/category_picker_sheet.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionId;
@@ -36,34 +45,35 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   List<TransactionSplit> _splits = [];
   final TextEditingController _noteController = TextEditingController();
 
+  bool _hydrated = false;
+
   @override
   void initState() {
     super.initState();
     if (widget.initialType != null) {
       _transactionType = widget.initialType!;
     }
-    if (widget.transactionId != null) {
-      final t = ref.read(transactionByIdProvider(widget.transactionId!));
-      if (t != null) {
-        _expression = t.amount.toStringAsFixed(2);
-        if (_expression.endsWith('.00')) {
-          _expression = _expression.substring(0, _expression.length - 3);
-        }
-        _selectedAccountId = t.accountId;
-        _selectedCategoryId = t.categoryId;
-        _note = t.note ?? '';
-        _noteController.text = _note;
-        _selectedDate = DateTime.parse(t.date);
-        if (t.receiptImagePath != null) {
-          _receiptImage = File(t.receiptImagePath!);
-        }
-        _transactionType = t.type;
-        if (t.splits.length > 1) {
-          _isSplitMode = true;
-          _splits = List.from(t.splits);
-        }
-      }
+  }
+
+  void _hydrateFromTransaction(TransactionEntity t) {
+    _expression = t.amount.toStringAsFixed(2);
+    if (_expression.endsWith('.00')) {
+      _expression = _expression.substring(0, _expression.length - 3);
     }
+    _selectedAccountId = t.accountId;
+    _selectedCategoryId = t.categoryId;
+    _note = t.note ?? '';
+    _noteController.text = _note;
+    _selectedDate = DateTime.parse(t.date);
+    if (t.receiptImagePath != null) {
+      _receiptImage = File(t.receiptImagePath!);
+    }
+    _transactionType = t.type;
+    if (t.splits.length > 1) {
+      _isSplitMode = true;
+      _splits = List.from(t.splits);
+    }
+    _hydrated = true;
   }
 
   @override
@@ -88,7 +98,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         if (_expression == '0' && value != '.') {
           _expression = value;
         } else {
-          final lastChar = _expression.characters.last;
+          final lastChar = _expression[_expression.length - 1];
           if ((value == '+' || value == '-' || value == '.') && 
               (lastChar == '+' || lastChar == '-' || lastChar == '.')) {
             return; 
@@ -135,90 +145,29 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    if (pickedFile == null || !mounted) return;
 
-    if (pickedFile != null) {
-      final appDir = await getApplicationDocumentsDirectory();
-      final fileName = path.basename(pickedFile.path);
-      final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
-      
-      setState(() {
-        _receiptImage = savedImage;
-      });
+    final appDir = await getApplicationDocumentsDirectory();
+    if (!mounted) return;
+
+    final fileName = path.basename(pickedFile.path);
+    final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+    if (!mounted) return;
+
+    final previousImage = _receiptImage;
+
+    setState(() => _receiptImage = savedImage);
+
+    if (previousImage != null && previousImage.path != savedImage.path) {
+      previousImage.delete().catchError((_) => previousImage);
     }
-  }
-
-  Future<void> _selectCategory(BuildContext context, Function(Category) onSelected) async {
-    final categoriesState = ref.read(categoriesProvider);
-    if (categoriesState.value == null) return;
-    
-    final categories = categoriesState.value!;
-    final mainCategories = categories.where((c) => c.parentId == null).toList();
-    final subCategories = categories.where((c) => c.parentId != null).toList();
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text('Seleccionar Categoría', style: Theme.of(context).textTheme.titleLarge),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: mainCategories.length,
-                    itemBuilder: (context, index) {
-                      final main = mainCategories[index];
-                      final children = subCategories.where((c) => c.parentId == main.id).toList();
-
-                      if (children.isEmpty) {
-                        return ListTile(
-                          // ignore: non_const_argument_for_const_parameter
-                          leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
-                          title: Text(main.name),
-                          onTap: () {
-                            onSelected(main);
-                            Navigator.pop(context);
-                          },
-                        );
-                      }
-                      return ExpansionTile(
-                        // ignore: non_const_argument_for_const_parameter
-                        leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
-                        title: Text(main.name),
-                        children: children.map((child) => ListTile(
-                          contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
-                          // ignore: non_const_argument_for_const_parameter
-                          leading: Icon(IconData(child.iconCode, fontFamily: 'MaterialIcons'), color: Color(child.colorCode)),
-                          title: Text(child.name),
-                          onTap: () {
-                            onSelected(child);
-                            Navigator.pop(context);
-                          },
-                        )).toList(),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    );
   }
 
   Future<void> _addSplitDialog() async {
     double amount = 0;
     Category? selectedCat;
+    final categoriesState = ref.read(categoriesProvider);
+    
     await showDialog(context: context, builder: (ctx) {
       return StatefulBuilder(builder: (context, setStateSB) {
         return AlertDialog(
@@ -234,9 +183,15 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: () {
-                  _selectCategory(context, (cat) {
-                    setStateSB(() => selectedCat = cat);
-                  });
+                  if (categoriesState.value != null) {
+                    showCategoryPickerSheet(
+                      context: context,
+                      categories: categoriesState.value!,
+                      onSelected: (cat) {
+                        setStateSB(() => selectedCat = cat);
+                      },
+                    );
+                  }
                 },
                 child: Text(selectedCat == null ? 'Seleccionar Categoría' : selectedCat!.name),
               ),
@@ -283,7 +238,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Añada al menos una división')));
         return;
       }
-      double totalSplits = _splits.fold(0, (sum, item) => sum + item.amount);
+      final totalSplits = _splits.fold<double>(0, (sum, item) => sum + item.amount);
       if ((totalSplits - amount).abs() > 0.01) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('La suma de las divisiones (\$${totalSplits.toStringAsFixed(2)}) no coincide con el total (\$${amount.toStringAsFixed(2)})'))
@@ -297,8 +252,19 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       }
     }
 
+    int? parsedId;
+    if (widget.transactionId != null) {
+      parsedId = int.tryParse(widget.transactionId!);
+      if (parsedId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ID de transacción inválido, no se puede guardar')),
+        );
+        return;
+      }
+    }
+
     final newTransaction = TransactionEntity(
-      id: widget.transactionId != null ? int.tryParse(widget.transactionId!) : null,
+      id: parsedId,
       accountId: _selectedAccountId!,
       categoryId: _isSplitMode ? null : _selectedCategoryId!,
       amount: amount,
@@ -309,7 +275,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       splits: _isSplitMode ? _splits : [],
     );
 
-    if (widget.transactionId == null) {
+    if (parsedId == null) {
       await ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
     } else {
       await ref.read(transactionsProvider.notifier).updateTransaction(newTransaction);
@@ -328,12 +294,30 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final categoriesState = ref.watch(categoriesProvider);
     final theme = Theme.of(context);
 
-    accountsState.whenData((accounts) {
-      if (accounts.isNotEmpty && _selectedAccountId == null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() => _selectedAccountId = accounts.first.id);
-        });
+    if (widget.transactionId != null && !_hydrated) {
+      final t = ref.watch(transactionByIdProvider(widget.transactionId!));
+      if (t == null) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Editar Gasto')),
+          body: const Center(child: CircularProgressIndicator()),
+        );
       }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _hydrateFromTransaction(t));
+      });
+      return Scaffold(
+        appBar: AppBar(title: const Text('Editar Gasto')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    ref.listen<AsyncValue<List<Account>>>(accountsProvider, (previous, next) {
+      next.whenData((accounts) {
+        if (accounts.isNotEmpty && _selectedAccountId == null) {
+          setState(() => _selectedAccountId = accounts.first.id);
+        }
+      });
     });
 
     Category? selectedCategory;
@@ -353,18 +337,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(value: 'expense', label: Text('Gasto')),
-                      ButtonSegment(value: 'income', label: Text('Ingreso')),
-                      ButtonSegment(value: 'transfer', label: Text('Transferencia')),
-                    ],
-                    selected: {_transactionType},
-                    onSelectionChanged: (Set<String> newSelection) {
-                      setState(() {
-                        _transactionType = newSelection.first;
-                      });
-                    },
+                  TransactionTypeSelector(
+                    transactionType: _transactionType,
+                    onChanged: (val) => setState(() => _transactionType = val),
                   ),
                   const SizedBox(height: 24),
                   
@@ -380,25 +355,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   const SizedBox(height: 24),
 
                   accountsState.when(
-                    data: (accounts) => DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(labelText: 'Cuenta', border: OutlineInputBorder()),
-                      // ignore: deprecated_member_use
-                      value: _selectedAccountId,
-                      items: accounts.map((a) => DropdownMenuItem(
-                        value: a.id,
-                        child: Row(
-                          children: [
-                            // ignore: non_const_argument_for_const_parameter
-                            Icon(IconData(a.iconCode, fontFamily: 'MaterialIcons'), color: Color(a.colorCode)),
-                            const SizedBox(width: 8),
-                            Text(a.name),
-                          ],
-                        ),
-                      )).toList(),
+                    data: (accounts) => TransactionAccountSelector(
+                      selectedAccountId: _selectedAccountId,
+                      accounts: accounts,
                       onChanged: (val) => setState(() => _selectedAccountId = val),
                     ),
                     loading: () => const CircularProgressIndicator(),
-                    error: (e, st) => Text('Error: \$e'),
+                    error: (e, st) => Text('Error: $e'),
                   ),
                   const SizedBox(height: 16),
 
@@ -408,127 +371,48 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       const Text('Dividir Gasto (Splits)'),
                       Switch(
                         value: _isSplitMode,
-                        onChanged: (val) {
-                          setState(() {
-                            _isSplitMode = val;
-                          });
-                        },
+                        onChanged: (val) => setState(() {
+                          _isSplitMode = val;
+                          if (!val) _splits.clear();
+                        }),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
 
                   if (!_isSplitMode)
-                    InkWell(
-                      onTap: () {
-                        _selectCategory(context, (cat) {
-                          setState(() => _selectedCategoryId = cat.id);
-                        });
-                      },
-                      child: InputDecorator(
-                        decoration: const InputDecoration(labelText: 'Categoría', border: OutlineInputBorder()),
-                        child: Row(
-                          children: [
-                            if (selectedCategory != null)
-                              // ignore: non_const_argument_for_const_parameter
-                              Icon(IconData(selectedCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(selectedCategory.colorCode)),
-                            const SizedBox(width: 8),
-                            Text(selectedCategory != null ? selectedCategory.name : 'Seleccionar Categoría'),
-                          ],
-                        ),
-                      ),
+                    TransactionCategorySelector(
+                      selectedCategory: selectedCategory,
+                      categories: categoriesState.value,
+                      onSelected: (cat) => setState(() => _selectedCategoryId = cat.id),
                     )
                   else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (_splits.isNotEmpty)
-                          ..._splits.map((s) {
-                            final cat = categoriesState.value?.where((c) => c.id == s.categoryId).firstOrNull;
-                            return ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              // ignore: non_const_argument_for_const_parameter
-                              leading: cat != null ? Icon(IconData(cat.iconCode, fontFamily: 'MaterialIcons'), color: Color(cat.colorCode)) : const Icon(Icons.category),
-                              title: Text(cat?.name ?? 'Desconocida'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('\$${s.amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        _splits.remove(s);
-                                      });
-                                    },
-                                  )
-                                ],
-                              ),
-                            );
-                          }),
-                        OutlinedButton.icon(
-                          onPressed: _addSplitDialog,
-                          icon: const Icon(Icons.add),
-                          label: const Text('Añadir División'),
-                        )
-                      ],
+                    TransactionSplitList(
+                      splits: _splits,
+                      categories: categoriesState.value,
+                      onAddSplit: _addSplitDialog,
+                      onRemoveSplit: (s) => setState(() => _splits.remove(s)),
                     ),
 
                   const SizedBox(height: 16),
                   
-                  InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) {
-                        setState(() => _selectedDate = picked);
-                      }
-                    },
-                    child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Fecha', border: OutlineInputBorder()),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today),
-                          const SizedBox(width: 8),
-                          Text("${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}"),
-                        ],
-                      ),
-                    ),
+                  TransactionDateSelector(
+                    selectedDate: _selectedDate,
+                    onChanged: (date) => setState(() => _selectedDate = date),
                   ),
 
                   const SizedBox(height: 16),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _noteController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nota (opcional)',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (val) => _note = val,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filledTonal(
-                        icon: Icon(_receiptImage != null ? Icons.image : Icons.camera_alt),
-                        onPressed: _pickImage,
-                      ),
-                      if (_receiptImage != null)
-                        IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _receiptImage = null;
-                            });
-                          },
-                        ),
-                    ],
+                  TransactionNoteImageInput(
+                    noteController: _noteController,
+                    onNoteChanged: (val) => _note = val,
+                    receiptImage: _receiptImage,
+                    onPickImage: _pickImage,
+                    onClearImage: () {
+                      final old = _receiptImage;
+                      setState(() => _receiptImage = null);
+                      old?.delete().catchError((_) => old);
+                    },
                   ),
                 ],
               ),
