@@ -52,3 +52,13 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     await loadAccounts();
   }
 }
+
+final accountByIdProvider = Provider.family<Account?, String>((ref, id) {
+  final accounts = ref.watch(accountsProvider);
+  final parsedId = int.tryParse(id);
+  if (parsedId == null) return null;
+  return accounts.maybeWhen(
+    data: (list) => list.where((a) => a.id == parsedId).firstOrNull,
+    orElse: () => null,
+  );
+});

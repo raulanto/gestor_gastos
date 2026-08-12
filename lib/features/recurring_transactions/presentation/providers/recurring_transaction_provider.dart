@@ -67,3 +67,13 @@ class RecurringTransactionNotifier extends AsyncNotifier<List<RecurringTransacti
     state = AsyncValue.data((state.value ?? []).where((e) => e.id != id).toList());
   }
 }
+
+final recurringTransactionByIdProvider = Provider.family<RecurringTransactionEntity?, String>((ref, id) {
+  final transactions = ref.watch(recurringTransactionsProvider);
+  final parsedId = int.tryParse(id);
+  if (parsedId == null) return null;
+  return transactions.maybeWhen(
+    data: (list) => list.where((rt) => rt.id == parsedId).firstOrNull,
+    orElse: () => null,
+  );
+});

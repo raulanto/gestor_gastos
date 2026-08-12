@@ -78,3 +78,13 @@ class PersonsNotifier extends AsyncNotifier<List<PersonEntity>> {
     );
   }
 }
+
+final personByIdProvider = Provider.family<PersonEntity?, String>((ref, id) {
+  final persons = ref.watch(personsProvider);
+  final parsedId = int.tryParse(id);
+  if (parsedId == null) return null;
+  return persons.maybeWhen(
+    data: (list) => list.where((p) => p.id == parsedId).firstOrNull,
+    orElse: () => null,
+  );
+});

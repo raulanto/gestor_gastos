@@ -46,22 +46,27 @@ class HomeHeader extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: theme.colorScheme.onPrimary,
-                                width: 2,
+                          GestureDetector(
+                            onTap: () {
+                              context.go('/settings');
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: theme.colorScheme.onPrimary,
+                                  width: 2,
+                                ),
                               ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: theme.colorScheme.onPrimary
-                                  .withValues(alpha: 0.2),
-                              child: Icon(
-                                Icons.person,
-                                size: 24,
-                                color: theme.colorScheme.onPrimary,
+                              child: CircleAvatar(
+                                radius: 20,
+                                backgroundColor: theme.colorScheme.onPrimary
+                                    .withValues(alpha: 0.2),
+                                child: Icon(
+                                  Icons.person,
+                                  size: 24,
+                                  color: theme.colorScheme.onPrimary,
+                                ),
                               ),
                             ),
                           ),

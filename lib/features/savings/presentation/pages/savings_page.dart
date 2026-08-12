@@ -128,7 +128,7 @@ class SavingsGoalCard extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: () {
-          context.push('/savings_goal_details', extra: goal);
+          context.push('/savings_goal_details/${goal.id}');
         },
         child: Padding(
           padding: const EdgeInsets.all(20),

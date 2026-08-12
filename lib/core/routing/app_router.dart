@@ -38,31 +38,42 @@ import '../../features/persons/domain/entities/person.dart';
 import '../../features/persons/presentation/pages/add_edit_person_page.dart';
 import '../../features/persons/presentation/pages/persons_catalog_page.dart';
 import '../presentation/layouts/main_layout.dart';
+import 'go_router_refresh_notifier.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _shellNavigatorTransactionsKey = GlobalKey<NavigatorState>(debugLabel: 'shellTransactions');
-final GlobalKey<NavigatorState> _shellNavigatorRecurringKey = GlobalKey<NavigatorState>(debugLabel: 'shellRecurring');
-final GlobalKey<NavigatorState> _shellNavigatorSavingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSavings');
-final GlobalKey<NavigatorState> _shellNavigatorBudgetsKey = GlobalKey<NavigatorState>(debugLabel: 'shellBudgets');
-final GlobalKey<NavigatorState> _shellNavigatorLoansKey = GlobalKey<NavigatorState>(debugLabel: 'shellLoans');
-final GlobalKey<NavigatorState> _shellNavigatorSettingsKey = GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
+final GlobalKey<NavigatorState> _shellNavigatorTransactionsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellTransactions');
+final GlobalKey<NavigatorState> _shellNavigatorRecurringKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellRecurring');
+final GlobalKey<NavigatorState> _shellNavigatorSavingsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellSavings');
+final GlobalKey<NavigatorState> _shellNavigatorBudgetsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellBudgets');
+final GlobalKey<NavigatorState> _shellNavigatorLoansKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellLoans');
+final GlobalKey<NavigatorState> _shellNavigatorSettingsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellSettings');
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authNotifierProvider);
-  final pinState = ref.watch(pinProvider);
-  final sessionState = ref.watch(sessionProvider);
+  final refreshNotifier = ref.watch(goRouterRefreshNotifierProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
+      final pinState = ref.read(pinProvider);
+      final isUnlocked = ref.read(sessionProvider);
       if (authState.isLoading || pinState.isLoading) return null;
 
       final isAuth = authState.value != null;
       final hasPin = pinState.value != null;
-      final isUnlocked = sessionState;
 
-      final isGoingToAuthPages = state.matchedLocation == '/' || state.matchedLocation == '/login';
+      final isGoingToAuthPages =
+          state.matchedLocation == '/' || state.matchedLocation == '/login';
       final isGoingToPinSetup = state.matchedLocation == '/pin_setup';
       final isGoingToPinLogin = state.matchedLocation == '/pin_login';
 
@@ -77,8 +88,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (hasPin && !isUnlocked && !isGoingToPinLogin) {
           return '/pin_login';
         }
-        
-        if (hasPin && isUnlocked && (isGoingToAuthPages || isGoingToPinSetup || isGoingToPinLogin)) {
+
+        if (hasPin &&
+            isUnlocked &&
+            (isGoingToAuthPages || isGoingToPinSetup || isGoingToPinLogin)) {
           return '/transactions';
         }
       }
@@ -172,6 +185,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
+        
       ),
       GoRoute(
         path: '/accounts',
@@ -179,11 +193,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AccountsPage(),
       ),
       GoRoute(
-        path: '/account_details',
+        path: '/account_details/:accountId',
         name: 'account_details',
         builder: (context, state) {
-          final account = state.extra as Account;
-          return AccountDetailsPage(account: account);
+          final accountId = state.pathParameters['accountId']!;
+          return AccountDetailsPage(accountId: accountId);
         },
       ),
       GoRoute(
@@ -203,24 +217,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/add_recurring_transaction',
         name: 'add_recurring_transaction',
         builder: (context, state) {
-          final tx = state.extra as RecurringTransactionEntity?;
-          return AddRecurringTransactionPage(transactionToEdit: tx);
+          return const AddRecurringTransactionPage();
         },
       ),
       GoRoute(
-        path: '/edit_transaction',
+        path: '/edit_recurring_transaction/:recurringTransactionId',
+        name: 'edit_recurring_transaction',
+        builder: (context, state) {
+          final id = state.pathParameters['recurringTransactionId']!;
+          return AddRecurringTransactionPage(transactionId: id);
+        },
+      ),
+      GoRoute(
+        path: '/edit_transaction/:transactionId',
         name: 'edit_transaction',
         builder: (context, state) {
-          final transaction = state.extra as TransactionEntity?;
-          return AddTransactionPage(existingTransaction: transaction);
+          final id = state.pathParameters['transactionId']!;
+          return AddTransactionPage(transactionId: id);
         },
       ),
       GoRoute(
-        path: '/transaction_details',
+        path: '/transaction_details/:transactionId',
         name: 'transaction_details',
         builder: (context, state) {
-          final transaction = state.extra as TransactionEntity;
-          return TransactionDetailsPage(transaction: transaction);
+          final id = state.pathParameters['transactionId']!;
+          return TransactionDetailsPage(transactionId: id);
         },
       ),
       GoRoute(
@@ -229,19 +250,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AddSavingsGoalPage(),
       ),
       GoRoute(
-        path: '/savings_goal_details',
+        path: '/savings_goal_details/:goalId',
         name: 'savings_goal_details',
         builder: (context, state) {
-          final goal = state.extra as SavingsGoalEntity;
-          return SavingsGoalDetailsPage(goal: goal);
+          final id = state.pathParameters['goalId']!;
+          return SavingsGoalDetailsPage(goalId: id);
         },
       ),
       GoRoute(
-        path: '/savings_rules',
+        path: '/savings_rules/:goalId',
         name: 'savings_rules',
         builder: (context, state) {
-          final goal = state.extra as SavingsGoalEntity;
-          return SavingsRulesPage(goal: goal);
+          final id = state.pathParameters['goalId']!;
+          return SavingsRulesPage(goalId: id);
         },
       ),
       GoRoute(
@@ -250,10 +271,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SavingsCompletedPage(),
       ),
       GoRoute(
-        path: '/add_budget',
+        path: '/add_budget/:monthYear',
         name: 'add_budget',
         builder: (context, state) {
-          final monthYear = state.extra as String;
+          final monthYear = state.pathParameters['monthYear']!;
           return AddBudgetPage(monthYear: monthYear);
         },
       ),
@@ -263,11 +284,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AddLoanPage(),
       ),
       GoRoute(
-        path: '/loan_details',
+        path: '/loan_details/:loanId',
         name: 'loan_details',
         builder: (context, state) {
-          final loan = state.extra as LoanEntity;
-          return LoanDetailsPage(loan: loan);
+          final id = state.pathParameters['loanId']!;
+          return LoanDetailsPage(loanId: id);
         },
       ),
       GoRoute(
@@ -284,11 +305,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AddEditPersonPage(),
       ),
       GoRoute(
-        path: '/edit_person',
+        path: '/edit_person/:personId',
         name: 'edit_person',
         builder: (context, state) {
-          final person = state.extra as PersonEntity;
-          return AddEditPersonPage(personToEdit: person);
+          final id = state.pathParameters['personId']!;
+          return AddEditPersonPage(personId: id);
         },
       ),
     ],

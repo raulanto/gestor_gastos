@@ -53,7 +53,7 @@ class AccountsPage extends ConsumerWidget {
                   ],
                 ),
                 onTap: () {
-                  context.push('/account_details', extra: account);
+                  context.push('/account_details/${account.id}');
                 },
               );
             },

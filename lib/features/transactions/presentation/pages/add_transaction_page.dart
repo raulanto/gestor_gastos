@@ -14,10 +14,10 @@ import '../providers/transaction_provider.dart';
 import '../widgets/custom_numeric_keyboard.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
-  final TransactionEntity? existingTransaction;
+  final String? transactionId;
   final String? initialType;
 
-  const AddTransactionPage({super.key, this.existingTransaction, this.initialType});
+  const AddTransactionPage({super.key, this.transactionId, this.initialType});
 
   @override
   ConsumerState<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -42,24 +42,26 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     if (widget.initialType != null) {
       _transactionType = widget.initialType!;
     }
-    if (widget.existingTransaction != null) {
-      final t = widget.existingTransaction!;
-      _expression = t.amount.toStringAsFixed(2);
-      if (_expression.endsWith('.00')) {
-        _expression = _expression.substring(0, _expression.length - 3);
-      }
-      _selectedAccountId = t.accountId;
-      _selectedCategoryId = t.categoryId;
-      _note = t.note ?? '';
-      _noteController.text = _note;
-      _selectedDate = DateTime.parse(t.date);
-      if (t.receiptImagePath != null) {
-        _receiptImage = File(t.receiptImagePath!);
-      }
-      _transactionType = t.type;
-      if (t.splits.length > 1) {
-        _isSplitMode = true;
-        _splits = List.from(t.splits);
+    if (widget.transactionId != null) {
+      final t = ref.read(transactionByIdProvider(widget.transactionId!));
+      if (t != null) {
+        _expression = t.amount.toStringAsFixed(2);
+        if (_expression.endsWith('.00')) {
+          _expression = _expression.substring(0, _expression.length - 3);
+        }
+        _selectedAccountId = t.accountId;
+        _selectedCategoryId = t.categoryId;
+        _note = t.note ?? '';
+        _noteController.text = _note;
+        _selectedDate = DateTime.parse(t.date);
+        if (t.receiptImagePath != null) {
+          _receiptImage = File(t.receiptImagePath!);
+        }
+        _transactionType = t.type;
+        if (t.splits.length > 1) {
+          _isSplitMode = true;
+          _splits = List.from(t.splits);
+        }
       }
     }
   }
@@ -296,7 +298,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     }
 
     final newTransaction = TransactionEntity(
-      id: widget.existingTransaction?.id,
+      id: widget.transactionId != null ? int.tryParse(widget.transactionId!) : null,
       accountId: _selectedAccountId!,
       categoryId: _isSplitMode ? null : _selectedCategoryId!,
       amount: amount,
@@ -307,7 +309,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       splits: _isSplitMode ? _splits : [],
     );
 
-    if (widget.existingTransaction == null) {
+    if (widget.transactionId == null) {
       await ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
     } else {
       await ref.read(transactionsProvider.notifier).updateTransaction(newTransaction);
@@ -341,7 +343,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingTransaction == null ? 'Añadir Gasto' : 'Editar Gasto'),
+        title: Text(widget.transactionId == null ? 'Añadir Gasto' : 'Editar Gasto'),
       ),
       body: Column(
         children: [

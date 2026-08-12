@@ -75,3 +75,12 @@ final filteredTransactionsProvider = Provider<AsyncValue<List<TransactionEntity>
   });
 });
 
+final transactionByIdProvider = Provider.family<TransactionEntity?, String>((ref, id) {
+  final transactions = ref.watch(transactionsProvider);
+  final parsedId = int.tryParse(id);
+  if (parsedId == null) return null;
+  return transactions.maybeWhen(
+    data: (list) => list.where((t) => t.id == parsedId).firstOrNull,
+    orElse: () => null,
+  );
+});

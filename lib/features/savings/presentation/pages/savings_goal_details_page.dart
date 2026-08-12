@@ -11,22 +11,20 @@ import '../widgets/savings_transaction_form.dart';
 import '../widgets/savings_transaction_list.dart';
 
 class SavingsGoalDetailsPage extends ConsumerStatefulWidget {
-  final SavingsGoalEntity goal;
+  final String goalId;
 
-  const SavingsGoalDetailsPage({super.key, required this.goal});
+  const SavingsGoalDetailsPage({super.key, required this.goalId});
 
   @override
   ConsumerState<SavingsGoalDetailsPage> createState() => _SavingsGoalDetailsPageState();
 }
 
 class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage> {
-  late SavingsGoalEntity _currentGoal;
   late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _currentGoal = widget.goal;
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
   }
 
@@ -38,33 +36,37 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
 
   @override
   Widget build(BuildContext context) {
-    final txsAsync = ref.watch(savingsGoalTransactionsProvider(_currentGoal.id!));
+    final goal = ref.watch(savingsGoalByIdProvider(widget.goalId));
+    
+    if (goal == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Meta no encontrada')),
+        body: const Center(child: Text('La meta no existe o fue eliminada')),
+      );
+    }
+    
+    final txsAsync = ref.watch(savingsGoalTransactionsProvider(goal.id!));
     
     return Stack(
       children: [
         Scaffold(
           appBar: AppBar(
-        title: Text(_currentGoal.name),
+        title: Text(goal.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Reglas de Ahorro',
             onPressed: () {
-              context.push('/savings_rules', extra: _currentGoal);
+              context.push('/savings_rules/${goal.id}');
             },
           ),
           PopupMenuButton<String>(
             onSelected: (val) async {
               if (val == 'edit') {
-                final updatedGoal = await showDialog<SavingsGoalEntity>(
+                await showDialog<SavingsGoalEntity>(
                   context: context,
-                  builder: (ctx) => EditSavingsGoalDialog(goal: _currentGoal),
+                  builder: (ctx) => EditSavingsGoalDialog(goal: goal),
                 );
-                if (updatedGoal != null) {
-                  setState(() {
-                    _currentGoal = updatedGoal;
-                  });
-                }
               } else if (val == 'delete') {
                 showDialog(
                   context: context,
@@ -75,7 +77,7 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
                       TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
                       TextButton(
                         onPressed: () {
-                          ref.read(savingsGoalsProvider.notifier).deleteGoal(_currentGoal.id!);
+                          ref.read(savingsGoalsProvider.notifier).deleteGoal(goal.id!);
                           Navigator.pop(ctx);
                           context.pop();
                         },
@@ -100,7 +102,7 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SavingsGoalHeader(goal: _currentGoal, savedAmount: savedAmount),
+              SavingsGoalHeader(goal: goal, savedAmount: savedAmount),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
                 child: Text('Historial', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -114,11 +116,11 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
-      floatingActionButton: _currentGoal.status == 'completed' ? null : FloatingActionButton.extended(
+      floatingActionButton: goal.status == 'completed' ? null : FloatingActionButton.extended(
         onPressed: () {
           final txs = txsAsync.value ?? [];
           final savedAmount = txs.fold<double>(0, (sum, tx) => tx.type == 'deposit' ? sum + tx.amount : sum - tx.amount);
-          _showTransactionModal(context, ref, true, savedAmount);
+          _showTransactionModal(context, ref, true, savedAmount, goal);
         },
         label: const Text('Aportar'),
         icon: const Icon(Icons.add),
@@ -140,25 +142,22 @@ class _SavingsGoalDetailsPageState extends ConsumerState<SavingsGoalDetailsPage>
 );
   }
 
-  void _showTransactionModal(BuildContext context, WidgetRef ref, bool isDeposit, double savedAmount) {
+  void _showTransactionModal(BuildContext context, WidgetRef ref, bool isDeposit, double savedAmount, SavingsGoalEntity currentGoal) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, top: 16, left: 16, right: 16),
-          child: SavingsTransactionForm(goal: _currentGoal, savedAmount: savedAmount, isDeposit: isDeposit),
+          child: SavingsTransactionForm(goal: currentGoal, savedAmount: savedAmount, isDeposit: isDeposit),
         );
       }
     ).then((_) {
       // Re-fetch to check if the goal completed status updated
       final goalsState = ref.read(savingsGoalsProvider);
-      final updatedDbGoal = goalsState.value?.where((g) => g.id == _currentGoal.id).firstOrNull;
-      if (updatedDbGoal != null && updatedDbGoal.status != _currentGoal.status) {
-        setState(() {
-          _currentGoal = updatedDbGoal;
-        });
-        if (_currentGoal.status == 'completed') {
+      final updatedDbGoal = goalsState.value?.where((g) => g.id == currentGoal.id).firstOrNull;
+      if (updatedDbGoal != null && updatedDbGoal.status != currentGoal.status) {
+        if (updatedDbGoal.status == 'completed') {
           _confettiController.play();
         }
       }

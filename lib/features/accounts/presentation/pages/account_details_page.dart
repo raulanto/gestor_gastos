@@ -9,13 +9,24 @@ import '../providers/account_transactions_provider.dart';
 import '../../../home/presentation/providers/period_view_provider.dart';
 import '../../../home/presentation/widgets/period_selector.dart';
 import '../../../../core/providers/date_filter_provider.dart';
-class AccountDetailsPage extends ConsumerWidget {
-  final Account account;
+import '../providers/account_provider.dart';
 
-  const AccountDetailsPage({super.key, required this.account});
+class AccountDetailsPage extends ConsumerWidget {
+  final String accountId;
+
+  const AccountDetailsPage({super.key, required this.accountId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final account = ref.watch(accountByIdProvider(accountId));
+    
+    if (account == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Cuenta no encontrada')),
+        body: const Center(child: Text('La cuenta no existe o fue eliminada')),
+      );
+    }
+
     final theme = Theme.of(context);
     final filterMap = ref.watch(accountDateFilterProvider);
     final filter = filterMap[account.id] ?? PeriodView.month;
@@ -232,7 +243,7 @@ class AccountDetailsPage extends ConsumerWidget {
                                     ),
                                   ),
                                   onTap: () {
-                                    context.push('/transaction_details', extra: tx);
+                                    context.push('/transaction_details/${tx.id}');
                                   },
                                 );
                               },

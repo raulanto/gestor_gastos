@@ -10,16 +10,16 @@ final savingsRulesProvider = FutureProvider.family<List<SavingsRuleEntity>, int>
 });
 
 class SavingsRulesPage extends ConsumerStatefulWidget {
-  final SavingsGoalEntity goal;
+  final String goalId;
 
-  const SavingsRulesPage({super.key, required this.goal});
+  const SavingsRulesPage({super.key, required this.goalId});
 
   @override
   ConsumerState<SavingsRulesPage> createState() => _SavingsRulesPageState();
 }
 
 class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
-  Future<void> _toggleRule(SavingsRuleEntity? existingRule, String type, bool isEnabled) async {
+  Future<void> _toggleRule(SavingsGoalEntity goal, SavingsRuleEntity? existingRule, String type, bool isEnabled) async {
     final repo = ref.read(savingsRepositoryProvider);
     if (existingRule != null) {
       await repo.updateRule(existingRule.copyWith(status: isEnabled ? 'active' : 'paused'));
@@ -30,16 +30,16 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
       if (type == 'round_up') defaultValue = 10;
       
       await repo.createRule(SavingsRuleEntity(
-        goalId: widget.goal.id!,
+        goalId: goal.id!,
         ruleType: type,
         value: defaultValue,
         status: 'active',
       ));
     }
-    ref.invalidate(savingsRulesProvider(widget.goal.id!));
+    ref.invalidate(savingsRulesProvider(goal.id!));
   }
 
-  Future<void> _editRuleValue(SavingsRuleEntity rule, String title) async {
+  Future<void> _editRuleValue(SavingsGoalEntity goal, SavingsRuleEntity rule, String title) async {
     final controller = TextEditingController(text: rule.value.toStringAsFixed(rule.ruleType == 'fixed_percentage' ? 0 : 2));
     final newValue = await showDialog<double>(
       context: context,
@@ -70,13 +70,22 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
     if (newValue != null) {
       final repo = ref.read(savingsRepositoryProvider);
       await repo.updateRule(rule.copyWith(value: newValue));
-      ref.invalidate(savingsRulesProvider(widget.goal.id!));
+      ref.invalidate(savingsRulesProvider(goal.id!));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final rulesAsync = ref.watch(savingsRulesProvider(widget.goal.id!));
+    final goal = ref.watch(savingsGoalByIdProvider(widget.goalId));
+    
+    if (goal == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Meta no encontrada')),
+        body: const Center(child: Text('La meta no existe o fue eliminada')),
+      );
+    }
+
+    final rulesAsync = ref.watch(savingsRulesProvider(goal.id!));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Reglas de Ahorro')),
@@ -89,9 +98,10 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('Configuración para ${widget.goal.name}', style: Theme.of(context).textTheme.titleLarge),
+              Text('Configuración para ${goal.name}', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
               _buildRuleTile(
+                goal: goal,
                 title: 'Redondeo de Gastos',
                 subtitle: roundUp != null ? 'Redondea tus gastos a múltiplos de \$${roundUp.value.toStringAsFixed(0)}' : 'Desactivado',
                 icon: Icons.pie_chart_outline,
@@ -100,6 +110,7 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
               ),
               const Divider(),
               _buildRuleTile(
+                goal: goal,
                 title: 'Porcentaje de Ingresos',
                 subtitle: percentage != null ? '${percentage.value.toStringAsFixed(0)}% de cada ingreso' : 'Desactivado',
                 icon: Icons.percent,
@@ -108,6 +119,7 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
               ),
               const Divider(),
               _buildRuleTile(
+                goal: goal,
                 title: 'Ahorro Programado',
                 subtitle: scheduled != null ? '\$${scheduled.value.toStringAsFixed(2)} mensuales' : 'Desactivado',
                 icon: Icons.calendar_month,
@@ -124,6 +136,7 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
   }
 
   Widget _buildRuleTile({
+    required SavingsGoalEntity goal,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -146,11 +159,11 @@ class _SavingsRulesPageState extends ConsumerState<SavingsRulesPage> {
           if (isActive && hasValueConfig)
             IconButton(
               icon: const Icon(Icons.edit, size: 20),
-              onPressed: () => _editRuleValue(rule!, 'Editar $title'),
+              onPressed: () => _editRuleValue(goal, rule!, 'Editar $title'),
             ),
           Switch(
             value: isActive,
-            onChanged: (val) => _toggleRule(rule, type, val),
+            onChanged: (val) => _toggleRule(goal, rule, type, val),
           ),
         ],
       ),

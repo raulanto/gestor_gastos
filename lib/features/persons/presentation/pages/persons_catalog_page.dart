@@ -62,13 +62,13 @@ class PersonsCatalogPage extends ConsumerWidget {
                       : null,
                   trailing: isSelectionMode ? null : IconButton(
                     icon: const Icon(Icons.edit, size: 20),
-                    onPressed: () => context.push('/edit_person', extra: person),
+                    onPressed: () => context.push('/edit_person/${person.id}'),
                   ),
                   onTap: () {
                     if (isSelectionMode) {
                       context.pop(person);
                     } else {
-                      context.push('/edit_person', extra: person);
+                      context.push('/edit_person/${person.id}');
                     }
                   },
                 ),

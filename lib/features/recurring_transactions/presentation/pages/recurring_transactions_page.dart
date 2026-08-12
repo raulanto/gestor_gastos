@@ -141,7 +141,7 @@ class RecurringTransactionsPage extends ConsumerWidget {
                               ],
                             ),
                             onTap: () {
-                              context.push('/add_recurring_transaction', extra: rt);
+                              context.push('/edit_recurring_transaction/${rt.id}');
                             },
                             onLongPress: () {
                               showDialog(

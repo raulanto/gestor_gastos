@@ -41,9 +41,9 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       body: widget.navigationShell,
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.onSurface,
               borderRadius: BorderRadius.circular(40),
@@ -57,7 +57,6 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                 _buildAddButton(context),
                 _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
                 _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
-                _buildNavItem(Icons.settings, Icons.settings_outlined, 5),
               ],
             ),
           ),
@@ -73,7 +72,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       onTap: () => _goBranch(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: isSelected ? theme.colorScheme.surface : Colors.transparent,
           shape: BoxShape.circle,
@@ -93,7 +92,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         context.push('/add_transaction?type=income');
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: theme.colorScheme.primary,
           shape: BoxShape.circle,

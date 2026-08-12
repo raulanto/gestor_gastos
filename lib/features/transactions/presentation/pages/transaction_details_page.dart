@@ -9,12 +9,20 @@ import '../../domain/entities/transaction.dart';
 import '../providers/transaction_provider.dart';
 
 class TransactionDetailsPage extends ConsumerWidget {
-  final TransactionEntity transaction;
+  final String transactionId;
 
-  const TransactionDetailsPage({super.key, required this.transaction});
+  const TransactionDetailsPage({super.key, required this.transactionId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final transaction = ref.watch(transactionByIdProvider(transactionId));
+    
+    if (transaction == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Transacción no encontrada')),
+        body: const Center(child: Text('La transacción no existe o fue eliminada')),
+      );
+    }
     final accountsState = ref.watch(accountsProvider);
     final categoriesState = ref.watch(categoriesProvider);
     final theme = Theme.of(context);
@@ -34,7 +42,7 @@ class TransactionDetailsPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              context.push('/edit_transaction', extra: transaction);
+              context.push('/edit_transaction/${transaction.id}');
             },
           ),
           IconButton(

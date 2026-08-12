@@ -7,11 +7,11 @@ import '../../domain/entities/person.dart';
 import '../providers/persons_provider.dart';
 
 class AddEditPersonPage extends ConsumerStatefulWidget {
-  final PersonEntity? personToEdit;
+  final String? personId;
 
   const AddEditPersonPage({
     super.key,
-    this.personToEdit,
+    this.personId,
   });
 
   @override
@@ -29,10 +29,13 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.personToEdit != null) {
-      _nameController.text = widget.personToEdit!.name;
-      _phoneController.text = widget.personToEdit!.phone ?? '';
-      _photoPath = widget.personToEdit!.photoPath;
+    if (widget.personId != null) {
+      final p = ref.read(personByIdProvider(widget.personId!));
+      if (p != null) {
+        _nameController.text = p.name;
+        _phoneController.text = p.phone ?? '';
+        _photoPath = p.photoPath;
+      }
     }
   }
 
@@ -57,7 +60,7 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
       final name = _nameController.text.trim();
       final phone = _phoneController.text.trim();
 
-      if (widget.personToEdit == null) {
+      if (widget.personId == null) {
         final newPerson = PersonEntity(
           name: name,
           phone: phone.isEmpty ? null : phone,
@@ -65,12 +68,15 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
         );
         ref.read(personsProvider.notifier).addPerson(newPerson);
       } else {
-        final updatedPerson = widget.personToEdit!.copyWith(
-          name: name,
-          phone: phone.isEmpty ? null : phone,
-          photoPath: _photoPath,
-        );
-        ref.read(personsProvider.notifier).updatePerson(updatedPerson);
+        final existingPerson = ref.read(personByIdProvider(widget.personId!));
+        if (existingPerson != null) {
+          final updatedPerson = existingPerson.copyWith(
+            name: name,
+            phone: phone.isEmpty ? null : phone,
+            photoPath: _photoPath,
+          );
+          ref.read(personsProvider.notifier).updatePerson(updatedPerson);
+        }
       }
       context.pop();
     }
@@ -78,7 +84,7 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.personToEdit != null;
+    final isEditing = widget.personId != null;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -89,7 +95,10 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () {
-                ref.read(personsProvider.notifier).deletePerson(widget.personToEdit!.id!);
+                final p = ref.read(personByIdProvider(widget.personId!));
+                if (p?.id != null) {
+                  ref.read(personsProvider.notifier).deletePerson(p!.id!);
+                }
                 context.pop();
               },
             ),

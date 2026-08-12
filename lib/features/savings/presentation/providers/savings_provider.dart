@@ -52,3 +52,13 @@ final savingsGoalTransactionsProvider = FutureProvider.family<List<SavingsTransa
   final repo = ref.watch(savingsRepositoryProvider);
   return repo.getTransactionsByGoal(goalId);
 });
+
+final savingsGoalByIdProvider = Provider.family<SavingsGoalEntity?, String>((ref, id) {
+  final goals = ref.watch(savingsGoalsProvider);
+  final parsedId = int.tryParse(id);
+  if (parsedId == null) return null;
+  return goals.maybeWhen(
+    data: (list) => list.where((g) => g.id == parsedId).firstOrNull,
+    orElse: () => null,
+  );
+});

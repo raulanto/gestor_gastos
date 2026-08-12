@@ -8,8 +8,8 @@ import '../../domain/entities/loan_payment.dart';
 import '../providers/loans_provider.dart';
 
 class LoanDetailsPage extends ConsumerStatefulWidget {
-  final LoanEntity loan;
-  const LoanDetailsPage({super.key, required this.loan});
+  final String loanId;
+  const LoanDetailsPage({super.key, required this.loanId});
 
   @override
   ConsumerState<LoanDetailsPage> createState() => _LoanDetailsPageState();
@@ -20,7 +20,15 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final paymentsAsync = ref.watch(loanPaymentsProvider(widget.loan.id!));
+    final loan = ref.watch(loanByIdProvider(widget.loanId));
+    if (loan == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Préstamo no encontrado')),
+        body: const Center(child: Text('El préstamo no existe o fue eliminado')),
+      );
+    }
+    
+    final paymentsAsync = ref.watch(loanPaymentsProvider(loan.id!));
     final theme = Theme.of(context);
     
     return Scaffold(
@@ -28,8 +36,8 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
       body: paymentsAsync.when(
         data: (payments) {
           final totalPaid = payments.fold(0.0, (sum, p) => sum + p.amount);
-          final remaining = widget.loan.amount - totalPaid;
-          final isPaid = widget.loan.status == 'paid' || remaining <= 0;
+          final remaining = loan.amount - totalPaid;
+          final isPaid = loan.status == 'paid' || remaining <= 0;
 
           return ListView(
             padding: const EdgeInsets.all(16.0),
@@ -46,10 +54,10 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
                     CircleAvatar(
                       radius: 32,
                       backgroundColor: theme.colorScheme.primaryContainer,
-                      backgroundImage: widget.loan.person?.photoPath != null 
-                          ? FileImage(File(widget.loan.person!.photoPath!)) 
+                      backgroundImage: loan.person?.photoPath != null 
+                          ? FileImage(File(loan.person!.photoPath!)) 
                           : null,
-                      child: widget.loan.person?.photoPath == null 
+                      child: loan.person?.photoPath == null 
                           ? Icon(Icons.person, size: 36, color: theme.colorScheme.onPrimaryContainer)
                           : null,
                     ),
@@ -59,17 +67,17 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.loan.personName ?? 'Desconocido',
+                            loan.personName ?? 'Desconocido',
                             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
-                          _buildDetailRow(Icons.attach_money, 'Monto total', '\$${widget.loan.amount.toStringAsFixed(2)}', theme),
+                          _buildDetailRow(Icons.attach_money, 'Monto total', '\$${loan.amount.toStringAsFixed(2)}', theme),
                           const SizedBox(height: 8),
-                          _buildDetailRow(Icons.category, 'Tipo', widget.loan.type, theme),
+                          _buildDetailRow(Icons.category, 'Tipo', loan.type, theme),
                           const SizedBox(height: 8),
-                          _buildDetailRow(Icons.calendar_today, 'Fecha préstamo', DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.loan.date)), theme),
+                          _buildDetailRow(Icons.calendar_today, 'Fecha préstamo', DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.date)), theme),
                           const SizedBox(height: 8),
-                          _buildDetailRow(Icons.event_available, 'Fecha a pagar', DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.loan.dueDate)), theme),
+                          _buildDetailRow(Icons.event_available, 'Fecha a pagar', DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.dueDate)), theme),
                           const SizedBox(height: 16),
                           const Divider(),
                           const SizedBox(height: 12),
@@ -116,7 +124,7 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
                 ElevatedButton.icon(
                   icon: const Icon(Icons.add),
                   label: const Text('Registrar Abono'),
-                  onPressed: () => _showAddPaymentDialog(remaining),
+                  onPressed: () => _showAddPaymentDialog(remaining, loan),
                 ),
             ],
           );
@@ -127,7 +135,7 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
     );
   }
 
-  void _showAddPaymentDialog(double remaining) {
+  void _showAddPaymentDialog(double remaining, LoanEntity loan) {
     _amountController.text = remaining.toStringAsFixed(2);
     showModalBottomSheet(
       context: context,
@@ -165,12 +173,12 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
                     final val = double.tryParse(_amountController.text);
                     if (val != null && val > 0) {
                       final payment = LoanPaymentEntity(
-                        loanId: widget.loan.id!,
+                        loanId: loan.id!,
                         amount: val,
                         date: DateTime.now().toIso8601String(),
                       );
-                      ref.read(loansProvider.notifier).addPayment(payment, widget.loan);
-                      ref.invalidate(loanPaymentsProvider(widget.loan.id!));
+                      ref.read(loansProvider.notifier).addPayment(payment, loan);
+                      ref.invalidate(loanPaymentsProvider(loan.id!));
                       Navigator.pop(ctx);
                     }
                   },

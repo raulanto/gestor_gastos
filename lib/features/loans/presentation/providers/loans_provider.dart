@@ -36,3 +36,13 @@ final loanPaymentsProvider = FutureProvider.family<List<LoanPaymentEntity>, int>
   final repo = ref.watch(loanRepositoryProvider);
   return await repo.getLoanPayments(loanId);
 });
+
+final loanByIdProvider = Provider.family<LoanEntity?, String>((ref, id) {
+  final loans = ref.watch(loansProvider);
+  final parsedId = int.tryParse(id);
+  if (parsedId == null) return null;
+  return loans.maybeWhen(
+    data: (list) => list.where((l) => l.id == parsedId).firstOrNull,
+    orElse: () => null,
+  );
+});

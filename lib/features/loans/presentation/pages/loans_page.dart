@@ -116,7 +116,7 @@ class LoansPage extends ConsumerWidget {
                       '\$${loan.amount.toStringAsFixed(2)}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    onTap: () => context.push('/loan_details', extra: loan),
+                    onTap: () => context.push('/loan_details/${loan.id}'),
                   ),
                 )),
                 const SizedBox(height: 16),
@@ -142,7 +142,7 @@ class LoansPage extends ConsumerWidget {
                       '\$${loan.amount.toStringAsFixed(2)}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
                     ),
-                    onTap: () => context.push('/loan_details', extra: loan),
+                    onTap: () => context.push('/loan_details/${loan.id}'),
                   ),
                 )),
               ]

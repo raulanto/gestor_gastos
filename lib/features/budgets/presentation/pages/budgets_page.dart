@@ -80,7 +80,7 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
                         style: IconButton.styleFrom(backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15)),
                         icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
                         onPressed: () {
-                          context.push('/add_budget', extra: _monthYearKey);
+                          context.push('/add_budget/$_monthYearKey');
                         },
                       ),
                     ],

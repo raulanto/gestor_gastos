@@ -62,7 +62,7 @@ class TransactionList extends ConsumerWidget {
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
                   onTap: () {
-                    context.push('/transaction_details', extra: t);
+                    context.push('/transaction_details/${t.id}');
                   },
                   leading: CircleAvatar(
                     backgroundColor: categoryColor.withValues(alpha: 0.2),
