@@ -1,11 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../domain/entities/loan.dart';
-import '../../domain/entities/loan_payment.dart';
 import '../providers/loans_provider.dart';
+import '../widgets/loan_details_header.dart';
+import '../widgets/add_payment_dialog.dart';
 
 class LoanDetailsPage extends ConsumerStatefulWidget {
   final String loanId;
@@ -16,8 +16,6 @@ class LoanDetailsPage extends ConsumerStatefulWidget {
 }
 
 class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
-  final _amountController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     final loan = ref.watch(loanByIdProvider(widget.loanId));
@@ -29,7 +27,6 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
     }
     
     final paymentsAsync = ref.watch(loanPaymentsProvider(loan.id!));
-    final theme = Theme.of(context);
     
     return Scaffold(
       appBar: AppBar(title: const Text('Detalles del Préstamo')),
@@ -42,69 +39,11 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 32,
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      backgroundImage: loan.person?.photoPath != null 
-                          ? FileImage(File(loan.person!.photoPath!)) 
-                          : null,
-                      child: loan.person?.photoPath == null 
-                          ? Icon(Icons.person, size: 36, color: theme.colorScheme.onPrimaryContainer)
-                          : null,
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            loan.personName ?? 'Desconocido',
-                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildDetailRow(Icons.attach_money, 'Monto total', '\$${loan.amount.toStringAsFixed(2)}', theme),
-                          const SizedBox(height: 8),
-                          _buildDetailRow(Icons.category, 'Tipo', loan.type, theme),
-                          const SizedBox(height: 8),
-                          _buildDetailRow(Icons.calendar_today, 'Fecha préstamo', DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.date)), theme),
-                          const SizedBox(height: 8),
-                          _buildDetailRow(Icons.event_available, 'Fecha a pagar', DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.dueDate)), theme),
-                          const SizedBox(height: 16),
-                          const Divider(),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Abonado', style: theme.textTheme.bodySmall),
-                                  Text('\$${totalPaid.toStringAsFixed(2)}', style: theme.textTheme.titleMedium?.copyWith(color: Colors.green, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text('Restante', style: theme.textTheme.bodySmall),
-                                  Text('\$${remaining > 0 ? remaining.toStringAsFixed(2) : '0.00'}', style: theme.textTheme.titleMedium?.copyWith(color: isPaid ? Colors.grey : Colors.red, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              LoanDetailsHeader(
+                loan: loan,
+                totalPaid: totalPaid,
+                remaining: remaining,
+                isPaid: isPaid,
               ),
               const SizedBox(height: 24),
               const Text('Historial de Abonos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -136,70 +75,12 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
   }
 
   void _showAddPaymentDialog(double remaining, LoanEntity loan) {
-    _amountController.text = remaining.toStringAsFixed(2);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 24, right: 24, top: 24,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Registrar Abono', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: 'Monto a abonar', 
-                prefixText: '\$',
-                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-              ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    final val = double.tryParse(_amountController.text);
-                    if (val != null && val > 0) {
-                      final payment = LoanPaymentEntity(
-                        loanId: loan.id!,
-                        amount: val,
-                        date: DateTime.now().toIso8601String(),
-                      );
-                      ref.read(loansProvider.notifier).addPayment(payment, loan);
-                      ref.invalidate(loanPaymentsProvider(loan.id!));
-                      Navigator.pop(ctx);
-                    }
-                  },
-                  child: const Text('Guardar'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value, ThemeData theme) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 8),
-        Text('$label: ', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-        Expanded(child: Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold))),
-      ],
+      builder: (ctx) => AddPaymentDialog(remaining: remaining, loan: loan),
     );
   }
 }
+

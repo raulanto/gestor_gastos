@@ -6,10 +6,7 @@ import '../../../features/recurring_transactions/application/recurring_service.d
 import '../../../features/savings/application/savings_schedule_service.dart';
 
 class MainLayout extends ConsumerStatefulWidget {
-  const MainLayout({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainLayout({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
@@ -23,7 +20,9 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(recurringServiceProvider).checkAndExecuteRecurring();
-      ref.read(savingsScheduleServiceProvider).checkAndExecuteScheduledSavings();
+      ref
+          .read(savingsScheduleServiceProvider)
+          .checkAndExecuteScheduledSavings();
     });
   }
 
@@ -57,7 +56,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
 
                 _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
                 _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
-                                _buildAddButton(context),
+                _buildAddButton(context),
               ],
             ),
           ),
@@ -66,7 +65,11 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     );
   }
 
-  Widget _buildNavItem(IconData selectedIcon, IconData unselectedIcon, int index) {
+  Widget _buildNavItem(
+    IconData selectedIcon,
+    IconData unselectedIcon,
+    int index,
+  ) {
     final isSelected = widget.navigationShell.currentIndex == index;
     final theme = Theme.of(context);
     return GestureDetector(
@@ -80,7 +83,9 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         ),
         child: Icon(
           isSelected ? selectedIcon : unselectedIcon,
-          color: isSelected ? theme.colorScheme.onSurface : theme.colorScheme.surface.withValues(alpha: 0.6),
+          color: isSelected
+              ? theme.colorScheme.onSurface
+              : theme.colorScheme.surface.withValues(alpha: 0.6),
         ),
       ),
     );
@@ -98,11 +103,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
           color: theme.colorScheme.primary,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.add,
-          color: theme.colorScheme.onPrimary,
-          size: 28,
-        ),
+        child: Icon(Icons.add, color: theme.colorScheme.onPrimary, size: 28),
       ),
     );
   }
