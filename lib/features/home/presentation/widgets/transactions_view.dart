@@ -10,13 +10,21 @@ import 'home_header.dart';
 import 'period_selector.dart';
 import 'kpi_cards.dart';
 import 'home_chart.dart';
+import 'home_category_chart.dart';
 import 'transaction_list.dart';
 
-class TransactionsView extends ConsumerWidget {
+class TransactionsView extends ConsumerStatefulWidget {
   const TransactionsView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TransactionsView> createState() => _TransactionsViewState();
+}
+
+class _TransactionsViewState extends ConsumerState<TransactionsView> {
+  int _chartType = 0; // 0 = Flujo, 1 = Categorías
+
+  @override
+  Widget build(BuildContext context) {
     final summaryState = ref.watch(homeSummaryProvider);
     final theme = Theme.of(context);
 
@@ -110,11 +118,34 @@ class TransactionsView extends ConsumerWidget {
                                   totalExpense: summary.totalExpense,
                                 ),
                                 const SizedBox(height: 32),
-                                Text('Flujo de Dinero', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Análisis', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                    SegmentedButton<int>(
+                                      segments: const [
+                                        ButtonSegment(value: 0, label: Text('Flujo'), icon: Icon(Icons.bar_chart, size: 18)),
+                                        ButtonSegment(value: 1, label: Text('Categorías'), icon: Icon(Icons.pie_chart, size: 18)),
+                                      ],
+                                      selected: {_chartType},
+                                      onSelectionChanged: (Set<int> newSelection) {
+                                        setState(() {
+                                          _chartType = newSelection.first;
+                                        });
+                                      },
+                                      style: SegmentedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        textStyle: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: 16),
                                 SizedBox(
                                   height: 200,
-                                  child: HomeChart(chartData: summary.chartData),
+                                  child: _chartType == 0 
+                                      ? HomeChart(chartData: summary.chartData)
+                                      : HomeCategoryChart(categoryData: summary.categoryExpenses),
                                 ),
                                 const SizedBox(height: 32),
                                 Row(
