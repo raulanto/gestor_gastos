@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/category_provider.dart';
 import '../widgets/add_edit_category_dialog.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class CategoriesPage extends ConsumerWidget {
   const CategoriesPage({super.key});
@@ -49,7 +50,7 @@ class CategoriesPage extends ConsumerWidget {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: Color(mainCategory.colorCode).withValues(alpha: 0.2),
-                    child: Icon(IconData(mainCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(mainCategory.colorCode)),
+                    child: Icon(IconUtils.getIcon(mainCategory.iconCode), color: Color(mainCategory.colorCode)),
                   ),
                   title: Text(mainCategory.name),
                   trailing: mainActions,
@@ -60,7 +61,7 @@ class CategoriesPage extends ConsumerWidget {
                 controlAffinity: ListTileControlAffinity.leading,
                 leading: CircleAvatar(
                   backgroundColor: Color(mainCategory.colorCode).withValues(alpha: 0.2),
-                  child: Icon(IconData(mainCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(mainCategory.colorCode)),
+                  child: Icon(IconUtils.getIcon(mainCategory.iconCode), color: Color(mainCategory.colorCode)),
                 ),
                 title: Text(mainCategory.name),
                 trailing: mainActions,
@@ -69,7 +70,7 @@ class CategoriesPage extends ConsumerWidget {
                     contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
                     leading: CircleAvatar(
                       backgroundColor: Color(child.colorCode).withValues(alpha: 0.2),
-                      child: Icon(IconData(child.iconCode, fontFamily: 'MaterialIcons'), color: Color(child.colorCode), size: 18),
+                      child: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode), size: 18),
                       radius: 16,
                     ),
                     title: Text(child.name),

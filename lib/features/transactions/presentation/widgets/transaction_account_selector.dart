@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../accounts/domain/entities/account.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class TransactionAccountSelector extends StatelessWidget {
   final int? selectedAccountId;
@@ -22,7 +23,7 @@ class TransactionAccountSelector extends StatelessWidget {
         value: a.id,
         child: Row(
           children: [
-            Icon(IconData(a.iconCode, fontFamily: 'MaterialIcons'), color: Color(a.colorCode)),
+            Icon(IconUtils.getIcon(a.iconCode), color: Color(a.colorCode)),
             const SizedBox(width: 8),
             Text(a.name),
           ],

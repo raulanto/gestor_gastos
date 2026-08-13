@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../categories/domain/entities/category.dart';
 import 'category_picker_sheet.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class BudgetCategorySelector extends StatelessWidget {
   final Category? selectedCategory;
@@ -30,7 +31,7 @@ class BudgetCategorySelector extends StatelessWidget {
         child: Row(
           children: [
             if (selectedCategory != null)
-              Icon(IconData(selectedCategory!.iconCode, fontFamily: 'MaterialIcons'), color: Color(selectedCategory!.colorCode)),
+              Icon(IconUtils.getIcon(selectedCategory!.iconCode), color: Color(selectedCategory!.colorCode)),
             const SizedBox(width: 8),
             Text(selectedCategory != null ? selectedCategory!.name : 'Seleccionar Categoría'),
           ],

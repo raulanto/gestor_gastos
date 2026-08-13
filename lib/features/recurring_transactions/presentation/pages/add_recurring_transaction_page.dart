@@ -8,6 +8,7 @@ import '../../../../features/categories/domain/entities/category.dart';
 import '../../../../features/categories/presentation/providers/category_provider.dart';
 import '../../domain/entities/recurring_transaction.dart';
 import '../providers/recurring_transaction_provider.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 const periodicityMap = {
   'daily': 'Diario',
@@ -97,7 +98,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
                       if (children.isEmpty) {
                         return ListTile(
                           // ignore: non_const_argument_for_const_parameter
-                          leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
+                          leading: Icon(IconUtils.getIcon(main.iconCode), color: Color(main.colorCode)),
                           title: Text(main.name),
                           onTap: () {
                             onSelected(main);
@@ -107,12 +108,12 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
                       }
                       return ExpansionTile(
                         // ignore: non_const_argument_for_const_parameter
-                        leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
+                        leading: Icon(IconUtils.getIcon(main.iconCode), color: Color(main.colorCode)),
                         title: Text(main.name),
                         children: children.map((child) => ListTile(
                           contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
                           // ignore: non_const_argument_for_const_parameter
-                          leading: Icon(IconData(child.iconCode, fontFamily: 'MaterialIcons'), color: Color(child.colorCode)),
+                          leading: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode)),
                           title: Text(child.name),
                           onTap: () {
                             onSelected(child);
@@ -327,7 +328,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
                   child: Row(
                     children: [
                       // ignore: non_const_argument_for_const_parameter
-                      Icon(IconData(a.iconCode, fontFamily: 'MaterialIcons'), color: Color(a.colorCode)),
+                      Icon(IconUtils.getIcon(a.iconCode), color: Color(a.colorCode)),
                       const SizedBox(width: 8),
                       Text(a.name),
                     ],
@@ -364,7 +365,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
                     children: [
                       if (selectedCategory != null)
                         // ignore: non_const_argument_for_const_parameter
-                        Icon(IconData(selectedCategory.iconCode, fontFamily: 'MaterialIcons'), color: Color(selectedCategory.colorCode)),
+                        Icon(IconUtils.getIcon(selectedCategory.iconCode), color: Color(selectedCategory.colorCode)),
                       const SizedBox(width: 8),
                       Text(selectedCategory != null ? selectedCategory.name : 'Seleccionar Categoría'),
                     ],
@@ -381,7 +382,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         // ignore: non_const_argument_for_const_parameter
-                        leading: cat != null ? Icon(IconData(cat.iconCode, fontFamily: 'MaterialIcons'), color: Color(cat.colorCode)) : const Icon(Icons.category),
+                        leading: cat != null ? Icon(IconUtils.getIcon(cat.iconCode), color: Color(cat.colorCode)) : const Icon(Icons.category),
                         title: Text(cat?.name ?? 'Desconocida'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,

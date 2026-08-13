@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../categories/domain/entities/category.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 Future<void> showCategoryPickerSheet({
   required BuildContext context,
@@ -35,7 +36,7 @@ Future<void> showCategoryPickerSheet({
 
                     if (children.isEmpty) {
                       return ListTile(
-                        leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
+                        leading: Icon(IconUtils.getIcon(main.iconCode), color: Color(main.colorCode)),
                         title: Text(main.name),
                         onTap: () {
                           onSelected(main);
@@ -44,11 +45,11 @@ Future<void> showCategoryPickerSheet({
                       );
                     }
                     return ExpansionTile(
-                      leading: Icon(IconData(main.iconCode, fontFamily: 'MaterialIcons'), color: Color(main.colorCode)),
+                      leading: Icon(IconUtils.getIcon(main.iconCode), color: Color(main.colorCode)),
                       title: Text(main.name),
                       children: children.map((child) => ListTile(
                         contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
-                        leading: Icon(IconData(child.iconCode, fontFamily: 'MaterialIcons'), color: Color(child.colorCode)),
+                        leading: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode)),
                         title: Text(child.name),
                         onTap: () {
                           onSelected(child);

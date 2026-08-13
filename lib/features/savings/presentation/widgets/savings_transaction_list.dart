@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/savings_transaction.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class SavingsTransactionList extends ConsumerWidget {
   final List<SavingsTransactionEntity> transactions;
@@ -61,7 +62,7 @@ class SavingsTransactionList extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // ignore: non_const_argument_for_const_parameter
-                        Icon(IconData(account.iconCode, fontFamily: 'MaterialIcons'), size: 14, color: Color(account.colorCode)),
+                        Icon(IconUtils.getIcon(account.iconCode), size: 14, color: Color(account.colorCode)),
                         const SizedBox(width: 4),
                         Text(
                           account.name,

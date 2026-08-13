@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
 import '../../../categories/domain/entities/category.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class TransactionCategorySplits extends StatelessWidget {
   final TransactionEntity transaction;
@@ -18,7 +19,7 @@ class TransactionCategorySplits extends StatelessWidget {
       final cat = categories.where((c) => c.id == transaction.categoryId).firstOrNull;
       return ListTile(
         leading: Icon(
-          cat != null ? IconData(cat.iconCode, fontFamily: 'MaterialIcons') : Icons.category,
+          cat != null ? IconUtils.getIcon(cat.iconCode) : Icons.category,
           color: cat != null ? Color(cat.colorCode) : Colors.grey,
           size: 32,
         ),
@@ -44,7 +45,7 @@ class TransactionCategorySplits extends StatelessWidget {
             return ListTile(
               dense: true,
               leading: Icon(
-                cat != null ? IconData(cat.iconCode, fontFamily: 'MaterialIcons') : Icons.category,
+                cat != null ? IconUtils.getIcon(cat.iconCode) : Icons.category,
                 color: cat != null ? Color(cat.colorCode) : Colors.grey,
               ),
               title: Text(cat?.name ?? 'Desconocida'),

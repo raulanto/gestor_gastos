@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/savings_provider.dart';
 import '../../domain/entities/savings_goal.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class SavingsPage extends ConsumerWidget {
   const SavingsPage({super.key});
@@ -139,7 +140,7 @@ class SavingsGoalCard extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     backgroundColor: Color(goal.colorCode).withValues(alpha: 0.2),
-                    child: Icon(IconData(goal.iconCode, fontFamily: 'MaterialIcons'), color: Color(goal.colorCode)),
+                    child: Icon(IconUtils.getIcon(goal.iconCode), color: Color(goal.colorCode)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(

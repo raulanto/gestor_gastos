@@ -10,6 +10,7 @@ import '../../../home/presentation/providers/period_view_provider.dart';
 import '../../../home/presentation/widgets/period_selector.dart';
 import '../../../../core/providers/date_filter_provider.dart';
 import '../providers/account_provider.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class AccountDetailsPage extends ConsumerWidget {
   final String accountId;
@@ -54,7 +55,7 @@ class AccountDetailsPage extends ConsumerWidget {
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               backgroundColor: Color(account.colorCode).withValues(alpha: 0.8),
-              child: Icon(IconData(account.iconCode, fontFamily: 'MaterialIcons'), color: Colors.white, size: 20),
+              child: Icon(IconUtils.getIcon(account.iconCode), color: Colors.white, size: 20),
             ),
           )
         ],

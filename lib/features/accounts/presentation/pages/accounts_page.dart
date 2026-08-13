@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/account_provider.dart';
 import '../widgets/add_edit_account_dialog.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class AccountsPage extends ConsumerWidget {
   const AccountsPage({super.key});
@@ -26,7 +27,7 @@ class AccountsPage extends ConsumerWidget {
                 leading: CircleAvatar(
                   backgroundColor: Color(account.colorCode).withValues(alpha: 0.2),
                   child: Icon(
-                    IconData(account.iconCode, fontFamily: 'MaterialIcons'),
+                    IconUtils.getIcon(account.iconCode),
                     color: Color(account.colorCode),
                   ),
                 ),

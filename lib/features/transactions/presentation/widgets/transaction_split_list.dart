@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
 import '../../../categories/domain/entities/category.dart';
 import 'category_picker_sheet.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class TransactionSplitList extends StatelessWidget {
   final List<TransactionSplit> splits;
@@ -27,7 +28,7 @@ class TransactionSplitList extends StatelessWidget {
             final cat = categories?.where((c) => c.id == s.categoryId).firstOrNull;
             return ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: cat != null ? Icon(IconData(cat.iconCode, fontFamily: 'MaterialIcons'), color: Color(cat.colorCode)) : const Icon(Icons.category),
+              leading: cat != null ? Icon(IconUtils.getIcon(cat.iconCode), color: Color(cat.colorCode)) : const Icon(Icons.category),
               title: Text(cat?.name ?? 'Desconocida'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class TransactionList extends ConsumerWidget {
   final Map<String, List<TransactionEntity>> groupedTransactions;
@@ -57,7 +58,7 @@ class TransactionList extends ConsumerWidget {
                 final category = categories.where((c) => c.id == t.categoryId).firstOrNull;
 
                 final categoryColor = category != null ? Color(category.colorCode) : theme.colorScheme.primary;
-                final categoryIcon = category != null ? IconData(category.iconCode, fontFamily: 'MaterialIcons') : (isExpense ? Icons.shopping_bag_outlined : (isTransfer ? Icons.swap_horiz : Icons.account_balance_wallet_outlined));
+                final categoryIcon = category != null ? IconUtils.getIcon(category.iconCode) : (isExpense ? Icons.shopping_bag_outlined : (isTransfer ? Icons.swap_horiz : Icons.account_balance_wallet_outlined));
 
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),

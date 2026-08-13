@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../accounts/domain/entities/account.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class TransactionAccountTile extends StatelessWidget {
   final Account account;
@@ -10,7 +11,7 @@ class TransactionAccountTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(
-        IconData(account.iconCode, fontFamily: 'MaterialIcons'),
+        IconUtils.getIcon(account.iconCode),
         color: Color(account.colorCode),
         size: 32,
       ),

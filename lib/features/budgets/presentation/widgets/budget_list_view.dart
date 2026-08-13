@@ -5,6 +5,7 @@ import '../../domain/entities/budget.dart';
 import '../providers/budgets_provider.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../savings/presentation/providers/savings_provider.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class BudgetListView extends ConsumerWidget {
   final String monthYearKey;
@@ -43,7 +44,7 @@ class BudgetListView extends ConsumerWidget {
                 orElse: () => categoriesState.value!.first,
               );
               title = cat.name;
-              iconData = IconData(cat.iconCode, fontFamily: 'MaterialIcons');
+              iconData = IconUtils.getIcon(cat.iconCode);
               color = Color(cat.colorCode);
             } else if (b.savingsGoalId != null && savingsState.value != null) {
               final goal = savingsState.value!.firstWhere(
@@ -51,7 +52,7 @@ class BudgetListView extends ConsumerWidget {
                 orElse: () => savingsState.value!.first,
               );
               title = 'Ahorro: ${goal.name}';
-              iconData = IconData(goal.iconCode, fontFamily: 'MaterialIcons');
+              iconData = IconUtils.getIcon(goal.iconCode);
               color = Color(goal.colorCode);
             }
 
