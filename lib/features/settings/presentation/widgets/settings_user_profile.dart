@@ -32,7 +32,8 @@ class SettingsUserProfile extends ConsumerWidget {
               if (pickedFile == null) return;
               
               final appDir = await getApplicationDocumentsDirectory();
-              final fileName = path.basename(pickedFile.path);
+              final timestamp = DateTime.now().millisecondsSinceEpoch;
+              final fileName = '${timestamp}_${path.basename(pickedFile.path)}';
               final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
               
               setState(() {
@@ -96,15 +97,14 @@ class SettingsUserProfile extends ConsumerWidget {
                     child: FilledButton(
                       onPressed: () async {
                         final newName = nameController.text.trim();
-                        if (newName.isNotEmpty) {
-                          await ref.read(authNotifierProvider.notifier).updateProfile(
-                            user.id,
-                            newName,
-                            currentPhotoPath,
-                          );
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
+                        final finalName = newName.isNotEmpty ? newName : user.username;
+                        await ref.read(authNotifierProvider.notifier).updateProfile(
+                          user.id,
+                          finalName,
+                          currentPhotoPath,
+                        );
+                        if (context.mounted) {
+                          Navigator.pop(context);
                         }
                       },
                       child: const Text('Guardar Cambios'),
