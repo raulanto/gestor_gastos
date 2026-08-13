@@ -8,7 +8,6 @@ import 'core/theme/theme.dart';
 import 'core/theme/theme_provider.dart';
 
 void main() async {
-  // Asegurar la inicialización de bindings de Flutter antes de bases de datos
   WidgetsFlutterBinding.ensureInitialized();
   
   final prefs = await SharedPreferences.getInstance();

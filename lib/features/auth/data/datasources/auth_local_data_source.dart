@@ -19,8 +19,7 @@ class AuthLocalDataSource {
 
   Future<User> saveUser(String username) async {
     final db = await _appDatabase.database;
-    
-    // Validar si ya existe el usuario o insertar
+
     final existingUsers = await db.query('users', where: 'username = ?', whereArgs: [username]);
     if (existingUsers.isNotEmpty) {
       return User.fromMap(existingUsers.first);

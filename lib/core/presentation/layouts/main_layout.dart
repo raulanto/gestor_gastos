@@ -40,25 +40,39 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       body: widget.navigationShell,
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface,
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildNavItem(Icons.home, Icons.home_outlined, 0),
-                _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 1),
-                _buildNavItem(Icons.handshake, Icons.handshake_outlined, 4),
-
-                _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
-                _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
-                _buildAddButton(context),
-              ],
-            ),
+          padding: const EdgeInsets.only(bottom: 10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildNavItem(Icons.home, Icons.home_outlined, 0),
+                    const SizedBox(width: 4),
+                    _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 1),
+                    const SizedBox(width: 4),
+                    _buildNavItem(Icons.handshake, Icons.handshake_outlined, 4),
+                    const SizedBox(width: 4),
+                    _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
+                    const SizedBox(width: 4),
+                    _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -75,17 +89,19 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     return GestureDetector(
       onTap: () => _goBranch(index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(10),
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutQuint,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? theme.colorScheme.surface : Colors.transparent,
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Icon(
           isSelected ? selectedIcon : unselectedIcon,
+          size: 24,
           color: isSelected
               ? theme.colorScheme.onSurface
-              : theme.colorScheme.surface.withValues(alpha: 0.6),
+              : theme.colorScheme.surface.withValues(alpha: 0.5),
         ),
       ),
     );
