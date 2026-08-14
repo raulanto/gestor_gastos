@@ -47,12 +47,15 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
   bool _hydrated = false;
 
+  bool _showKeyboard = false;
+
   @override
   void initState() {
     super.initState();
     if (widget.initialType != null) {
       _transactionType = widget.initialType!;
     }
+    _showKeyboard = widget.transactionId == null;
   }
 
   void _hydrateFromTransaction(TransactionEntity t) {
@@ -326,35 +329,102 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.transactionId == null ? 'Añadir Gasto' : 'Editar Gasto'),
-      ),
-      body: Column(
+      backgroundColor: theme.colorScheme.surface,
+      body: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TransactionTypeSelector(
-                    transactionType: _transactionType,
-                    onChanged: (val) => setState(() => _transactionType = val),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 350,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary.withValues(alpha: 1.0),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  
-                  Center(
-                    child: Text(
-                      '\$$_expression',
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        color: _transactionType == 'expense' ? Colors.red : Colors.green,
-                        fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => context.pop(),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.transactionId == null ? 'Añadir Gasto' : 'Editar Gasto',
+                        style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  child: Column(
+                    children: [
+                      TransactionTypeSelector(
+                        transactionType: _transactionType,
+                        onChanged: (val) => setState(() => _transactionType = val),
+                      ),
+                      const SizedBox(height: 24),
+                      GestureDetector(
+                        onTap: () => setState(() => _showKeyboard = true),
+                        child: Text(
+                          '\$$_expression',
+                          style: theme.textTheme.displayLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  accountsState.when(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_showKeyboard) {
+                                setState(() => _showKeyboard = false);
+                              }
+                            },
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  accountsState.when(
                     data: (accounts) => TransactionAccountSelector(
                       selectedAccountId: _selectedAccountId,
                       accounts: accounts,
@@ -414,13 +484,37 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       old?.delete().catchError((_) => old);
                     },
                   ),
+                  const SizedBox(height: 32),
+                  FilledButton(
+                    onPressed: _saveTransaction,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text('Guardar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
                 ],
               ),
             ),
           ),
-          
-          CustomNumericKeyboard(
-            onKeyPressed: _onKeyPressed,
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          child: (_showKeyboard && MediaQuery.of(context).viewInsets.bottom == 0)
+              ? CustomNumericKeyboard(
+                  onKeyPressed: _onKeyPressed,
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    ),
+  ),
+),
+              ],
+            ),
           ),
         ],
       ),
