@@ -95,6 +95,7 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final categoriesState = ref.watch(categoriesProvider);
     final savingsState = ref.watch(savingsGoalsProvider);
 
@@ -106,52 +107,123 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nuevo Presupuesto')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            BudgetTypeSelector(
-              isSavings: _isSavings,
-              onChanged: (val) => setState(() => _isSavings = val),
-            ),
-            const SizedBox(height: 24),
-
-            if (!_isSavings)
-              BudgetCategorySelector(
-                selectedCategory: selectedCategory,
-                categories: categoriesState.value,
-                onSelected: (cat) =>
-                    setState(() => _selectedCategoryId = cat.id),
-              )
-            else
-              savingsState.when(
-                data: (goals) => BudgetSavingsGoalSelector(
-                  selectedGoalId: _selectedSavingsGoalId,
-                  goals: goals,
-                  onChanged: (val) =>
-                      setState(() => _selectedSavingsGoalId = val),
+      backgroundColor: theme.colorScheme.surface,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 250,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.jpg'),
+                  fit: BoxFit.cover,
                 ),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, st) => Text('Error: $e'),
               ),
-
-            const SizedBox(height: 16),
-
-            BudgetAmountInput(
-              controller: _amountController,
-              isSavings: _isSavings,
-              onSuggestAmount: _suggestAmount,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colorScheme.primary.withValues(alpha: 0.4),
+                      theme.colorScheme.primary.withValues(alpha: 1.0),
+                    ],
+                  ),
+                ),
+              ),
             ),
-
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _save,
-              child: const Text('Guardar Presupuesto'),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => context.pop(),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Nuevo Presupuesto',
+                        style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          BudgetTypeSelector(
+                            isSavings: _isSavings,
+                            onChanged: (val) => setState(() => _isSavings = val),
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          if (!_isSavings)
+                            BudgetCategorySelector(
+                              selectedCategory: selectedCategory,
+                              categories: categoriesState.value,
+                              onSelected: (cat) =>
+                                  setState(() => _selectedCategoryId = cat.id),
+                            )
+                          else
+                            savingsState.when(
+                              data: (goals) => BudgetSavingsGoalSelector(
+                                selectedGoalId: _selectedSavingsGoalId,
+                                goals: goals,
+                                onChanged: (val) =>
+                                    setState(() => _selectedSavingsGoalId = val),
+                              ),
+                              loading: () => const Center(child: CircularProgressIndicator()),
+                              error: (e, st) => Text('Error: $e'),
+                            ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          BudgetAmountInput(
+                            controller: _amountController,
+                            isSavings: _isSavings,
+                            onSuggestAmount: _suggestAmount,
+                          ),
+                          
+                          const SizedBox(height: 32),
+                          FilledButton(
+                            onPressed: _save,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: const Text('Guardar Presupuesto', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
