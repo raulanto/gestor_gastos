@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../transactions/domain/entities/transaction.dart';
 import '../providers/home_summary_provider.dart';
+import '../../../accounts/presentation/providers/account_provider.dart';
 
 import 'home_header.dart';
 import 'period_selector.dart';
@@ -23,6 +24,9 @@ class TransactionsView extends ConsumerStatefulWidget {
 class _TransactionsViewState extends ConsumerState<TransactionsView> {
   int _chartType = 0; // 0 = Flujo, 1 = Categorías
   bool _isBalanceMinimized = false;
+  bool _showCharts = false;
+
+  int? _selectedAccountId;
 
   void _toggleBalanceMinimized() {
     setState(() {
@@ -33,6 +37,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
   @override
   Widget build(BuildContext context) {
     final summaryState = ref.watch(homeSummaryProvider);
+    final accountsState = ref.watch(accountsProvider);
     final theme = Theme.of(context);
 
     return SafeArea(
@@ -48,9 +53,19 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
               continue;
             }
 
+            if (_selectedAccountId != null &&
+                _selectedAccountId != -1 &&
+                t.accountId != _selectedAccountId) {
+              continue;
+            }
+
             final date = DateTime.parse(t.date);
-            final diff = DateTime(now.year, now.month, now.day).difference(DateTime(date.year, date.month, date.day)).inDays;
-            
+            final diff = DateTime(
+              now.year,
+              now.month,
+              now.day,
+            ).difference(DateTime(date.year, date.month, date.day)).inDays;
+
             String key;
             if (diff == 0) {
               key = 'HOY';
@@ -59,7 +74,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
             } else {
               key = DateFormat('dd MMM').format(date).toUpperCase();
             }
-            
+
             if (!groupedTransactions.containsKey(key)) {
               groupedTransactions[key] = [];
             }
@@ -75,7 +90,9 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: _isBalanceMinimized ? MediaQuery.of(context).size.height : 350,
+                height: _isBalanceMinimized
+                    ? MediaQuery.of(context).size.height
+                    : 350,
                 child: Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
@@ -90,8 +107,12 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          theme.colorScheme.primary.withValues(alpha: _isBalanceMinimized ? 0.2 : 0.4),
-                          theme.colorScheme.primary.withValues(alpha: _isBalanceMinimized ? 0.6 : 1.0),
+                          theme.colorScheme.primary.withValues(
+                            alpha: _isBalanceMinimized ? 0.2 : 0.4,
+                          ),
+                          theme.colorScheme.primary.withValues(
+                            alpha: _isBalanceMinimized ? 0.6 : 1.0,
+                          ),
                         ],
                       ),
                     ),
@@ -116,7 +137,9 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeInOut,
-                top: _isBalanceMinimized ? MediaQuery.of(context).size.height : 240,
+                top: _isBalanceMinimized
+                    ? MediaQuery.of(context).size.height
+                    : 240,
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -139,71 +162,179 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                                 totalExpense: summary.totalExpense,
                               ),
                               const SizedBox(height: 32),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Análisis', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                                  SegmentedButton<int>(
-                                    segments: const [
-                                      ButtonSegment(value: 0, label: Text('Flujo'), icon: Icon(Icons.bar_chart, size: 18)),
-                                      ButtonSegment(value: 1, label: Text('Categorías'), icon: Icon(Icons.pie_chart, size: 18)),
+                              InkWell(
+                                onTap: () => setState(() => _showCharts = !_showCharts),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Análisis',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(fontWeight: FontWeight.bold),
+                                      ),
+                                      Icon(
+                                        _showCharts ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                        color: theme.colorScheme.primary,
+                                      ),
                                     ],
-                                    selected: {_chartType},
-                                    onSelectionChanged: (Set<int> newSelection) {
-                                      setState(() {
-                                        _chartType = newSelection.first;
-                                      });
-                                    },
-                                    style: SegmentedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                                      textStyle: const TextStyle(fontSize: 12),
-                                    ),
                                   ),
-                                ],
+                                ),
                               ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 200,
-                                child: _chartType == 0 
-                                    ? HomeChart(chartData: summary.chartData)
-                                    : HomeCategoryChart(categoryData: summary.categoryExpenses),
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                alignment: Alignment.topCenter,
+                                child: _showCharts 
+                                  ? Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        const SizedBox(height: 16),
+                                        Center(
+                                          child: SegmentedButton<int>(
+                                            segments: const [
+                                              ButtonSegment(
+                                                value: 0,
+                                                label: Text('Flujo'),
+                                                icon: Icon(Icons.bar_chart, size: 18),
+                                              ),
+                                              ButtonSegment(
+                                                value: 1,
+                                                label: Text('Categorías'),
+                                                icon: Icon(Icons.pie_chart, size: 18),
+                                              ),
+                                            ],
+                                            selected: {_chartType},
+                                            onSelectionChanged:
+                                                (Set<int> newSelection) {
+                                                  setState(() {
+                                                    _chartType = newSelection.first;
+                                                  });
+                                                },
+                                            style: SegmentedButton.styleFrom(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                              ),
+                                              textStyle: const TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        SizedBox(
+                                          height: 200,
+                                          child: _chartType == 0
+                                              ? HomeChart(chartData: summary.chartData)
+                                              : HomeCategoryChart(
+                                                  categoryData: summary.categoryExpenses,
+                                                ),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
                               ),
                               const SizedBox(height: 32),
                               Row(
                                 children: [
                                   Expanded(
                                     child: FilledButton.icon(
-                                      onPressed: () => context.push('/add_transaction?type=income'),
+                                      onPressed: () => context.push(
+                                        '/add_transaction?type=income',
+                                      ),
                                       icon: const Icon(Icons.add),
                                       label: const Text('Ingreso'),
                                       style: FilledButton.styleFrom(
-                                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-                                        foregroundColor: theme.colorScheme.primary,
+                                        backgroundColor: theme
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.15),
+                                        foregroundColor:
+                                            theme.colorScheme.primary,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: FilledButton.icon(
-                                      onPressed: () => context.push('/add_transaction?type=expense'),
+                                      onPressed: () => context.push(
+                                        '/add_transaction?type=expense',
+                                      ),
                                       icon: const Icon(Icons.call_made),
                                       label: const Text('Gasto'),
                                       style: FilledButton.styleFrom(
-                                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-                                        foregroundColor: theme.colorScheme.primary,
+                                        backgroundColor: theme
+                                            .colorScheme
+                                            .primary
+                                            .withValues(alpha: 0.15),
+                                        foregroundColor:
+                                            theme.colorScheme.primary,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 24),
-                              Text('Historial', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Historial',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Row(
+                                    children: [
+                                      // Filtro de Cuenta
+                                      PopupMenuButton<int>(
+                                        icon: Icon(
+                                          Icons.account_balance_wallet,
+                                          color:
+                                              _selectedAccountId != null &&
+                                                  _selectedAccountId != -1
+                                              ? theme.colorScheme.primary
+                                              : Colors.grey,
+                                          size: 20,
+                                        ),
+                                        tooltip: 'Filtrar por cuenta',
+                                        onSelected: (val) => setState(
+                                          () => _selectedAccountId = val,
+                                        ),
+                                        itemBuilder: (context) {
+                                          final items = <PopupMenuEntry<int>>[
+                                            const PopupMenuItem(
+                                              value: -1,
+                                              child: Text('Todas las cuentas'),
+                                            ),
+                                          ];
+                                          if (accountsState.value != null) {
+                                            for (var account
+                                                in accountsState.value!) {
+                                              items.add(
+                                                PopupMenuItem(
+                                                  value: account.id,
+                                                  child: Text(account.name),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                          return items;
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
                       ),
                       TransactionList(groupedTransactions: groupedTransactions),
-                      const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
+                      const SliverPadding(
+                        padding: EdgeInsets.only(bottom: 100),
+                      ),
                     ],
                   ),
                 ),
@@ -212,7 +343,9 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeInOut,
-                top: _isBalanceMinimized ? MediaQuery.of(context).size.height * 0.35 : 0,
+                top: _isBalanceMinimized
+                    ? MediaQuery.of(context).size.height * 0.35
+                    : 0,
                 left: 0,
                 right: 0,
                 child: HomeHeader(
@@ -239,8 +372,15 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
             ],
           );
         },
-        loading: () => Center(child: CircularProgressIndicator(color: theme.colorScheme.onPrimary)),
-        error: (e, st) => Center(child: Text('Error: $e', style: TextStyle(color: theme.colorScheme.onPrimary))),
+        loading: () => Center(
+          child: CircularProgressIndicator(color: theme.colorScheme.onPrimary),
+        ),
+        error: (e, st) => Center(
+          child: Text(
+            'Error: $e',
+            style: TextStyle(color: theme.colorScheme.onPrimary),
+          ),
+        ),
       ),
     );
   }
