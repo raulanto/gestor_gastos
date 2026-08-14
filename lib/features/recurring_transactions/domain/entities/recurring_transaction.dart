@@ -45,6 +45,7 @@ class RecurringTransactionEntity {
   final double amount;
   final int accountId;
   final int? categoryId;
+  final String? name;
   final String? note;
   final String type; // 'expense', 'income'
   final String periodicity; // 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'
@@ -57,6 +58,7 @@ class RecurringTransactionEntity {
     required this.amount,
     required this.accountId,
     this.categoryId,
+    this.name,
     this.note,
     this.type = 'expense',
     required this.periodicity,
@@ -70,6 +72,8 @@ class RecurringTransactionEntity {
       'id': id,
       'amount': amount,
       'account_id': accountId,
+      'category_id': categoryId,
+      'name': name,
       'note': note,
       'type': type,
       'periodicity': periodicity,
@@ -83,7 +87,8 @@ class RecurringTransactionEntity {
       id: map['id'],
       amount: map['amount'],
       accountId: map['account_id'],
-      categoryId: splits.isNotEmpty ? splits.first.categoryId : map['category_id'],
+      categoryId: map['category_id'],
+      name: map['name'],
       note: map['note'],
       type: map['type'],
       periodicity: map['periodicity'],

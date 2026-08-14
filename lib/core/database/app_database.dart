@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 8,
+      version: 9,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -39,6 +39,7 @@ class AppDatabase {
           amount REAL NOT NULL,
           account_id INTEGER NOT NULL,
           category_id INTEGER,
+          name TEXT,
           note TEXT,
           type TEXT NOT NULL,
           periodicity TEXT NOT NULL, 
@@ -174,6 +175,10 @@ class AppDatabase {
     if (oldVersion < 8) {
       await db.execute('ALTER TABLE users ADD COLUMN photo_path TEXT');
     }
+
+    if (oldVersion < 9) {
+      await db.execute('ALTER TABLE recurring_transactions ADD COLUMN name TEXT');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -242,6 +247,7 @@ class AppDatabase {
         amount REAL NOT NULL,
         account_id INTEGER NOT NULL,
         category_id INTEGER,
+        name TEXT,
         note TEXT,
         type TEXT NOT NULL,
         periodicity TEXT NOT NULL, 

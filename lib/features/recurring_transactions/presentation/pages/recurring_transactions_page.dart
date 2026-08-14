@@ -97,71 +97,131 @@ class RecurringTransactionsPage extends ConsumerWidget {
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                            color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            ),
                           ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                            leading: CircleAvatar(
-                              backgroundColor: isActive 
-                                  ? (isExpense ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1))
-                                  : Colors.grey.withValues(alpha: 0.1),
-                              child: Icon(
-                                isExpense ? Icons.autorenew : Icons.savings,
-                                color: isActive ? (isExpense ? Colors.red : Colors.green) : Colors.grey,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  context.push('/edit_recurring_transaction/${rt.id}');
+                                },
+                                onLongPress: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Eliminar Gasto Recurrente'),
+                                      content: const Text('¿Estás seguro de que deseas eliminar este gasto recurrente? No se eliminarán los cobros ya generados.'),
+                                      actions: [
+                                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+                                        TextButton(
+                                          onPressed: () {
+                                            ref.read(recurringTransactionsProvider.notifier).remove(rt.id!);
+                                            Navigator.pop(ctx);
+                                          },
+                                          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                                        ),
+                                      ],
+                                    )
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: isActive 
+                                              ? (isExpense ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1))
+                                              : Colors.grey.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        child: Icon(
+                                          isExpense ? Icons.autorenew : Icons.savings,
+                                          color: isActive ? (isExpense ? Colors.red : Colors.green) : Colors.grey,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              rt.name ?? rt.note ?? 'Recurrente', 
+                                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${periodicityMap[rt.periodicity] ?? rt.periodicity} • Próx: $nextDate',
+                                              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: isActive 
+                                                    ? theme.colorScheme.primary.withValues(alpha: 0.1) 
+                                                    : Colors.grey.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                isActive ? 'Activo' : 'Pausado', 
+                                                style: theme.textTheme.labelSmall?.copyWith(
+                                                  color: isActive ? theme.colorScheme.primary : Colors.grey,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            '\$${rt.amount.toStringAsFixed(2)}',
+                                            style: theme.textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: isActive ? (isExpense ? theme.colorScheme.onSurface : Colors.green) : Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Transform.scale(
+                                            scale: 0.8,
+                                            alignment: Alignment.centerRight,
+                                            child: Switch(
+                                              value: isActive,
+                                              activeColor: theme.colorScheme.primary,
+                                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              onChanged: (val) {
+                                                ref.read(recurringTransactionsProvider.notifier).toggleStatus(rt.id!);
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                            title: Text(rt.note ?? 'Recurrente', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('${periodicityMap[rt.periodicity] ?? rt.periodicity} • Próx: $nextDate'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '\$${rt.amount.toStringAsFixed(2)}',
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: isActive ? (isExpense ? theme.colorScheme.onSurface : Colors.green) : Colors.grey,
-                                      ),
-                                    ),
-                                    Text(isActive ? 'Activo' : 'Pausado', style: theme.textTheme.bodySmall?.copyWith(color: isActive ? Colors.green : Colors.grey)),
-                                  ],
-                                ),
-                                const SizedBox(width: 8),
-                                Switch(
-                                  value: isActive,
-                                  activeColor: theme.colorScheme.primary,
-                                  onChanged: (val) {
-                                    ref.read(recurringTransactionsProvider.notifier).toggleStatus(rt.id!);
-                                  },
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              context.push('/edit_recurring_transaction/${rt.id}');
-                            },
-                            onLongPress: () {
-                              showDialog(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: const Text('Eliminar Gasto Recurrente'),
-                                  content: const Text('¿Estás seguro de que deseas eliminar este gasto recurrente? No se eliminarán los cobros ya generados.'),
-                                  actions: [
-                                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-                                    TextButton(
-                                      onPressed: () {
-                                        ref.read(recurringTransactionsProvider.notifier).remove(rt.id!);
-                                        Navigator.pop(ctx);
-                                      },
-                                      child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-                                    ),
-                                  ],
-                                )
-                              );
-                            },
                           ),
                         );
                       },

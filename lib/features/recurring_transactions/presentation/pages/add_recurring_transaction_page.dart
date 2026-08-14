@@ -29,6 +29,7 @@ class AddRecurringTransactionPage extends ConsumerStatefulWidget {
 
 class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransactionPage> {
   final _amountController = TextEditingController();
+  final _nameController = TextEditingController();
   final _noteController = TextEditingController();
   
   int? _selectedAccountId;
@@ -49,6 +50,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
       final t = ref.read(recurringTransactionByIdProvider(widget.transactionId!));
       if (t != null) {
         _amountController.text = t.amount.toString();
+        _nameController.text = t.name ?? '';
         _noteController.text = t.note ?? '';
         _selectedAccountId = t.accountId;
         _selectedCategoryId = t.categoryId;
@@ -56,8 +58,14 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
         _periodicity = t.periodicity;
         _nextExecutionDate = DateTime.parse(t.nextExecutionDate);
         if (t.splits.isNotEmpty) {
-          _isSplitMode = true;
-          _splits.addAll(t.splits);
+          bool isSingle = t.categoryId != null && 
+                          t.splits.length == 1 && 
+                          t.splits.first.amount == t.amount;
+          
+          if (!isSingle) {
+            _isSplitMode = true;
+            _splits.addAll(t.splits);
+          }
         }
       }
     }
@@ -219,6 +227,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
         amount: amount,
         accountId: _selectedAccountId!,
         categoryId: _isSplitMode ? null : _selectedCategoryId!,
+        name: _nameController.text.isNotEmpty ? _nameController.text : null,
         note: _noteController.text,
         type: _transactionType,
         periodicity: _periodicity,
@@ -232,6 +241,7 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
         amount: amount,
         accountId: _selectedAccountId!,
         categoryId: _isSplitMode ? null : _selectedCategoryId!,
+        name: _nameController.text.isNotEmpty ? _nameController.text : null,
         note: _noteController.text,
         type: _transactionType,
         periodicity: _periodicity,
@@ -282,6 +292,12 @@ class _AddRecurringTransactionPageState extends ConsumerState<AddRecurringTransa
                   _transactionType = newSelection.first;
                 });
               },
+            ),
+            const SizedBox(height: 16),
+            
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Nombre del Gasto (Ej: Netflix, Internet)', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 16),
             

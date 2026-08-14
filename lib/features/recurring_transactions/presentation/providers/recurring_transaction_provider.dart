@@ -49,6 +49,7 @@ class RecurringTransactionNotifier extends AsyncNotifier<List<RecurringTransacti
           amount: e.amount,
           accountId: e.accountId,
           categoryId: e.categoryId,
+          name: e.name,
           note: e.note,
           type: e.type,
           periodicity: e.periodicity,
