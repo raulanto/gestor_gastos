@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import '../../../../../core/theme/theme_provider.dart';
-
+import 'theme_mode_selector.dart';
 
 
 class SettingsThemeCard extends ConsumerWidget {
@@ -64,27 +64,10 @@ class SettingsThemeCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: SegmentedButton<ThemeMode>(
-                    segments: const [
-                      ButtonSegment(
-                        value: ThemeMode.system,
-                        icon: Icon(Icons.settings_system_daydream),
-                        label: Text('Sistema'),
-                      ),
-                      ButtonSegment(
-                        value: ThemeMode.light,
-                        icon: Icon(Icons.light_mode),
-                        label: Text('Claro'),
-                      ),
-                      ButtonSegment(
-                        value: ThemeMode.dark,
-                        icon: Icon(Icons.dark_mode),
-                        label: Text('Oscuro'),
-                      ),
-                    ],
-                    selected: {themeMode},
-                    onSelectionChanged: (Set<ThemeMode> newSelection) {
-                      ref.read(themeModeProvider.notifier).setThemeMode(newSelection.first);
+                  child: ThemeModeSelector(
+                    currentMode: themeMode,
+                    onChanged: (newMode) {
+                      ref.read(themeModeProvider.notifier).setThemeMode(newMode);
                     },
                   ),
                 ),

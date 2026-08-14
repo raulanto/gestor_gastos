@@ -12,6 +12,7 @@ import 'period_selector.dart';
 import 'kpi_cards.dart';
 import 'home_chart.dart';
 import 'home_category_chart.dart';
+import 'chart_type_selector.dart';
 import 'transaction_list.dart';
 
 class TransactionsView extends ConsumerStatefulWidget {
@@ -193,33 +194,15 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
                                         const SizedBox(height: 16),
-                                        Center(
-                                          child: SegmentedButton<int>(
-                                            segments: const [
-                                              ButtonSegment(
-                                                value: 0,
-                                                label: Text('Flujo'),
-                                                icon: Icon(Icons.bar_chart, size: 18),
-                                              ),
-                                              ButtonSegment(
-                                                value: 1,
-                                                label: Text('Categorías'),
-                                                icon: Icon(Icons.pie_chart, size: 18),
-                                              ),
-                                            ],
-                                            selected: {_chartType},
-                                            onSelectionChanged:
-                                                (Set<int> newSelection) {
-                                                  setState(() {
-                                                    _chartType = newSelection.first;
-                                                  });
-                                                },
-                                            style: SegmentedButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                              ),
-                                              textStyle: const TextStyle(fontSize: 12),
-                                            ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                          child: ChartTypeSelector(
+                                            chartType: _chartType,
+                                            onChanged: (val) {
+                                              setState(() {
+                                                _chartType = val;
+                                              });
+                                            },
                                           ),
                                         ),
                                         const SizedBox(height: 16),
