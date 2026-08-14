@@ -378,28 +378,34 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                  child: Column(
-                    children: [
-                      TransactionTypeSelector(
-                        transactionType: _transactionType,
-                        onChanged: (val) => setState(() => _transactionType = val),
-                      ),
-                      const SizedBox(height: 24),
-                      GestureDetector(
-                        onTap: () => setState(() => _showKeyboard = true),
-                        child: Text(
-                          '\$$_expression',
-                          style: theme.textTheme.displayLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  child: MediaQuery.of(context).viewInsets.bottom == 0
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                          child: Column(
+                            children: [
+                              TransactionTypeSelector(
+                                transactionType: _transactionType,
+                                onChanged: (val) => setState(() => _transactionType = val),
+                              ),
+                              const SizedBox(height: 24),
+                              GestureDetector(
+                                onTap: () => setState(() => _showKeyboard = true),
+                                child: Text(
+                                  '\$$_expression',
+                                  style: theme.textTheme.displayLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
                 Expanded(
                   child: Container(

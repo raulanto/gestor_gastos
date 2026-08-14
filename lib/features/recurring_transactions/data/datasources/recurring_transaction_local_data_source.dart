@@ -57,6 +57,7 @@ class RecurringTransactionLocalDataSource {
       amount: rt.amount,
       accountId: rt.accountId,
       categoryId: rt.categoryId,
+      name: rt.name,
       note: rt.note,
       type: rt.type,
       periodicity: rt.periodicity,
