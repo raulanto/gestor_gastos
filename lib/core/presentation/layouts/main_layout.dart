@@ -107,20 +107,4 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     );
   }
 
-  Widget _buildAddButton(BuildContext context) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () {
-        context.push('/add_transaction?type=income');
-      },
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(Icons.add, color: theme.colorScheme.onPrimary, size: 28),
-      ),
-    );
-  }
 }

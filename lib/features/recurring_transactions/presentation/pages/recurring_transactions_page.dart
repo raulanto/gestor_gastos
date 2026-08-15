@@ -208,7 +208,7 @@ class RecurringTransactionsPage extends ConsumerWidget {
                                             alignment: Alignment.centerRight,
                                             child: Switch(
                                               value: isActive,
-                                              activeColor: theme.colorScheme.primary,
+                                              activeThumbColor: theme.colorScheme.primary,
                                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                               onChanged: (val) {
                                                 ref.read(recurringTransactionsProvider.notifier).toggleStatus(rt.id!);

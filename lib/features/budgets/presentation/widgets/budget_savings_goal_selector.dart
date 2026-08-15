@@ -17,7 +17,7 @@ class BudgetSavingsGoalSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<int>(
       decoration: const InputDecoration(labelText: 'Meta de Ahorro', border: OutlineInputBorder()),
-      value: selectedGoalId,
+      initialValue: selectedGoalId,
       items: goals.map((g) => DropdownMenuItem(
         value: g.id,
         child: Text(g.name),

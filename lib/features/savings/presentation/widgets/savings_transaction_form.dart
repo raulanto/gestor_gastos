@@ -76,7 +76,7 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.account_balance_wallet),
                 ),
-                value: _selectedAccountId,
+                initialValue: _selectedAccountId,
                 items: accounts.map((acc) {
                   return DropdownMenuItem<int>(
                     value: acc.id,
@@ -186,7 +186,7 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                     await ref.read(savingsGoalsProvider.notifier).updateGoal(
                       widget.goal.copyWith(status: 'completed')
                     );
-                    if (mounted) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Felicidades! Meta de ahorro cumplida.')));
                     }
                   }

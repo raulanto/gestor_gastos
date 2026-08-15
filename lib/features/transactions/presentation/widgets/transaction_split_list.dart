@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
 import '../../../categories/domain/entities/category.dart';
-import 'category_picker_sheet.dart';
 import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class TransactionSplitList extends StatelessWidget {

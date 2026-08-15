@@ -20,7 +20,7 @@ class SettingsManagementCard extends StatelessWidget {
         const SizedBox(height: 8),
         Card(
           elevation: 0,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Column(
             children: [

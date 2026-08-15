@@ -22,7 +22,7 @@ class AccountSelectorField extends StatelessWidget {
         prefixIcon: Icon(Icons.account_balance_wallet),
         border: OutlineInputBorder()
       ),
-      value: selectedAccountId,
+      initialValue: selectedAccountId,
       items: accounts.map((a) => DropdownMenuItem(
         value: a.id,
         child: Row(

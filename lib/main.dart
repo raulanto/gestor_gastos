@@ -21,7 +21,6 @@ void main() async {
 
   Workmanager().initialize(
     callbackDispatcher,
-    isInDebugMode: true, // Use false for production
   );
 
   Workmanager().registerPeriodicTask(

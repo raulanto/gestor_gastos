@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../settings/presentation/providers/notification_preferences_provider.dart';
-import '../domain/repositories/savings_repository.dart';
 import '../presentation/providers/savings_provider.dart';
 
 final savingsNotificationWatcherProvider = Provider<SavingsNotificationWatcher>((ref) {

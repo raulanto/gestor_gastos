@@ -70,8 +70,8 @@ class CategoriesPage extends ConsumerWidget {
                     contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
                     leading: CircleAvatar(
                       backgroundColor: Color(child.colorCode).withValues(alpha: 0.2),
-                      child: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode), size: 18),
                       radius: 16,
+                      child: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode), size: 18),
                     ),
                     title: Text(child.name),
                     trailing: Row(

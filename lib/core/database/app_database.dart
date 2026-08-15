@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -191,6 +191,21 @@ class AppDatabase {
       ''');
       
       await db.execute('ALTER TABLE budgets ADD COLUMN warning_threshold REAL NOT NULL DEFAULT 0.8');
+    }
+
+    if (oldVersion < 11) {
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions(account_id)');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_transaction_splits_transaction_id ON transaction_splits(transaction_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_transaction_splits_category_id ON transaction_splits(category_id)');
+
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_categories_parent_id ON categories(parent_id)');
+
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_savings_transactions_goal_id ON savings_transactions(goal_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_savings_rules_goal_id ON savings_rules(goal_id)');
+      
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_budgets_month_year ON budgets(month_year)');
     }
   }
 

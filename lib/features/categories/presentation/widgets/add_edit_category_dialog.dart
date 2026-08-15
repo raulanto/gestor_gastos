@@ -47,7 +47,7 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name ?? '');
     _selectedIcon = widget.category?.iconCode ?? _availableIcons.first.codePoint;
-    _selectedColor = widget.category?.colorCode ?? _availableColors.first.value;
+    _selectedColor = widget.category?.colorCode ?? _availableColors.first.toARGB32();
     _selectedParentId = widget.category?.parentId;
   }
 
@@ -114,7 +114,7 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
 
                 return DropdownButtonFormField<int?>(
                   decoration: const InputDecoration(labelText: 'Categoría Padre (Opcional)', border: OutlineInputBorder()),
-                  value: _selectedParentId,
+                  initialValue: _selectedParentId,
                   items: [
                     const DropdownMenuItem(value: null, child: Text('Ninguna (Principal)')),
                     ...mainCategories.map((c) => DropdownMenuItem(
@@ -126,7 +126,7 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
                 );
               },
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             if (categoriesState.value?.any((c) => c.parentId == null && c.id != widget.category?.id) == true)
               const SizedBox(height: 16),
@@ -154,9 +154,9 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
               spacing: 8,
               runSpacing: 8,
               children: _availableColors.map((color) {
-                final isSelected = color.value == _selectedColor;
+                final isSelected = color.toARGB32() == _selectedColor;
                 return InkWell(
-                  onTap: () => setState(() => _selectedColor = color.value),
+                  onTap: () => setState(() => _selectedColor = color.toARGB32()),
                   child: Container(
                     width: 40,
                     height: 40,

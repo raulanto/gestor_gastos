@@ -33,7 +33,7 @@ class LoanService {
 
   Future<void> createLoan(LoanEntity loan) async {
     // 1. Save loan
-    final loanId = await _loanRepository.createLoan(loan);
+    await _loanRepository.createLoan(loan);
 
     // 2. Register expense transaction
     final catId = await _getPrestamosCategoryId();

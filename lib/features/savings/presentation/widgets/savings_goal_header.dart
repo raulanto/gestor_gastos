@@ -20,7 +20,7 @@ class SavingsGoalHeader extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(16.0),
       elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -37,7 +37,7 @@ class SavingsGoalHeader extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.2),
+                      color: Colors.green.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Text('¡Meta Cumplida!', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),

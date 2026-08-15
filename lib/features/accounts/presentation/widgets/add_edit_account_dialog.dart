@@ -42,7 +42,7 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
     _nameController = TextEditingController(text: widget.account?.name ?? '');
     _balanceController = TextEditingController(text: widget.account?.balance.toStringAsFixed(2) ?? '');
     _selectedIcon = widget.account?.iconCode ?? _availableIcons.first.codePoint;
-    _selectedColor = widget.account?.colorCode ?? _availableColors.first.value;
+    _selectedColor = widget.account?.colorCode ?? _availableColors.first.toARGB32();
   }
 
   @override
@@ -120,9 +120,9 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
               spacing: 8,
               runSpacing: 8,
               children: _availableColors.map((color) {
-                final isSelected = color.value == _selectedColor;
+                final isSelected = color.toARGB32() == _selectedColor;
                 return InkWell(
-                  onTap: () => setState(() => _selectedColor = color.value),
+                  onTap: () => setState(() => _selectedColor = color.toARGB32()),
                   child: Container(
                     width: 40,
                     height: 40,

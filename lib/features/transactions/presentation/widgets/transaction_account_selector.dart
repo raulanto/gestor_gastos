@@ -18,7 +18,7 @@ class TransactionAccountSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<int>(
       decoration: const InputDecoration(labelText: 'Cuenta', border: OutlineInputBorder()),
-      value: selectedAccountId,
+      initialValue: selectedAccountId,
       items: accounts.map((a) => DropdownMenuItem(
         value: a.id,
         child: Row(

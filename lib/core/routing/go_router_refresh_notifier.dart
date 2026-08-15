@@ -13,17 +13,17 @@ class GoRouterRefreshNotifier extends ChangeNotifier {
     // No importa el valor, solo que algo cambió.
     _authSub = _ref.listen(
       authNotifierProvider,
-      (_, __) => notifyListeners(),
+      (_, _) => notifyListeners(),
       fireImmediately: false,
     );
     _pinSub = _ref.listen(
       pinProvider,
-      (_, __) => notifyListeners(),
+      (_, _) => notifyListeners(),
       fireImmediately: false,
     );
     _sessionSub = _ref.listen(
       sessionProvider,
-      (_, __) => notifyListeners(),
+      (_, _) => notifyListeners(),
       fireImmediately: false,
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../widgets/settings_user_profile.dart';
 import '../widgets/settings_theme_card.dart';
 import '../widgets/settings_management_card.dart';

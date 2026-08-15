@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../domain/entities/account.dart';
 import '../providers/account_transactions_provider.dart';
 import '../../../home/presentation/providers/period_view_provider.dart';
 import '../../../home/presentation/widgets/period_selector.dart';

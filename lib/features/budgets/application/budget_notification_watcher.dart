@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../settings/presentation/providers/notification_preferences_provider.dart';
-import '../data/datasources/budget_local_data_source.dart';
 import '../presentation/providers/budgets_provider.dart';
 import '../../categories/presentation/providers/category_provider.dart';
 

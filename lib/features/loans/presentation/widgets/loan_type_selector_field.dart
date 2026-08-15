@@ -18,7 +18,7 @@ class LoanTypeSelectorField extends StatelessWidget {
         prefixIcon: Icon(Icons.category),
         border: OutlineInputBorder()
       ),
-      value: type,
+      initialValue: type,
       items: const [
         DropdownMenuItem(
           value: 'efectivo', 
