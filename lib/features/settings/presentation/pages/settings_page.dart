@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../widgets/settings_user_profile.dart';
 import '../widgets/settings_theme_card.dart';
 import '../widgets/settings_management_card.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return SafeArea(
@@ -19,10 +21,12 @@ class SettingsPage extends StatelessWidget {
             left: 0,
             right: 0,
             height: 350,
-            child: Container(
-              decoration: const BoxDecoration(
+            child: AnimatedContainer(
+  duration: const Duration(milliseconds: 500),
+  
+              decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/home_bg.jpg'),
+                  image: AssetImage(ref.watch(appBackgroundProvider)),
                   fit: BoxFit.cover,
                 ),
               ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/theme_provider.dart';
 import 'package:go_router/go_router.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends ConsumerWidget {
   const WelcomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
@@ -14,10 +16,12 @@ class WelcomePage extends StatelessWidget {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
+            child: AnimatedContainer(
+  duration: const Duration(milliseconds: 500),
+  
+              decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/home_bg.jpg'),
+                  image: AssetImage(ref.watch(appBackgroundProvider)),
                   fit: BoxFit.cover,
                 ),
               ),

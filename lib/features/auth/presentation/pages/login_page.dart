@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/theme_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 
@@ -42,10 +43,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             left: 0,
             right: 0,
             height: 350,
-            child: Container(
-              decoration: const BoxDecoration(
+            child: AnimatedContainer(
+  duration: const Duration(milliseconds: 500),
+  
+              decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/home_bg.jpg'),
+                  image: AssetImage(ref.watch(appBackgroundProvider)),
                   fit: BoxFit.cover,
                 ),
               ),

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../providers/home_summary_provider.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
+import '../../../../core/theme/theme_provider.dart';
 
 import 'home_header.dart';
 import 'period_selector.dart';
@@ -94,14 +95,16 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                 height: _isBalanceMinimized
                     ? MediaQuery.of(context).size.height
                     : 350,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/home_bg.jpg'),
-                      fit: BoxFit.cover,
+                child: AnimatedContainer(
+  duration: const Duration(milliseconds: 500),
+  
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(ref.watch(appBackgroundProvider)),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  child: AnimatedContainer(
+                    child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -117,9 +120,9 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                         ],
                       ),
                     ),
+                    ),
                   ),
                 ),
-              ),
               // Restaurar al deslizar hacia arriba
               if (_isBalanceMinimized)
                 Positioned.fill(
@@ -129,6 +132,15 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                         setState(() {
                           _isBalanceMinimized = false;
                         });
+                      }
+                    },
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity != null) {
+                        if (details.primaryVelocity! > 0) {
+                          ref.read(appBackgroundProvider.notifier).previousBackground();
+                        } else if (details.primaryVelocity! < 0) {
+                          ref.read(appBackgroundProvider.notifier).nextBackground();
+                        }
                       }
                     },
                     child: Container(color: Colors.transparent),

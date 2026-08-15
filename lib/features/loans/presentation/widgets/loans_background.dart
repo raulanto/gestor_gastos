@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/theme_provider.dart';
 
-class LoansBackground extends StatelessWidget {
+class LoansBackground extends ConsumerWidget {
   const LoansBackground({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
       height: 350,
-      child: Container(
-        decoration: const BoxDecoration(
+      child: AnimatedContainer(
+  duration: const Duration(milliseconds: 500),
+  
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/home_bg.jpg'),
+            image: AssetImage(ref.watch(appBackgroundProvider)),
             fit: BoxFit.cover,
           ),
         ),
