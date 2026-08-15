@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../savings/application/savings_service.dart';
+import '../../../budgets/application/budget_notification_watcher.dart';
 import '../../domain/entities/transaction.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../../data/datasources/transaction_local_data_source.dart';
@@ -41,6 +42,15 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionEntity>> {
       ref.read(savingsServiceProvider).processTransactionRules(newT).catchError((e) {
         debugPrint('Error processing savings rules: $e');
       });
+
+      // Check budget thresholds in the background
+      final watcher = ref.read(budgetNotificationWatcherProvider);
+      final txDate = DateTime.tryParse(newT.date) ?? DateTime.now();
+      for (final split in newT.splits) {
+        watcher.checkBudgetForCategory(split.categoryId, txDate).catchError((e) {
+           debugPrint('Error checking budget notifications: $e');
+        });
+      }
       
       return await _repository.getTransactions();
     });
@@ -57,7 +67,17 @@ class TransactionNotifier extends AsyncNotifier<List<TransactionEntity>> {
   Future<void> updateTransaction(TransactionEntity transaction) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _repository.updateTransaction(transaction);
+      final updatedT = await _repository.updateTransaction(transaction);
+      
+      // Check budget thresholds in the background
+      final watcher = ref.read(budgetNotificationWatcherProvider);
+      final txDate = DateTime.tryParse(updatedT.date) ?? DateTime.now();
+      for (final split in updatedT.splits) {
+        watcher.checkBudgetForCategory(split.categoryId, txDate).catchError((e) {
+           debugPrint('Error checking budget notifications: $e');
+        });
+      }
+
       return await _repository.getTransactions();
     });
   }

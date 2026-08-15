@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../transactions/domain/entities/transaction.dart';
 import '../../transactions/domain/repositories/transaction_repository.dart';
@@ -5,18 +6,20 @@ import '../../transactions/presentation/providers/transaction_provider.dart';
 import '../domain/entities/savings_transaction.dart';
 import '../domain/repositories/savings_repository.dart';
 import '../presentation/providers/savings_provider.dart';
+import 'savings_notification_watcher.dart';
 
 final savingsServiceProvider = Provider<SavingsService>((ref) {
   final savingsRepo = ref.watch(savingsRepositoryProvider);
   final txRepo = ref.watch(transactionRepositoryProvider);
-  return SavingsService(savingsRepo, txRepo);
+  return SavingsService(savingsRepo, txRepo, ref);
 });
 
 class SavingsService {
   final SavingsRepository _savingsRepository;
   final TransactionRepository _transactionRepository;
+  final Ref ref;
 
-  SavingsService(this._savingsRepository, this._transactionRepository);
+  SavingsService(this._savingsRepository, this._transactionRepository, this.ref);
 
   /// Processes active savings rules against a new transaction.
   Future<void> processTransactionRules(TransactionEntity tx) async {
@@ -98,6 +101,11 @@ class SavingsService {
       reason: reason,
     );
     await _savingsRepository.createTransaction(savingsTx);
+
+    // Trigger notification watcher
+    ref.read(savingsNotificationWatcherProvider).checkSavingsProgress(goalId, amount).catchError((e) {
+      debugPrint('Error in savings watcher: $e');
+    });
 
     // 2. Create a normal expense transaction to reflect the real money leaving the account, if configured
     if (deductFromBalance) {

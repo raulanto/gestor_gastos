@@ -22,7 +22,7 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -179,6 +179,19 @@ class AppDatabase {
     if (oldVersion < 9) {
       await db.execute('ALTER TABLE recurring_transactions ADD COLUMN name TEXT');
     }
+
+    if (oldVersion < 10) {
+      await db.execute('''
+        CREATE TABLE notification_preferences(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL UNIQUE,
+          is_enabled INTEGER NOT NULL DEFAULT 1,
+          time_of_day TEXT
+        )
+      ''');
+      
+      await db.execute('ALTER TABLE budgets ADD COLUMN warning_threshold REAL NOT NULL DEFAULT 0.8');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -309,6 +322,16 @@ class AppDatabase {
       )
     ''');
 
+    // Tabla de Preferencias de Notificaciones
+    await db.execute('''
+      CREATE TABLE notification_preferences(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL UNIQUE,
+        is_enabled INTEGER NOT NULL DEFAULT 1,
+        time_of_day TEXT
+      )
+    ''');
+
     // Tabla de Presupuestos
     await db.execute('''
       CREATE TABLE budgets(
@@ -317,6 +340,7 @@ class AppDatabase {
         savings_goal_id INTEGER,
         amount REAL NOT NULL,
         month_year TEXT NOT NULL,
+        warning_threshold REAL NOT NULL DEFAULT 0.8,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
         FOREIGN KEY (savings_goal_id) REFERENCES savings_goals(id) ON DELETE CASCADE
       )

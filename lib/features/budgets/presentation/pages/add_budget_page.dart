@@ -27,6 +27,7 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
   bool _isSavings = false;
   int? _selectedCategoryId;
   int? _selectedSavingsGoalId;
+  double _warningThreshold = 0.8;
 
   Future<void> _suggestAmount() async {
     if (_isSavings) return;
@@ -82,6 +83,7 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
         savingsGoalId: _isSavings ? _selectedSavingsGoalId : null,
         amount: amount,
         monthYear: widget.monthYear,
+        warningThreshold: _warningThreshold,
       ),
     );
 
@@ -202,6 +204,24 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                             controller: _amountController,
                             isSavings: _isSavings,
                             onSuggestAmount: _suggestAmount,
+                          ),
+                          
+                          const SizedBox(height: 24),
+                          Text(
+                            'Avisarme al llegar al ${(_warningThreshold * 100).toInt()}%',
+                            style: theme.textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          Slider(
+                            value: _warningThreshold,
+                            min: 0.1,
+                            max: 1.0,
+                            divisions: 9,
+                            label: '${(_warningThreshold * 100).toInt()}%',
+                            activeColor: theme.colorScheme.primary,
+                            onChanged: (val) {
+                              setState(() => _warningThreshold = val);
+                            },
                           ),
                           
                           const SizedBox(height: 32),

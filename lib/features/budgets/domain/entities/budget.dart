@@ -4,6 +4,7 @@ class BudgetEntity {
   final int? savingsGoalId;
   final double amount;
   final String monthYear; // Formato YYYY-MM
+  final double warningThreshold;
 
   BudgetEntity({
     this.id,
@@ -11,6 +12,7 @@ class BudgetEntity {
     this.savingsGoalId,
     required this.amount,
     required this.monthYear,
+    this.warningThreshold = 0.8,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class BudgetEntity {
       'savings_goal_id': savingsGoalId,
       'amount': amount,
       'month_year': monthYear,
+      'warning_threshold': warningThreshold,
     };
   }
 
@@ -30,6 +33,7 @@ class BudgetEntity {
       savingsGoalId: map['savings_goal_id'],
       amount: map['amount'],
       monthYear: map['month_year'],
+      warningThreshold: map['warning_threshold'] ?? 0.8,
     );
   }
 
@@ -39,6 +43,7 @@ class BudgetEntity {
     int? savingsGoalId,
     double? amount,
     String? monthYear,
+    double? warningThreshold,
   }) {
     return BudgetEntity(
       id: id ?? this.id,
@@ -46,6 +51,7 @@ class BudgetEntity {
       savingsGoalId: savingsGoalId ?? this.savingsGoalId,
       amount: amount ?? this.amount,
       monthYear: monthYear ?? this.monthYear,
+      warningThreshold: warningThreshold ?? this.warningThreshold,
     );
   }
 }

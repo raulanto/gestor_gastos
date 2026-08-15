@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../application/savings_notification_watcher.dart';
 import '../../domain/entities/savings_goal.dart';
 import '../../domain/entities/savings_transaction.dart';
 import '../providers/savings_provider.dart';
@@ -155,6 +156,12 @@ class _SavingsTransactionFormState extends ConsumerState<SavingsTransactionForm>
                 
                 final repo = ref.read(savingsRepositoryProvider);
                 await repo.createTransaction(tx);
+                
+                // Trigger notification watcher
+                final amountDelta = widget.isDeposit ? _amount : -_amount;
+                ref.read(savingsNotificationWatcherProvider).checkSavingsProgress(widget.goal.id!, amountDelta).catchError((e) {
+                   debugPrint('Error in savings watcher: $e');
+                });
                 
                 // Si la meta está vinculada al saldo real, reflejar la transacción manual
                 if (widget.goal.deductFromBalance) {

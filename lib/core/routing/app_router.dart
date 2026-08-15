@@ -29,6 +29,7 @@ import '../../features/savings/presentation/pages/savings_page.dart';
 import '../../features/budgets/presentation/pages/add_budget_page.dart';
 import '../../features/budgets/presentation/pages/budgets_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/settings/presentation/pages/notification_settings_page.dart';
 import '../../features/home/presentation/widgets/transactions_view.dart';
 import '../../features/loans/presentation/pages/loans_page.dart';
 import '../../features/loans/presentation/pages/add_loan_page.dart';
@@ -311,6 +312,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final id = state.pathParameters['personId']!;
           return AddEditPersonPage(personId: id);
         },
+      ),
+      GoRoute(
+        path: '/notification_settings',
+        name: 'notification_settings',
+        builder: (context, state) => const NotificationSettingsPage(),
       ),
     ],
   );

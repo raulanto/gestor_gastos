@@ -36,6 +36,12 @@ class SettingsManagementCard extends StatelessWidget {
                 subtitle: 'Administrar categorías de gastos',
                 onTap: () => context.push('/categories'),
               ),
+              SettingsTile(
+                icon: Icons.notifications,
+                title: 'Notificaciones',
+                subtitle: 'Configurar alertas y recordatorios',
+                onTap: () => context.push('/notification_settings'),
+              ),
             ],
           ),
         ),
