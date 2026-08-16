@@ -14,7 +14,9 @@ import '../widgets/loan_type_selector_field.dart';
 import '../widgets/due_date_selector_field.dart';
 
 class AddLoanPage extends ConsumerStatefulWidget {
-  const AddLoanPage({super.key});
+  final String? loanId;
+
+  const AddLoanPage({super.key, this.loanId});
 
   @override
   ConsumerState<AddLoanPage> createState() => _AddLoanPageState();
@@ -27,6 +29,26 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
   int? _selectedAccountId;
   String _type = 'efectivo';
   DateTime _dueDate = DateTime.now().add(const Duration(days: 30));
+  LoanEntity? _existingLoan;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.loanId != null) {
+      final loans = ref.read(loansProvider).value;
+      if (loans != null) {
+        final loan = loans.where((l) => l.id == int.tryParse(widget.loanId!)).firstOrNull;
+        if (loan != null) {
+          _existingLoan = loan;
+          _selectedPerson = loan.person; // Assuming the person object is populated
+          _amount = loan.amount;
+          _selectedAccountId = loan.accountId;
+          _type = loan.type;
+          _dueDate = DateTime.parse(loan.dueDate);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +104,7 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Nuevo Préstamo',
+                        _existingLoan != null ? 'Editar Préstamo' : 'Nuevo Préstamo',
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -122,6 +144,7 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                               ),
                               const SizedBox(height: 16),
                               AmountInputField(
+                                initialValue: _amount > 0 ? _amount.toStringAsFixed(2) : '',
                                 onSaved: (v) => _amount = double.parse(v!),
                               ),
                               const SizedBox(height: 16),
@@ -153,9 +176,9 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Guardar Préstamo',
-                                  style: TextStyle(
+                                child: Text(
+                                  _existingLoan != null ? 'Actualizar Préstamo' : 'Guardar Préstamo',
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -182,16 +205,28 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
   void _submit() {
     if (_formKey.currentState!.validate() && _selectedPerson != null) {
       _formKey.currentState!.save();
-      final loan = LoanEntity(
-        personId: _selectedPerson!.id,
-        personName: _selectedPerson!.name,
-        type: _type,
-        amount: _amount,
-        accountId: _selectedAccountId!,
-        date: DateTime.now().toIso8601String(),
-        dueDate: _dueDate.toIso8601String(),
-      );
-      ref.read(loansProvider.notifier).createLoan(loan);
+      if (_existingLoan != null) {
+        final updatedLoan = _existingLoan!.copyWith(
+          personId: _selectedPerson!.id,
+          personName: _selectedPerson!.name,
+          type: _type,
+          amount: _amount,
+          accountId: _selectedAccountId,
+          dueDate: _dueDate.toIso8601String(),
+        );
+        ref.read(loansProvider.notifier).updateLoan(updatedLoan);
+      } else {
+        final loan = LoanEntity(
+          personId: _selectedPerson!.id,
+          personName: _selectedPerson!.name,
+          type: _type,
+          amount: _amount,
+          accountId: _selectedAccountId!,
+          date: DateTime.now().toIso8601String(),
+          dueDate: _dueDate.toIso8601String(),
+        );
+        ref.read(loansProvider.notifier).createLoan(loan);
+      }
       context.pop();
     }
   }

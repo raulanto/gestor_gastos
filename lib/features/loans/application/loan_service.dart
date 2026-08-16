@@ -55,6 +55,36 @@ class LoanService {
     await _transactionNotifier.addTransaction(tx);
   }
 
+  Future<void> updateLoan(LoanEntity loan) async {
+    await _loanRepository.updateLoan(loan);
+  }
+
+  Future<void> deleteLoan(int id, {bool keepHistory = true}) async {
+    if (!keepHistory) {
+      final loan = await _loanRepository.getLoanById(id);
+      if (loan != null) {
+        final db = await _db.database;
+        // Delete initial loan transaction
+        await db.delete(
+          'transactions',
+          where: 'note = ? AND amount = ? AND date = ?',
+          whereArgs: ['Préstamo a ${loan.personName}', loan.amount, loan.date],
+        );
+        
+        // Delete payment transactions
+        final payments = await _loanRepository.getLoanPayments(id);
+        for (final p in payments) {
+          await db.delete(
+            'transactions',
+            where: 'note = ? AND amount = ? AND date = ?',
+            whereArgs: ['Abono de préstamo de ${loan.personName}', p.amount, p.date],
+          );
+        }
+      }
+    }
+    await _loanRepository.deleteLoan(id);
+  }
+
   Future<void> addLoanPayment(
     LoanPaymentEntity payment,
     LoanEntity loan,

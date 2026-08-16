@@ -244,6 +244,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AddSavingsGoalPage(),
       ),
       GoRoute(
+        path: '/edit_savings_goal/:goalId',
+        name: 'edit_savings_goal',
+        builder: (context, state) {
+          final id = state.pathParameters['goalId']!;
+          return AddSavingsGoalPage(goalId: id);
+        },
+      ),
+      GoRoute(
         path: '/savings_goal_details/:goalId',
         name: 'savings_goal_details',
         builder: (context, state) {
@@ -276,6 +284,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/add_loan',
         name: 'add_loan',
         builder: (context, state) => const AddLoanPage(),
+      ),
+      GoRoute(
+        path: '/edit_loan/:loanId',
+        name: 'edit_loan',
+        builder: (context, state) {
+          final id = state.pathParameters['loanId']!;
+          return AddLoanPage(loanId: id);
+        },
       ),
       GoRoute(
         path: '/loan_details/:loanId',

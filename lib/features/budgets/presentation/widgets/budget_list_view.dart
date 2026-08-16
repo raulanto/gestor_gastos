@@ -106,7 +106,7 @@ class BudgetListView extends ConsumerWidget {
                         ),
                         onSelected: (value) {
                           if (value == 'edit') {
-                            _showEditBudgetDialog(
+                            _showEditBudgetSheet(
                               context,
                               ref,
                               b,
@@ -179,7 +179,7 @@ class BudgetListView extends ConsumerWidget {
     );
   }
 
-  void _showEditBudgetDialog(
+  void _showEditBudgetSheet(
     BuildContext context,
     WidgetRef ref,
     BudgetEntity budget,
@@ -188,40 +188,69 @@ class BudgetListView extends ConsumerWidget {
     final controller = TextEditingController(
       text: budget.amount.toStringAsFixed(2),
     );
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Editar Presupuesto'),
-          content: TextField(
-            controller: controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Monto Límite',
-              border: OutlineInputBorder(),
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Editar Presupuesto',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Monto Límite',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final newAmount = double.tryParse(controller.text);
+                          if (newAmount != null && newAmount > 0) {
+                            final updatedBudget = budget.copyWith(amount: newAmount);
+                            await ref
+                                .read(budgetRepositoryProvider)
+                                .updateBudget(updatedBudget);
+                            ref.invalidate(monthlyBudgetsProvider(monthYearKey));
+                            ref.invalidate(globalBudgetProvider(monthYearKey));
+                            if (context.mounted) Navigator.of(context).pop();
+                          }
+                        },
+                        child: const Text('Guardar'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final newAmount = double.tryParse(controller.text);
-                if (newAmount != null && newAmount > 0) {
-                  final updatedBudget = budget.copyWith(amount: newAmount);
-                  await ref
-                      .read(budgetRepositoryProvider)
-                      .updateBudget(updatedBudget);
-                  ref.invalidate(monthlyBudgetsProvider(monthYearKey));
-                  ref.invalidate(globalBudgetProvider(monthYearKey));
-                  if (context.mounted) Navigator.of(context).pop();
-                }
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
         );
       },
     );

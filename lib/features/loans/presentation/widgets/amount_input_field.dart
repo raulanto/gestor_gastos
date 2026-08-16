@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 class AmountInputField extends StatelessWidget {
   final FormFieldSetter<String> onSaved;
+  final String? initialValue;
 
-  const AmountInputField({super.key, required this.onSaved});
+  const AmountInputField({super.key, required this.onSaved, this.initialValue});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: initialValue,
       decoration: const InputDecoration(
         labelText: 'Monto',
         prefixIcon: Icon(Icons.attach_money),

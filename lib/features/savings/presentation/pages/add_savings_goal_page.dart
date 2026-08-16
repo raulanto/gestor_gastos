@@ -6,7 +6,9 @@ import '../../domain/entities/savings_goal.dart';
 import '../providers/savings_provider.dart';
 
 class AddSavingsGoalPage extends ConsumerStatefulWidget {
-  const AddSavingsGoalPage({super.key});
+  final String? goalId;
+
+  const AddSavingsGoalPage({super.key, this.goalId});
 
   @override
   ConsumerState<AddSavingsGoalPage> createState() => _AddSavingsGoalPageState();
@@ -21,6 +23,30 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
   bool _isProtected = false;
   bool _deductFromBalance = true;
   int _priority = 0;
+  SavingsGoalEntity? _existingGoal;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.goalId != null) {
+      final goals = ref.read(savingsGoalsProvider).value;
+      if (goals != null) {
+        final intId = int.tryParse(widget.goalId!);
+        final goal = goals.where((g) => g.id == intId).firstOrNull;
+        if (goal != null) {
+          _existingGoal = goal;
+          _name = goal.name;
+          _targetAmount = goal.targetAmount;
+          _deadline = goal.deadlineDate != null
+              ? DateTime.parse(goal.deadlineDate!)
+              : null;
+          _isProtected = goal.isProtected;
+          _deductFromBalance = goal.deductFromBalance;
+          _priority = goal.priority;
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +101,7 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Nueva Meta de Ahorro',
+                        _existingGoal != null ? 'Editar Meta' : 'Nueva Meta de Ahorro',
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -100,16 +126,19 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                         padding: const EdgeInsets.all(24.0),
                         children: [
                           TextFormField(
+                            initialValue: _name,
                             decoration: const InputDecoration(
                               labelText: 'Nombre de la Meta (ej. Viaje)',
                               prefixIcon: Icon(Icons.title),
                             ),
                             validator: (v) =>
                                 v == null || v.isEmpty ? 'Requerido' : null,
+                            onChanged: (v) => _name = v,
                             onSaved: (v) => _name = v!,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
+                            initialValue: _targetAmount > 0 ? _targetAmount.toStringAsFixed(2) : '',
                             decoration: const InputDecoration(
                               labelText: 'Monto Objetivo',
                               prefixIcon: Icon(Icons.attach_money),
@@ -121,10 +150,12 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                                 v == null || double.tryParse(v) == null
                                 ? 'Monto inválido'
                                 : null,
+                            onChanged: (v) => _targetAmount = double.tryParse(v) ?? 0.0,
                             onSaved: (v) => _targetAmount = double.parse(v!),
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
+                            initialValue: _priority.toString(),
                             decoration: const InputDecoration(
                               labelText: 'Prioridad (Reglas Automáticas)',
                               helperText:
@@ -132,7 +163,8 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                               prefixIcon: Icon(Icons.low_priority),
                             ),
                             keyboardType: TextInputType.number,
-                            initialValue: '0',
+                            onChanged: (v) =>
+                                _priority = int.tryParse(v) ?? 0,
                             onSaved: (v) =>
                                 _priority = int.tryParse(v ?? '0') ?? 0,
                           ),
@@ -160,19 +192,33 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
-                                final newGoal = SavingsGoalEntity(
-                                  name: _name,
-                                  targetAmount: _targetAmount,
-                                  deadlineDate: _deadline?.toIso8601String(),
-                                  iconCode: Icons.savings.codePoint,
-                                  colorCode: Colors.blue.toARGB32(),
-                                  isProtected: _isProtected,
-                                  priority: _priority,
-                                  deductFromBalance: _deductFromBalance,
-                                );
-                                ref
-                                    .read(savingsGoalsProvider.notifier)
-                                    .addGoal(newGoal);
+                                if (_existingGoal != null) {
+                                  final updatedGoal = _existingGoal!.copyWith(
+                                    name: _name,
+                                    targetAmount: _targetAmount,
+                                    deadlineDate: _deadline?.toIso8601String(),
+                                    isProtected: _isProtected,
+                                    priority: _priority,
+                                    deductFromBalance: _deductFromBalance,
+                                  );
+                                  ref
+                                      .read(savingsGoalsProvider.notifier)
+                                      .updateGoal(updatedGoal);
+                                } else {
+                                  final newGoal = SavingsGoalEntity(
+                                    name: _name,
+                                    targetAmount: _targetAmount,
+                                    deadlineDate: _deadline?.toIso8601String(),
+                                    iconCode: Icons.savings.codePoint,
+                                    colorCode: Colors.blue.toARGB32(),
+                                    isProtected: _isProtected,
+                                    priority: _priority,
+                                    deductFromBalance: _deductFromBalance,
+                                  );
+                                  ref
+                                      .read(savingsGoalsProvider.notifier)
+                                      .addGoal(newGoal);
+                                }
                                 context.pop();
                               }
                             },
@@ -182,9 +228,9 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: const Text(
-                              'Guardar Meta',
-                              style: TextStyle(
+                            child: Text(
+                              _existingGoal != null ? 'Actualizar Meta' : 'Guardar Meta',
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),

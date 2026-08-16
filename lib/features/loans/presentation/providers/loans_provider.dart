@@ -3,6 +3,7 @@ import '../../domain/entities/loan.dart';
 import '../../domain/entities/loan_payment.dart';
 import '../../application/loan_service.dart';
 import '../../data/repositories/loan_repository_impl.dart';
+import '../../../transactions/presentation/providers/transaction_provider.dart';
 
 final loansProvider = AsyncNotifierProvider<LoansNotifier, List<LoanEntity>>(
   () {
@@ -21,6 +22,25 @@ class LoansNotifier extends AsyncNotifier<List<LoanEntity>> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(loanServiceProvider).createLoan(loan);
+      return await ref.read(loanRepositoryProvider).getLoans();
+    });
+  }
+
+  Future<void> updateLoan(LoanEntity loan) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(loanServiceProvider).updateLoan(loan);
+      return await ref.read(loanRepositoryProvider).getLoans();
+    });
+  }
+
+  Future<void> deleteLoan(int id, {bool keepHistory = true}) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(loanServiceProvider).deleteLoan(id, keepHistory: keepHistory);
+      if (!keepHistory) {
+        ref.invalidate(transactionsProvider);
+      }
       return await ref.read(loanRepositoryProvider).getLoans();
     });
   }

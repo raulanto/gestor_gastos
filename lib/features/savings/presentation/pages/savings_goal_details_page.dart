@@ -67,10 +67,7 @@ class _SavingsGoalDetailsPageState
               PopupMenuButton<String>(
                 onSelected: (val) async {
                   if (val == 'edit') {
-                    await showDialog<SavingsGoalEntity>(
-                      context: context,
-                      builder: (ctx) => EditSavingsGoalDialog(goal: goal),
-                    );
+                    context.push('/edit_savings_goal/${goal.id}');
                   } else if (val == 'delete') {
                     showDialog(
                       context: context,
