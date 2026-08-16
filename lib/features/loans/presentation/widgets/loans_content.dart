@@ -13,13 +13,11 @@ class LoansContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
-        ),
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(32),
+        topRight: Radius.circular(32),
       ),
       child: loansAsync.when(
         data: (loans) {
@@ -29,7 +27,7 @@ class LoansContent extends StatelessWidget {
           final paidLoans = loans.where((l) => l.status == 'paid').toList();
 
           return ListView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
             children: [
               if (activeLoans.isNotEmpty) ...[
                 const SectionTitle('Activos'),

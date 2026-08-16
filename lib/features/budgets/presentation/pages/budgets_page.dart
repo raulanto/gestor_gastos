@@ -97,13 +97,11 @@ class _BudgetsPageState extends ConsumerState<BudgetsPage> {
             BudgetGlobalCard(monthYearKey: _monthYearKey),
             const SizedBox(height: 16),
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
-                  ),
+              child: Material(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(top: 24),

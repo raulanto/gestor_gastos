@@ -64,17 +64,11 @@ class BudgetListView extends ConsumerWidget {
               barColor = Colors.orange;
             }
 
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Row(
                       children: [
                         CircleAvatar(
@@ -135,7 +129,6 @@ class BudgetListView extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ),
             );
           },
         );

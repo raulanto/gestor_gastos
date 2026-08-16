@@ -6,11 +6,16 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       child: Text(
-        title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title.toUpperCase(),
+        style: theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

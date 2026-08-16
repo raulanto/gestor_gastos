@@ -76,13 +76,11 @@ class SavingsPage extends ConsumerWidget {
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(32),
-                        topRight: Radius.circular(32),
-                      ),
+                  child: Material(
+                    color: theme.colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                      topRight: Radius.circular(32),
                     ),
                     child: savingsState.when(
                       data: (goals) {
@@ -123,20 +121,13 @@ class SavingsGoalCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final txsAsync = ref.watch(savingsGoalTransactionsProvider(goal.id!));
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: () {
-          context.push('/savings_goal_details/${goal.id}');
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+    return InkWell(
+      onTap: () {
+        context.push('/savings_goal_details/${goal.id}');
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -198,7 +189,6 @@ class SavingsGoalCard extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

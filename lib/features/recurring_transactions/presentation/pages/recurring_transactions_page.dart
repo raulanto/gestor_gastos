@@ -74,13 +74,11 @@ class RecurringTransactionsPage extends ConsumerWidget {
                   ),
                 ),
                 Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
-                  ),
+              child: Material(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
                 child: recurringState.when(
                   data: (rts) {
@@ -97,53 +95,34 @@ class RecurringTransactionsPage extends ConsumerWidget {
                         final isActive = rt.status == 'active';
                         final nextDate = DateFormat('dd MMM yyyy').format(DateTime.parse(rt.nextExecutionDate));
 
-                        return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: theme.colorScheme.shadow.withValues(alpha: 0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  context.push('/edit_recurring_transaction/${rt.id}');
-                                },
-                                onLongPress: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text('Eliminar Gasto Recurrente'),
-                                      content: const Text('¿Estás seguro de que deseas eliminar este gasto recurrente? No se eliminarán los cobros ya generados.'),
-                                      actions: [
-                                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-                                        TextButton(
-                                          onPressed: () {
-                                            ref.read(recurringTransactionsProvider.notifier).remove(rt.id!);
-                                            Navigator.pop(ctx);
-                                          },
-                                          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-                                        ),
-                                      ],
-                                    )
-                                  );
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Row(
-                                    children: [
+                        return InkWell(
+                          onTap: () {
+                            context.push('/edit_recurring_transaction/${rt.id}');
+                          },
+                          onLongPress: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Eliminar Gasto Recurrente'),
+                                content: const Text('¿Estás seguro de que deseas eliminar este gasto recurrente? No se eliminarán los cobros ya generados.'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+                                  TextButton(
+                                    onPressed: () {
+                                      ref.read(recurringTransactionsProvider.notifier).remove(rt.id!);
+                                      Navigator.pop(ctx);
+                                    },
+                                    child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              )
+                            );
+                          },
+                          child: Container(
+                            color: isActive ? null : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                            child: Row(
+                              children: [
                                       Container(
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
@@ -223,9 +202,6 @@ class RecurringTransactionsPage extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
                         );
                       },
                     );
