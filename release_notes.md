@@ -1,3 +1,26 @@
+## 🎉 v0.1.2-beta — Módulo de Préstamos, Rediseño UI y Respaldos
+
+En esta nueva versión beta hemos integrado nuevas herramientas para la gestión de deudas, refinado completamente el aspecto visual de la aplicación para ofrecer una experiencia más moderna y añadido la capacidad de realizar respaldos de tu información.
+
+### ✨ Lo Nuevo en esta Versión
+
+**🤝 Módulo de Préstamos**
+- Nuevo sistema para registrar y gestionar préstamos otorgados o recibidos.
+- Seguimiento de fechas de vencimiento y estados.
+- Posibilidad de registrar pagos parciales y abonos al capital.
+
+**🎨 Rediseño Visual (Flat Design) y Experiencia**
+- Renovación completa de las pantallas principales (Historial, Préstamos, Recurrentes, Ahorros y Presupuestos) eliminando el diseño de "tarjetas" (sombras y bordes duros) por una vista plana de borde a borde mucho más limpia.
+- Animaciones suaves de transición (*crossfade*) al cambiar el fondo de pantalla o el tema de la app.
+- Optimización de rendimiento en el scroll del historial de transacciones (memoización).
+
+**💾 Respaldo y Restauración de Datos**
+- Nueva opción en **Configuración** para exportar toda tu base de datos financiera a un archivo local `.json`.
+- Permite importar y restaurar todos los registros (cuentas, transacciones, presupuestos, metas, préstamos, etc.) en cualquier momento.
+- Por privacidad y seguridad, la exportación e importación **excluyen** tus credenciales y PIN de acceso.
+
+---
+
 ## 🎉 v0.1.0-beta — Primera versión beta
 
 **Gestor de Gastos Personales** llega a su primera versión beta pública, disponible para **Android**. Esta es una entrega inicial pensada para pruebas y retroalimentación antes del lanzamiento estable.
@@ -31,7 +54,7 @@
 - Preferencias persistentes sin parpadeos al iniciar
 
 ### 🛠️ Stack técnico
-Flutter (Dart) · go_router · flutter_riverpod (AsyncNotifier) · sqflite · flex_color_scheme · shared_preferences
+Flutter (Dart) · go_router · flutter_riverpod (AsyncNotifier) · sqflite · flex_color_scheme · shared_preferences · file_picker
 
 ### ⚠️ Notas de la beta
 - Disponible solo para **Android** en esta versión
