@@ -62,6 +62,19 @@ class AppBackgroundNotifier extends Notifier<String> {
     'assets/images/bg4.jpg',
     'assets/images/bg5.jpg',
     'assets/images/bg6.jpg',
+    'assets/images/bg7.jpg',
+    'assets/images/bg8.jpg',
+    'assets/images/bg9.jpg',
+    'assets/images/bg10.jpg',
+    'assets/images/bg11.jpg',
+    'assets/images/bg12.jpg',
+    'assets/images/bg13.jpg',
+    'assets/images/bg14.jpg',
+    'assets/images/bg15.jpg',
+    'assets/images/bg16.jpg',
+    'assets/images/bg17.jpg',
+    'assets/images/bg18.jpg',
+    'assets/images/bg19.jpg',
   ];
 
   @override

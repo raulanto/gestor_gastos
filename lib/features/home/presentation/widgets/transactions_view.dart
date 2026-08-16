@@ -165,29 +165,34 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                 height: _isBalanceMinimized
                     ? MediaQuery.of(context).size.height
                     : 350,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 500),
-
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(ref.watch(appBackgroundProvider)),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 600),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: Container(
+                    key: ValueKey(ref.watch(appBackgroundProvider)),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          theme.colorScheme.primary.withValues(
-                            alpha: _isBalanceMinimized ? 0.2 : 0.4,
-                          ),
-                          theme.colorScheme.primary.withValues(
-                            alpha: _isBalanceMinimized ? 0.6 : 1.0,
-                          ),
-                        ],
+                      image: DecorationImage(
+                        image: AssetImage(ref.watch(appBackgroundProvider)),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            theme.colorScheme.primary.withValues(
+                              alpha: _isBalanceMinimized ? 0.2 : 0.4,
+                            ),
+                            theme.colorScheme.primary.withValues(
+                              alpha: _isBalanceMinimized ? 0.6 : 1.0,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
