@@ -62,8 +62,16 @@ class MyApp extends ConsumerWidget {
         (e) => e.toString() == colorSchemeName,
         orElse: () => FlexScheme.materialBaseline,
       );
-      lightTheme = FlexThemeData.light(scheme: scheme, useMaterial3: true);
-      darkTheme = FlexThemeData.dark(scheme: scheme, useMaterial3: true);
+      lightTheme = FlexThemeData.light(
+        scheme: scheme,
+        useMaterial3: true,
+        fontFamily: 'SFProRounded',
+      );
+      darkTheme = FlexThemeData.dark(
+        scheme: scheme,
+        useMaterial3: true,
+        fontFamily: 'SFProRounded',
+      );
     }
 
     return MaterialApp.router(

@@ -36,6 +36,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: SFProRounded
+      fonts:
+        - asset: assets/fonts/FontsFree-Net-SF-Pro-Rounded-Bold.ttf
   assets:
     - assets/images/
 

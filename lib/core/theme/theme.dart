@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import 'package:google_fonts/google_fonts.dart';
 
 class MaterialTheme {
   final TextTheme textTheme;
@@ -346,7 +345,8 @@ class MaterialTheme {
       useMaterial3: true,
       brightness: colorScheme.brightness,
       colorScheme: colorScheme,
-      textTheme: GoogleFonts.interTextTheme(baseTextTheme),
+      fontFamily: 'SFProRounded',
+      textTheme: baseTextTheme.apply(fontFamily: 'SFProRounded'),
       scaffoldBackgroundColor: colorScheme.surface,
       canvasColor: colorScheme.surface,
     );
