@@ -49,7 +49,10 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
   }
 
   if (transactionsAsync is AsyncError) {
-    return AsyncValue.error(transactionsAsync.error!, transactionsAsync.stackTrace!);
+    return AsyncValue.error(
+      transactionsAsync.error!,
+      transactionsAsync.stackTrace!,
+    );
   }
 
   final allTransactions = transactionsAsync.value ?? [];
@@ -64,13 +67,19 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
     if (periodView == PeriodView.day) {
       // "Hoy" siempre se refiere al día real, independientemente del mes
       // que se haya navegado con las flechas del header.
-      include = date.year == now.year && date.month == now.month && date.day == now.day;
+      include =
+          date.year == now.year &&
+          date.month == now.month &&
+          date.day == now.day;
     } else if (periodView == PeriodView.week) {
       // "Semana" siempre se refiere a la semana actual (lunes-domingo real).
       final weekStart = now.subtract(Duration(days: now.weekday - 1));
-      include = date.isAfter(weekStart.subtract(const Duration(days: 1))) && date.isBefore(weekStart.add(const Duration(days: 7)));
+      include =
+          date.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+          date.isBefore(weekStart.add(const Duration(days: 7)));
     } else if (periodView == PeriodView.month) {
-      include = date.year == selectedMonth.year && date.month == selectedMonth.month;
+      include =
+          date.year == selectedMonth.year && date.month == selectedMonth.month;
     } else if (periodView == PeriodView.year) {
       include = date.year == selectedMonth.year;
     }
@@ -93,14 +102,14 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
       }
     }
   }
-  
+
   // Grouping for chart
   Map<String, Map<String, double>> chartData = {};
 
   for (var tx in txs) {
     final date = DateTime.parse(tx.date);
     String key;
-    
+
     if (periodView == PeriodView.year) {
       key = DateFormat('MMM yy').format(date); // Ej. Ene 26
     } else if (periodView == PeriodView.month) {
@@ -108,12 +117,17 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
       key = DateFormat('MMM dd').format(startOfWeek); // Ej. Ene 01
     } else if (periodView == PeriodView.week) {
       key = DateFormat('EEE dd').format(date); // Ej. Lun 01
-    } else { // day
+    } else {
+      // day
       key = DateFormat('HH:00').format(date); // Ej. 14:00
     }
 
     if (!chartData.containsKey(key)) {
-      chartData[key] = {'income': 0.0, 'expense': 0.0, 'timestamp': date.millisecondsSinceEpoch.toDouble()};
+      chartData[key] = {
+        'income': 0.0,
+        'expense': 0.0,
+        'timestamp': date.millisecondsSinceEpoch.toDouble(),
+      };
     }
     if (tx.type == 'income') {
       chartData[key]!['income'] = chartData[key]!['income']! + tx.amount;
@@ -133,12 +147,14 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
   }).toList();
   categoryExpenses.sort((a, b) => b.amount.compareTo(a.amount));
 
-  return AsyncValue.data(HomeSummary(
-    transactions: txs,
-    totalIncome: totalIncome,
-    totalExpense: totalExpense,
-    totalBalance: totalIncome - totalExpense,
-    chartData: chartData,
-    categoryExpenses: categoryExpenses,
-  ));
+  return AsyncValue.data(
+    HomeSummary(
+      transactions: txs,
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
+      totalBalance: totalIncome - totalExpense,
+      chartData: chartData,
+      categoryExpenses: categoryExpenses,
+    ),
+  );
 });

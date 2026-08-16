@@ -13,20 +13,24 @@ class RecurringTransactionLocalDataSource {
     List<RecurringTransactionEntity> rts = [];
     for (var map in maps) {
       final rtId = map['id'];
-      
+
       final splitMaps = await db.query(
         'recurring_transaction_splits',
         where: 'recurring_transaction_id = ?',
         whereArgs: [rtId],
       );
-      
-      final splits = splitMaps.map((s) => RecurringTransactionSplit.fromMap(s)).toList();
+
+      final splits = splitMaps
+          .map((s) => RecurringTransactionSplit.fromMap(s))
+          .toList();
       rts.add(RecurringTransactionEntity.fromMap(map, splits: splits));
     }
     return rts;
   }
 
-  Future<RecurringTransactionEntity> create(RecurringTransactionEntity rt) async {
+  Future<RecurringTransactionEntity> create(
+    RecurringTransactionEntity rt,
+  ) async {
     final db = await appDb.database;
     int id = await db.transaction((txn) async {
       final map = rt.toMap();
@@ -67,7 +71,9 @@ class RecurringTransactionLocalDataSource {
     );
   }
 
-  Future<RecurringTransactionEntity> update(RecurringTransactionEntity rt) async {
+  Future<RecurringTransactionEntity> update(
+    RecurringTransactionEntity rt,
+  ) async {
     final db = await appDb.database;
     await db.transaction((txn) async {
       final map = rt.toMap();
@@ -81,7 +87,11 @@ class RecurringTransactionLocalDataSource {
         whereArgs: [rt.id],
       );
 
-      await txn.delete('recurring_transaction_splits', where: 'recurring_transaction_id = ?', whereArgs: [rt.id]);
+      await txn.delete(
+        'recurring_transaction_splits',
+        where: 'recurring_transaction_id = ?',
+        whereArgs: [rt.id],
+      );
 
       if (rt.categoryId != null && rt.splits.isEmpty) {
         await txn.insert('recurring_transaction_splits', {
@@ -104,12 +114,22 @@ class RecurringTransactionLocalDataSource {
 
   Future<void> updateNextExecutionDate(int id, String nextDate) async {
     final db = await appDb.database;
-    await db.update('recurring_transactions', {'next_execution_date': nextDate}, where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      'recurring_transactions',
+      {'next_execution_date': nextDate},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<void> updateStatus(int id, String status) async {
     final db = await appDb.database;
-    await db.update('recurring_transactions', {'status': status}, where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      'recurring_transactions',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<void> delete(int id) async {

@@ -17,18 +17,28 @@ class TransactionAccountSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<int>(
-      decoration: const InputDecoration(labelText: 'Cuenta', border: OutlineInputBorder()),
+      decoration: const InputDecoration(
+        labelText: 'Cuenta',
+        border: OutlineInputBorder(),
+      ),
       initialValue: selectedAccountId,
-      items: accounts.map((a) => DropdownMenuItem(
-        value: a.id,
-        child: Row(
-          children: [
-            Icon(IconUtils.getIcon(a.iconCode), color: Color(a.colorCode)),
-            const SizedBox(width: 8),
-            Text(a.name),
-          ],
-        ),
-      )).toList(),
+      items: accounts
+          .map(
+            (a) => DropdownMenuItem(
+              value: a.id,
+              child: Row(
+                children: [
+                  Icon(
+                    IconUtils.getIcon(a.iconCode),
+                    color: Color(a.colorCode),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(a.name),
+                ],
+              ),
+            ),
+          )
+          .toList(),
       onChanged: onChanged,
     );
   }

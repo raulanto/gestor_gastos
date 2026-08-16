@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/budgets_provider.dart';
@@ -35,14 +36,28 @@ class BudgetGlobalCard extends ConsumerWidget {
             children: [
               Text(
                 'Presupuesto Global',
-                style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                ),
               ),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('\$${spent.toStringAsFixed(2)}', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
-                  Text('${(progress * 100).toStringAsFixed(0)}%', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  Text(
+                    CurrencyUtils.formatAmount(spent),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -51,7 +66,9 @@ class BudgetGlobalCard extends ConsumerWidget {
                 child: LinearProgressIndicator(
                   value: progress,
                   color: progressColor,
-                  backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+                  backgroundColor: theme.colorScheme.onPrimary.withValues(
+                    alpha: 0.2,
+                  ),
                   minHeight: 12,
                 ),
               ),
@@ -60,25 +77,39 @@ class BudgetGlobalCard extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+                      color: theme.colorScheme.onPrimary.withValues(
+                        alpha: 0.15,
+                      ),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.account_balance_wallet, size: 16, color: theme.colorScheme.onPrimary),
+                        Icon(
+                          Icons.account_balance_wallet,
+                          size: 16,
+                          color: theme.colorScheme.onPrimary,
+                        ),
                         const SizedBox(width: 6),
                         Text(
-                          'Disponible real: \$${available.toStringAsFixed(2)}',
-                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
+                          'Disponible real: ${CurrencyUtils.formatAmount(available)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Text(
-                    'Límite: \$${budgeted.toStringAsFixed(2)}',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
+                    'Límite: ${CurrencyUtils.formatAmount(budgeted)}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                    ),
                     textAlign: TextAlign.right,
                   ),
                 ],

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,8 +71,10 @@ class HomeHeader extends ConsumerWidget {
                                 radius: 20,
                                 backgroundColor: theme.colorScheme.onPrimary
                                     .withValues(alpha: 0.2),
-                                backgroundImage: user?.photoPath != null ? FileImage(File(user!.photoPath!)) : null,
-                                child: user?.photoPath == null 
+                                backgroundImage: user?.photoPath != null
+                                    ? FileImage(File(user!.photoPath!))
+                                    : null,
+                                child: user?.photoPath == null
                                     ? Icon(
                                         Icons.person,
                                         size: 24,
@@ -181,7 +184,7 @@ class HomeHeader extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${totalBalance.toStringAsFixed(2)}',
+                    CurrencyUtils.formatAmount(totalBalance),
                     style:
                         (isMinimized
                                 ? theme.textTheme.displayLarge
@@ -249,7 +252,7 @@ class HomeHeader extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          CurrencyUtils.formatAmount(amount),
           style: theme.textTheme.titleMedium?.copyWith(
             color: theme.colorScheme.onPrimary,
             fontWeight: FontWeight.w600,

@@ -118,7 +118,7 @@ class MaterialTheme {
 
   static ColorScheme lightHighContrastScheme() {
     return const ColorScheme(
-     brightness: Brightness.light,
+      brightness: Brightness.light,
       primary: Color(0xff032b5b),
       surfaceTint: Color(0xff415f91),
       onPrimary: Color(0xffffffff),
@@ -164,7 +164,6 @@ class MaterialTheme {
       surfaceContainer: Color(0xffe2e2e9),
       surfaceContainerHigh: Color(0xffd3d4db),
       surfaceContainerHighest: Color(0xffc5c6cd),
-
     );
   }
 
@@ -220,7 +219,6 @@ class MaterialTheme {
       surfaceContainer: Color(0xff1d2024),
       surfaceContainerHigh: Color(0xff282a2f),
       surfaceContainerHighest: Color(0xff33353a),
-
     );
   }
 
@@ -276,7 +274,6 @@ class MaterialTheme {
       surfaceContainer: Color(0xff1d2024),
       surfaceContainerHigh: Color(0xff282a2f),
       surfaceContainerHighest: Color(0xff33353a),
-
     );
   }
 
@@ -286,7 +283,7 @@ class MaterialTheme {
 
   static ColorScheme darkHighContrastScheme() {
     return const ColorScheme(
-       brightness: Brightness.dark,
+      brightness: Brightness.dark,
       primary: Color(0xffaac7ff),
       surfaceTint: Color(0xffaac7ff),
       onPrimary: Color(0xff0a305f),
@@ -332,7 +329,6 @@ class MaterialTheme {
       surfaceContainer: Color(0xff1d2024),
       surfaceContainerHigh: Color(0xff282a2f),
       surfaceContainerHighest: Color(0xff33353a),
-
     );
   }
 

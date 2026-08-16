@@ -4,9 +4,11 @@ import '../../domain/entities/loan_payment.dart';
 import '../../application/loan_service.dart';
 import '../../data/repositories/loan_repository_impl.dart';
 
-final loansProvider = AsyncNotifierProvider<LoansNotifier, List<LoanEntity>>(() {
-  return LoansNotifier();
-});
+final loansProvider = AsyncNotifierProvider<LoansNotifier, List<LoanEntity>>(
+  () {
+    return LoansNotifier();
+  },
+);
 
 class LoansNotifier extends AsyncNotifier<List<LoanEntity>> {
   @override
@@ -32,10 +34,11 @@ class LoansNotifier extends AsyncNotifier<List<LoanEntity>> {
   }
 }
 
-final loanPaymentsProvider = FutureProvider.family<List<LoanPaymentEntity>, int>((ref, loanId) async {
-  final repo = ref.watch(loanRepositoryProvider);
-  return await repo.getLoanPayments(loanId);
-});
+final loanPaymentsProvider =
+    FutureProvider.family<List<LoanPaymentEntity>, int>((ref, loanId) async {
+      final repo = ref.watch(loanRepositoryProvider);
+      return await repo.getLoanPayments(loanId);
+    });
 
 final loanByIdProvider = Provider.family<LoanEntity?, String>((ref, id) {
   final loans = ref.watch(loansProvider);

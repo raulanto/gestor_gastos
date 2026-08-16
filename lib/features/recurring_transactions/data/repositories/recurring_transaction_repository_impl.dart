@@ -2,7 +2,8 @@ import '../../domain/entities/recurring_transaction.dart';
 import '../../domain/repositories/recurring_transaction_repository.dart';
 import '../datasources/recurring_transaction_local_data_source.dart';
 
-class RecurringTransactionRepositoryImpl implements RecurringTransactionRepository {
+class RecurringTransactionRepositoryImpl
+    implements RecurringTransactionRepository {
   final RecurringTransactionLocalDataSource _dataSource;
 
   RecurringTransactionRepositoryImpl(this._dataSource);
@@ -13,12 +14,16 @@ class RecurringTransactionRepositoryImpl implements RecurringTransactionReposito
   }
 
   @override
-  Future<RecurringTransactionEntity> create(RecurringTransactionEntity rt) async {
+  Future<RecurringTransactionEntity> create(
+    RecurringTransactionEntity rt,
+  ) async {
     return await _dataSource.create(rt);
   }
 
   @override
-  Future<RecurringTransactionEntity> update(RecurringTransactionEntity rt) async {
+  Future<RecurringTransactionEntity> update(
+    RecurringTransactionEntity rt,
+  ) async {
     return await _dataSource.update(rt);
   }
 

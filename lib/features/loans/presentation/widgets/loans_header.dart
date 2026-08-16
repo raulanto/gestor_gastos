@@ -21,7 +21,9 @@ class LoansHeader extends StatelessWidget {
           ),
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
+              backgroundColor: theme.colorScheme.onPrimary.withValues(
+                alpha: 0.15,
+              ),
             ),
             icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
             onPressed: () => context.push('/add_loan'),

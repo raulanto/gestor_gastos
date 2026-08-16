@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -14,22 +15,29 @@ class LoanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     final photoPath = loan.person?.photoPath;
     final hasPhoto = photoPath != null;
-    
+
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-      tileColor: isActive ? null : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 24.0,
+        vertical: 4.0,
+      ),
+      tileColor: isActive
+          ? null
+          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       leading: CircleAvatar(
-        backgroundColor: isActive 
-            ? theme.colorScheme.primaryContainer 
+        backgroundColor: isActive
+            ? theme.colorScheme.primaryContainer
             : Colors.grey.shade300,
         backgroundImage: hasPhoto ? FileImage(File(photoPath)) : null,
-        child: !hasPhoto 
+        child: !hasPhoto
             ? Icon(
-                isActive ? Icons.person : Icons.check, 
-                color: isActive ? theme.colorScheme.onPrimaryContainer : Colors.green
+                isActive ? Icons.person : Icons.check,
+                color: isActive
+                    ? theme.colorScheme.onPrimaryContainer
+                    : Colors.green,
               )
             : null,
       ),
@@ -37,16 +45,18 @@ class LoanCard extends StatelessWidget {
         loan.personName ?? 'Desconocido',
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          decoration: isActive ? TextDecoration.none : TextDecoration.lineThrough,
+          decoration: isActive
+              ? TextDecoration.none
+              : TextDecoration.lineThrough,
         ),
       ),
       subtitle: Text(
-        isActive 
+        isActive
             ? 'Vence: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.dueDate))}'
-            : 'Liquidado'
+            : 'Liquidado',
       ),
       trailing: Text(
-        '\$${loan.amount.toStringAsFixed(2)}',
+        CurrencyUtils.formatAmount(loan.amount),
         style: theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.bold,
           color: isActive ? theme.colorScheme.onSurface : Colors.grey,

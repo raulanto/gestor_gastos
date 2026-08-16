@@ -20,7 +20,10 @@ class BudgetAmountInput extends StatelessWidget {
           child: TextField(
             controller: controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Monto Límite', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Monto Límite',
+              border: OutlineInputBorder(),
+            ),
           ),
         ),
         if (!isSavings) ...[
@@ -29,8 +32,8 @@ class BudgetAmountInput extends StatelessWidget {
             onPressed: onSuggestAmount,
             icon: const Icon(Icons.lightbulb_outline),
             tooltip: 'Sugerir basado en histórico',
-          )
-        ]
+          ),
+        ],
       ],
     );
   }

@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,10 +15,10 @@ class TransactionList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     final accountsState = ref.watch(accountsProvider);
     final categoriesState = ref.watch(categoriesProvider);
-    
+
     final accounts = accountsState.value ?? [];
     final categories = categoriesState.value ?? [];
 
@@ -40,83 +41,107 @@ class TransactionList extends ConsumerWidget {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final item = flattenedItems[index];
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final item = flattenedItems[index];
 
-          if (item is String) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-              child: Text(
-                item,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+        if (item is String) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 12.0,
+            ),
+            child: Text(
+              item,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-            );
-          } else if (item is TransactionEntity) {
-            final t = item;
-            final isExpense = t.type == 'expense';
-            final isTransfer = t.type == 'transfer';
-            
-            final account = accountsMap[t.accountId];
-            final category = categoriesMap[t.categoryId];
+            ),
+          );
+        } else if (item is TransactionEntity) {
+          final t = item;
+          final isExpense = t.type == 'expense';
+          final isTransfer = t.type == 'transfer';
 
-            final categoryColor = category != null ? Color(category.colorCode) : theme.colorScheme.primary;
-            final categoryIcon = category != null ? IconUtils.getIcon(category.iconCode) : (isExpense ? Icons.shopping_bag_outlined : (isTransfer ? Icons.swap_horiz : Icons.account_balance_wallet_outlined));
+          final account = accountsMap[t.accountId];
+          final category = categoriesMap[t.categoryId];
 
-            return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-              onTap: () {
-                context.push('/transaction_details/${t.id}');
-              },
-              leading: CircleAvatar(
-                backgroundColor: categoryColor.withValues(alpha: 0.2),
-                child: Icon(
-                  categoryIcon,
-                  color: categoryColor,
-                ),
-              ),
-              title: Text(t.note?.isNotEmpty == true ? t.note! : (category?.name ?? 'Transacción'), style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (account != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        account.name,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+          final categoryColor = category != null
+              ? Color(category.colorCode)
+              : theme.colorScheme.primary;
+          final categoryIcon = category != null
+              ? IconUtils.getIcon(category.iconCode)
+              : (isExpense
+                    ? Icons.shopping_bag_outlined
+                    : (isTransfer
+                          ? Icons.swap_horiz
+                          : Icons.account_balance_wallet_outlined));
+
+          return ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 4.0,
+            ),
+            onTap: () {
+              context.push('/transaction_details/${t.id}');
+            },
+            leading: CircleAvatar(
+              backgroundColor: categoryColor.withValues(alpha: 0.2),
+              child: Icon(categoryIcon, color: categoryColor),
+            ),
+            title: Text(
+              t.note?.isNotEmpty == true
+                  ? t.note!
+                  : (category?.name ?? 'Transacción'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (account != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      account.name,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(isExpense ? 'Gasto' : (isTransfer ? 'Transferencia' : 'Ingreso')),
+                  ),
+                  const SizedBox(width: 8),
                 ],
-              ),
-              trailing: Text(
-                "${isExpense ? '-' : (isTransfer ? '' : '+')}\$${t.amount.toStringAsFixed(2)}",
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: isExpense ? Colors.red.shade700 : (isTransfer ? theme.colorScheme.onSurface : Colors.green.shade700),
-                  fontWeight: FontWeight.bold,
+                Text(
+                  isExpense
+                      ? 'Gasto'
+                      : (isTransfer ? 'Transferencia' : 'Ingreso'),
                 ),
+              ],
+            ),
+            trailing: Text(
+              "${isExpense ? '-' : (isTransfer ? '' : '+')}${CurrencyUtils.formatAmount(t.amount)}",
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: isExpense
+                    ? Colors.red.shade700
+                    : (isTransfer
+                          ? theme.colorScheme.onSurface
+                          : Colors.green.shade700),
+                fontWeight: FontWeight.bold,
               ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
-        childCount: flattenedItems.length,
-      ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      }, childCount: flattenedItems.length),
     );
   }
 }

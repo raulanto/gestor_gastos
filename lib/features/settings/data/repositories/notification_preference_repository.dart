@@ -9,14 +9,14 @@ class NotificationPreferenceRepository {
   Future<List<NotificationPreference>> getPreferences() async {
     final db = await appDb.database;
     final maps = await db.query('notification_preferences');
-    
+
     // Create default preferences if they don't exist
     if (maps.isEmpty) {
       await _initializeDefaultPreferences();
       final newMaps = await db.query('notification_preferences');
       return newMaps.map((m) => NotificationPreference.fromMap(m)).toList();
     }
-    
+
     return maps.map((m) => NotificationPreference.fromMap(m)).toList();
   }
 
@@ -35,7 +35,7 @@ class NotificationPreferenceRepository {
 
   Future<void> updatePreference(NotificationPreference pref) async {
     final db = await appDb.database;
-    
+
     final existing = await getPreference(pref.type);
     if (existing != null) {
       await db.update(
@@ -54,8 +54,16 @@ class NotificationPreferenceRepository {
       NotificationPreference(type: 'budget', isEnabled: true),
       NotificationPreference(type: 'savings', isEnabled: true),
       NotificationPreference(type: 'recurring', isEnabled: true),
-      NotificationPreference(type: 'daily_reminder', isEnabled: false, timeOfDay: '20:00'),
-      NotificationPreference(type: 'summary', isEnabled: true, timeOfDay: '09:00'),
+      NotificationPreference(
+        type: 'daily_reminder',
+        isEnabled: false,
+        timeOfDay: '20:00',
+      ),
+      NotificationPreference(
+        type: 'summary',
+        isEnabled: true,
+        timeOfDay: '09:00',
+      ),
     ];
 
     final db = await appDb.database;

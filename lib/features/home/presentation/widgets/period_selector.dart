@@ -6,15 +6,12 @@ class PeriodSelector extends ConsumerWidget {
   final PeriodView? selectedPeriod;
   final ValueChanged<PeriodView>? onPeriodChanged;
 
-  const PeriodSelector({
-    super.key,
-    this.selectedPeriod,
-    this.onPeriodChanged,
-  });
+  const PeriodSelector({super.key, this.selectedPeriod, this.onPeriodChanged});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final PeriodView periodView = selectedPeriod ?? ref.watch(periodViewProvider);
+    final PeriodView periodView =
+        selectedPeriod ?? ref.watch(periodViewProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
@@ -33,7 +30,13 @@ class PeriodSelector extends ConsumerWidget {
     );
   }
 
-  Widget _buildOption(BuildContext context, WidgetRef ref, PeriodView value, String label, PeriodView selectedValue) {
+  Widget _buildOption(
+    BuildContext context,
+    WidgetRef ref,
+    PeriodView value,
+    String label,
+    PeriodView selectedValue,
+  ) {
     final isSelected = value == selectedValue;
     final theme = Theme.of(context);
 
@@ -50,14 +53,16 @@ class PeriodSelector extends ConsumerWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.onPrimary.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected
+              ? theme.colorScheme.onPrimary.withValues(alpha: 0.2)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
           style: theme.textTheme.titleSmall?.copyWith(
-            color: isSelected 
-                ? theme.colorScheme.onPrimary 
+            color: isSelected
+                ? theme.colorScheme.onPrimary
                 : theme.colorScheme.onPrimary.withValues(alpha: 0.5),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             letterSpacing: 0.5,

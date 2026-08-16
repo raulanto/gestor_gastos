@@ -6,11 +6,8 @@ import '../providers/persons_provider.dart';
 
 class PersonsCatalogPage extends ConsumerWidget {
   final bool isSelectionMode;
-  
-  const PersonsCatalogPage({
-    super.key,
-    this.isSelectionMode = false,
-  });
+
+  const PersonsCatalogPage({super.key, this.isSelectionMode = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,10 +15,7 @@ class PersonsCatalogPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contactos'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Contactos'), centerTitle: true),
       body: personsAsync.when(
         data: (persons) {
           if (persons.isEmpty) {
@@ -49,21 +43,24 @@ class PersonsCatalogPage extends ConsumerWidget {
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: theme.colorScheme.primaryContainer,
-                    backgroundImage: person.photoPath != null 
-                        ? FileImage(File(person.photoPath!)) 
+                    backgroundImage: person.photoPath != null
+                        ? FileImage(File(person.photoPath!))
                         : null,
-                    child: person.photoPath == null 
+                    child: person.photoPath == null
                         ? Text(person.name[0].toUpperCase())
                         : null,
                   ),
                   title: Text(person.name),
-                  subtitle: person.phone != null && person.phone!.isNotEmpty 
-                      ? Text(person.phone!) 
+                  subtitle: person.phone != null && person.phone!.isNotEmpty
+                      ? Text(person.phone!)
                       : null,
-                  trailing: isSelectionMode ? null : IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
-                    onPressed: () => context.push('/edit_person/${person.id}'),
-                  ),
+                  trailing: isSelectionMode
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          onPressed: () =>
+                              context.push('/edit_person/${person.id}'),
+                        ),
                   onTap: () {
                     if (isSelectionMode) {
                       context.pop(person);
@@ -80,10 +77,12 @@ class PersonsCatalogPage extends ConsumerWidget {
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
       floatingActionButton: personsAsync.maybeWhen(
-        data: (persons) => persons.isNotEmpty ? FloatingActionButton(
-          onPressed: () => context.push('/add_person'),
-          child: const Icon(Icons.person_add),
-        ) : null,
+        data: (persons) => persons.isNotEmpty
+            ? FloatingActionButton(
+                onPressed: () => context.push('/add_person'),
+                child: const Icon(Icons.person_add),
+              )
+            : null,
         orElse: () => null,
       ),
     );

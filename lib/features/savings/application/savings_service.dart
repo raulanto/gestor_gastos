@@ -19,20 +19,26 @@ class SavingsService {
   final TransactionRepository _transactionRepository;
   final Ref ref;
 
-  SavingsService(this._savingsRepository, this._transactionRepository, this.ref);
+  SavingsService(
+    this._savingsRepository,
+    this._transactionRepository,
+    this.ref,
+  );
 
   /// Processes active savings rules against a new transaction.
   Future<void> processTransactionRules(TransactionEntity tx) async {
     final allRules = await _savingsRepository.getRules();
     if (allRules.isEmpty) return;
-    
+
     // Fetch all active goals to get their priorities and configurations
     final allGoals = await _savingsRepository.getSavingsGoals();
-    final goalMap = { for (var g in allGoals) g.id! : g };
+    final goalMap = {for (var g in allGoals) g.id!: g};
 
     // Filter active rules and map them to their goals
-    final activeRules = allRules.where((r) => r.status == 'active' && goalMap.containsKey(r.goalId)).toList();
-    
+    final activeRules = allRules
+        .where((r) => r.status == 'active' && goalMap.containsKey(r.goalId))
+        .toList();
+
     // Sort rules based on their goal's priority (lowest number = highest priority)
     activeRules.sort((a, b) {
       final pA = goalMap[a.goalId]!.priority;
@@ -44,7 +50,7 @@ class SavingsService {
 
     for (var rule in activeRules) {
       final goal = goalMap[rule.goalId]!;
-      
+
       if (tx.type == 'expense' && rule.ruleType == 'round_up') {
         // Redondeo configurable
         final roundingTarget = rule.value > 0 ? rule.value : 10.0;
@@ -60,11 +66,13 @@ class SavingsService {
             deductFromBalance: goal.deductFromBalance,
           );
         }
-      } else if (tx.type == 'income' && rule.ruleType == 'fixed_percentage' && remainingIncome > 0) {
+      } else if (tx.type == 'income' &&
+          rule.ruleType == 'fixed_percentage' &&
+          remainingIncome > 0) {
         // Porcentaje sobre el ingreso
         final percentage = rule.value;
         double amountToSave = tx.amount * (percentage / 100);
-        
+
         // Limitar la cantidad a ahorrar al ingreso restante
         if (amountToSave > remainingIncome) {
           amountToSave = remainingIncome;
@@ -103,9 +111,12 @@ class SavingsService {
     await _savingsRepository.createTransaction(savingsTx);
 
     // Trigger notification watcher
-    ref.read(savingsNotificationWatcherProvider).checkSavingsProgress(goalId, amount).catchError((e) {
-      debugPrint('Error in savings watcher: $e');
-    });
+    ref
+        .read(savingsNotificationWatcherProvider)
+        .checkSavingsProgress(goalId, amount)
+        .catchError((e) {
+          debugPrint('Error in savings watcher: $e');
+        });
 
     // 2. Create a normal expense transaction to reflect the real money leaving the account, if configured
     if (deductFromBalance) {

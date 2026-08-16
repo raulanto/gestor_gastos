@@ -105,7 +105,6 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
           if (_cachedTransactions != summary.transactions ||
               _cachedSelectedAccountId != _selectedAccountId ||
               _cachedVisibleCount != _visibleCount) {
-            
             final filteredTxs = summary.transactions.where((t) {
               if (t.categoryId == null && t.splits.isEmpty) return false;
               if (_selectedAccountId != null &&
@@ -123,10 +122,12 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
             final Map<String, List<TransactionEntity>> groupedTransactions = {};
             final now = DateTime.now();
             final today = DateTime(now.year, now.month, now.day);
-            
+
             for (var t in _cachedVisibleTxs) {
               final date = DateTime.parse(t.date);
-              final diff = today.difference(DateTime(date.year, date.month, date.day)).inDays;
+              final diff = today
+                  .difference(DateTime(date.year, date.month, date.day))
+                  .inDays;
 
               String key;
               if (diff == 0) {
@@ -142,7 +143,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
               }
               groupedTransactions[key]!.add(t);
             }
-            
+
             _cachedTransactions = summary.transactions;
             _cachedSelectedAccountId = _selectedAccountId;
             _cachedVisibleCount = _visibleCount;
@@ -167,9 +168,10 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                     : 350,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 600),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
                   child: Container(
                     key: ValueKey(ref.watch(appBackgroundProvider)),
                     decoration: BoxDecoration(

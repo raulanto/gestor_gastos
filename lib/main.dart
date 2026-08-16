@@ -12,16 +12,14 @@ import 'core/background/background_task_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   final prefs = await SharedPreferences.getInstance();
 
   final notificationService = NotificationService();
   await notificationService.init();
   await notificationService.requestPermissions();
 
-  Workmanager().initialize(
-    callbackDispatcher,
-  );
+  Workmanager().initialize(callbackDispatcher);
 
   Workmanager().registerPeriodicTask(
     "daily_check_task",

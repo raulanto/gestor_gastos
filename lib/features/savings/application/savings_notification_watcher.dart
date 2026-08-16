@@ -3,16 +3,21 @@ import '../../../core/notifications/notification_service.dart';
 import '../../settings/presentation/providers/notification_preferences_provider.dart';
 import '../presentation/providers/savings_provider.dart';
 
-final savingsNotificationWatcherProvider = Provider<SavingsNotificationWatcher>((ref) {
-  return SavingsNotificationWatcher(ref);
-});
+final savingsNotificationWatcherProvider = Provider<SavingsNotificationWatcher>(
+  (ref) {
+    return SavingsNotificationWatcher(ref);
+  },
+);
 
 class SavingsNotificationWatcher {
   final Ref ref;
 
   SavingsNotificationWatcher(this.ref);
 
-  Future<void> checkSavingsProgress(int goalId, double newTransactionAmount) async {
+  Future<void> checkSavingsProgress(
+    int goalId,
+    double newTransactionAmount,
+  ) async {
     // 1. Verify global preference for savings notifications
     final prefsRepo = ref.read(notificationPreferenceRepositoryProvider);
     final savingsPref = await prefsRepo.getPreference('savings');
@@ -32,7 +37,10 @@ class SavingsNotificationWatcher {
 
     // 3. Calculate current and previous amounts
     final transactions = await repo.getTransactionsByGoal(goalId);
-    final currentAmount = transactions.fold(0.0, (sum, tx) => sum + (tx.type == 'deposit' ? tx.amount : -tx.amount));
+    final currentAmount = transactions.fold(
+      0.0,
+      (sum, tx) => sum + (tx.type == 'deposit' ? tx.amount : -tx.amount),
+    );
     // Assuming the new transaction was just added to the DB, so it's already in currentAmount
     // Wait, the new transaction amount could be negative if it's a withdrawal. Let's just use it directly.
     final previousAmount = currentAmount - newTransactionAmount;
@@ -51,7 +59,8 @@ class SavingsNotificationWatcher {
           await notificationService.showSavingsProgressAlert(
             id: goalId * 1000 + 4,
             title: '¡Meta Cumplida!',
-            body: '¡Felicidades! Has completado tu meta de ahorro "${goal.name}".',
+            body:
+                '¡Felicidades! Has completado tu meta de ahorro "${goal.name}".',
             payload: '/savings',
           );
         } else {
@@ -59,7 +68,8 @@ class SavingsNotificationWatcher {
           await notificationService.showSavingsProgressAlert(
             id: goalId * 1000 + (threshold * 100).toInt(),
             title: 'Progreso de Ahorro: ${(threshold * 100).toInt()}%',
-            body: 'Has alcanzado el ${(threshold * 100).toInt()}% de tu meta "${goal.name}". ¡Sigue así!',
+            body:
+                'Has alcanzado el ${(threshold * 100).toInt()}% de tu meta "${goal.name}". ¡Sigue así!',
             payload: '/savings',
           );
         }

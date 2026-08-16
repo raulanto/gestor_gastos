@@ -21,9 +21,10 @@ final personServiceProvider = Provider<PersonService>((ref) {
   return PersonService(repository);
 });
 
-final personsProvider = AsyncNotifierProvider<PersonsNotifier, List<PersonEntity>>(() {
-  return PersonsNotifier();
-});
+final personsProvider =
+    AsyncNotifierProvider<PersonsNotifier, List<PersonEntity>>(() {
+      return PersonsNotifier();
+    });
 
 class PersonsNotifier extends AsyncNotifier<List<PersonEntity>> {
   @override
@@ -34,10 +35,7 @@ class PersonsNotifier extends AsyncNotifier<List<PersonEntity>> {
   Future<List<PersonEntity>> _fetchPersons() async {
     final personService = ref.watch(personServiceProvider);
     final result = await personService.getPersons();
-    return result.fold(
-      (error) => throw Exception(error),
-      (persons) => persons,
-    );
+    return result.fold((error) => throw Exception(error), (persons) => persons);
   }
 
   Future<void> loadPersons() async {
@@ -48,34 +46,25 @@ class PersonsNotifier extends AsyncNotifier<List<PersonEntity>> {
   Future<void> addPerson(PersonEntity person) async {
     final personService = ref.read(personServiceProvider);
     final result = await personService.addPerson(person);
-    result.fold(
-      (error) {
-        state = AsyncValue.error(error, StackTrace.current);
-      },
-      (_) => loadPersons(),
-    );
+    result.fold((error) {
+      state = AsyncValue.error(error, StackTrace.current);
+    }, (_) => loadPersons());
   }
 
   Future<void> updatePerson(PersonEntity person) async {
     final personService = ref.read(personServiceProvider);
     final result = await personService.updatePerson(person);
-    result.fold(
-      (error) {
-        state = AsyncValue.error(error, StackTrace.current);
-      },
-      (_) => loadPersons(),
-    );
+    result.fold((error) {
+      state = AsyncValue.error(error, StackTrace.current);
+    }, (_) => loadPersons());
   }
 
   Future<void> deletePerson(int id) async {
     final personService = ref.read(personServiceProvider);
     final result = await personService.deletePerson(id);
-    result.fold(
-      (error) {
-        state = AsyncValue.error(error, StackTrace.current);
-      },
-      (_) => loadPersons(),
-    );
+    result.fold((error) {
+      state = AsyncValue.error(error, StackTrace.current);
+    }, (_) => loadPersons());
   }
 }
 

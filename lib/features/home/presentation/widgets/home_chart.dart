@@ -9,13 +9,15 @@ class HomeChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     if (chartData.isEmpty) {
       return const Center(child: Text('No hay suficientes datos.'));
     }
 
     final entries = chartData.entries.toList();
-    entries.sort((a, b) => a.value['timestamp']!.compareTo(b.value['timestamp']!));
+    entries.sort(
+      (a, b) => a.value['timestamp']!.compareTo(b.value['timestamp']!),
+    );
 
     double maxY = 0;
     for (var entry in entries) {
@@ -41,7 +43,9 @@ class HomeChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       entries[value.toInt()].key,
-                      style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   );
                 }
@@ -50,9 +54,15 @@ class HomeChart extends StatelessWidget {
               reservedSize: 30,
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         gridData: FlGridData(
           show: true,
@@ -71,7 +81,7 @@ class HomeChart extends StatelessWidget {
           final entry = entries[index];
           final income = entry.value['income']!;
           final expense = entry.value['expense']!;
-          
+
           return BarChartGroupData(
             x: index,
             barRods: [

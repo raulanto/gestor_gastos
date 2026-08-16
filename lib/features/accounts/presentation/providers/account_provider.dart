@@ -17,9 +17,11 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepositoryImpl(localDataSource);
 });
 
-final accountsProvider = AsyncNotifierProvider<AccountsNotifier, List<Account>>(() {
-  return AccountsNotifier();
-});
+final accountsProvider = AsyncNotifierProvider<AccountsNotifier, List<Account>>(
+  () {
+    return AccountsNotifier();
+  },
+);
 
 class AccountsNotifier extends AsyncNotifier<List<Account>> {
   late AccountRepository _repository;

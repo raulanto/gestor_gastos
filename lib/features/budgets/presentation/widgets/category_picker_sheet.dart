@@ -24,7 +24,10 @@ Future<void> showCategoryPickerSheet({
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text('Seleccionar Categoría', style: Theme.of(context).textTheme.titleLarge),
+                child: Text(
+                  'Seleccionar Categoría',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               Expanded(
                 child: ListView.builder(
@@ -32,11 +35,16 @@ Future<void> showCategoryPickerSheet({
                   itemCount: mainCategories.length,
                   itemBuilder: (context, index) {
                     final main = mainCategories[index];
-                    final children = subCategories.where((c) => c.parentId == main.id).toList();
+                    final children = subCategories
+                        .where((c) => c.parentId == main.id)
+                        .toList();
 
                     if (children.isEmpty) {
                       return ListTile(
-                        leading: Icon(IconUtils.getIcon(main.iconCode), color: Color(main.colorCode)),
+                        leading: Icon(
+                          IconUtils.getIcon(main.iconCode),
+                          color: Color(main.colorCode),
+                        ),
                         title: Text(main.name),
                         onTap: () {
                           onSelected(main);
@@ -45,17 +53,30 @@ Future<void> showCategoryPickerSheet({
                       );
                     }
                     return ExpansionTile(
-                      leading: Icon(IconUtils.getIcon(main.iconCode), color: Color(main.colorCode)),
+                      leading: Icon(
+                        IconUtils.getIcon(main.iconCode),
+                        color: Color(main.colorCode),
+                      ),
                       title: Text(main.name),
-                      children: children.map((child) => ListTile(
-                        contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
-                        leading: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode)),
-                        title: Text(child.name),
-                        onTap: () {
-                          onSelected(child);
-                          Navigator.pop(context);
-                        },
-                      )).toList(),
+                      children: children
+                          .map(
+                            (child) => ListTile(
+                              contentPadding: const EdgeInsets.only(
+                                left: 72.0,
+                                right: 16.0,
+                              ),
+                              leading: Icon(
+                                IconUtils.getIcon(child.iconCode),
+                                color: Color(child.colorCode),
+                              ),
+                              title: Text(child.name),
+                              onTap: () {
+                                onSelected(child);
+                                Navigator.pop(context);
+                              },
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                 ),
@@ -64,6 +85,6 @@ Future<void> showCategoryPickerSheet({
           );
         },
       );
-    }
+    },
   );
 }

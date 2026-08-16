@@ -42,7 +42,8 @@ class LoanEntity {
   factory LoanEntity.fromMap(Map<String, dynamic> map) {
     return LoanEntity(
       id: map['id'],
-      personName: map['person_name'] ?? map['person_name_joined'], // Or whatever logic
+      personName:
+          map['person_name'] ?? map['person_name_joined'], // Or whatever logic
       personId: map['person_id'],
       type: map['type'],
       amount: map['amount'],
@@ -50,12 +51,14 @@ class LoanEntity {
       date: map['date'],
       dueDate: map['due_date'],
       status: map['status'],
-      person: map['person_name_joined'] != null ? PersonEntity(
-        id: map['person_id'],
-        name: map['person_name_joined'],
-        phone: map['person_phone'],
-        photoPath: map['person_photo'],
-      ) : null,
+      person: map['person_name_joined'] != null
+          ? PersonEntity(
+              id: map['person_id'],
+              name: map['person_name_joined'],
+              phone: map['person_phone'],
+              photoPath: map['person_photo'],
+            )
+          : null,
     );
   }
 

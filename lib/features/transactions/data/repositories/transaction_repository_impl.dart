@@ -13,7 +13,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<TransactionEntity> createTransaction(TransactionEntity transaction) async {
+  Future<TransactionEntity> createTransaction(
+    TransactionEntity transaction,
+  ) async {
     return await _localDataSource.createTransaction(transaction);
   }
 
@@ -23,7 +25,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<TransactionEntity> updateTransaction(TransactionEntity transaction) async {
+  Future<TransactionEntity> updateTransaction(
+    TransactionEntity transaction,
+  ) async {
     return await _localDataSource.updateTransaction(transaction);
   }
 }

@@ -9,13 +9,17 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 class SettingsUserProfile extends ConsumerWidget {
   const SettingsUserProfile({super.key});
 
-  void _showEditProfileSheet(BuildContext context, WidgetRef ref, dynamic user) {
+  void _showEditProfileSheet(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic user,
+  ) {
     if (user == null) return;
-    
+
     final theme = Theme.of(context);
     final nameController = TextEditingController(text: user.username);
     String? currentPhotoPath = user.photoPath;
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -28,14 +32,18 @@ class SettingsUserProfile extends ConsumerWidget {
           builder: (BuildContext context, StateSetter setState) {
             Future<void> pickImage() async {
               final picker = ImagePicker();
-              final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+              final pickedFile = await picker.pickImage(
+                source: ImageSource.gallery,
+              );
               if (pickedFile == null) return;
-              
+
               final appDir = await getApplicationDocumentsDirectory();
               final timestamp = DateTime.now().millisecondsSinceEpoch;
               final fileName = '${timestamp}_${path.basename(pickedFile.path)}';
-              final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
-              
+              final savedImage = await File(
+                pickedFile.path,
+              ).copy('${appDir.path}/$fileName');
+
               setState(() {
                 currentPhotoPath = savedImage.path;
               });
@@ -53,7 +61,9 @@ class SettingsUserProfile extends ConsumerWidget {
                 children: [
                   Text(
                     'Editar Perfil',
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   GestureDetector(
@@ -63,10 +73,16 @@ class SettingsUserProfile extends ConsumerWidget {
                         CircleAvatar(
                           radius: 50,
                           backgroundColor: theme.colorScheme.primaryContainer,
-                          backgroundImage: currentPhotoPath != null ? FileImage(File(currentPhotoPath!)) : null,
-                          child: currentPhotoPath == null 
-                            ? Icon(Icons.person, size: 50, color: theme.colorScheme.onPrimaryContainer)
-                            : null,
+                          backgroundImage: currentPhotoPath != null
+                              ? FileImage(File(currentPhotoPath!))
+                              : null,
+                          child: currentPhotoPath == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: theme.colorScheme.onPrimaryContainer,
+                                )
+                              : null,
                         ),
                         Positioned(
                           bottom: 0,
@@ -77,7 +93,11 @@ class SettingsUserProfile extends ConsumerWidget {
                               color: theme.colorScheme.primary,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.camera_alt, size: 20, color: theme.colorScheme.onPrimary),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 20,
+                              color: theme.colorScheme.onPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -97,12 +117,16 @@ class SettingsUserProfile extends ConsumerWidget {
                     child: FilledButton(
                       onPressed: () async {
                         final newName = nameController.text.trim();
-                        final finalName = newName.isNotEmpty ? newName : user.username;
-                        await ref.read(authNotifierProvider.notifier).updateProfile(
-                          user.id,
-                          finalName,
-                          currentPhotoPath,
-                        );
+                        final finalName = newName.isNotEmpty
+                            ? newName
+                            : user.username;
+                        await ref
+                            .read(authNotifierProvider.notifier)
+                            .updateProfile(
+                              user.id,
+                              finalName,
+                              currentPhotoPath,
+                            );
                         if (context.mounted) {
                           Navigator.pop(context);
                         }
@@ -133,19 +157,26 @@ class SettingsUserProfile extends ConsumerWidget {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: theme.colorScheme.onPrimary, width: 3),
+                border: Border.all(
+                  color: theme.colorScheme.onPrimary,
+                  width: 3,
+                ),
               ),
               child: CircleAvatar(
                 radius: 40,
-                backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
-                backgroundImage: user?.photoPath != null ? FileImage(File(user!.photoPath!)) : null,
-                child: user?.photoPath == null 
-                  ? Icon(
-                      Icons.person,
-                      size: 40,
-                      color: theme.colorScheme.onPrimary,
-                    )
-                  : null,
+                backgroundColor: theme.colorScheme.onPrimary.withValues(
+                  alpha: 0.2,
+                ),
+                backgroundImage: user?.photoPath != null
+                    ? FileImage(File(user!.photoPath!))
+                    : null,
+                child: user?.photoPath == null
+                    ? Icon(
+                        Icons.person,
+                        size: 40,
+                        color: theme.colorScheme.onPrimary,
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 16),

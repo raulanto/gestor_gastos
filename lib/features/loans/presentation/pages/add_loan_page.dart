@@ -32,7 +32,7 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accountsAsync = ref.watch(accountsProvider);
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: Stack(
@@ -43,8 +43,8 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
             right: 0,
             height: 250,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -70,7 +70,10 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -80,7 +83,10 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                       const SizedBox(width: 8),
                       Text(
                         'Nuevo Préstamo',
-                        style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -98,7 +104,9 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                     child: accountsAsync.when(
                       data: (accounts) {
                         if (accounts.isEmpty) {
-                          return const Center(child: Text('Crea una cuenta primero.'));
+                          return const Center(
+                            child: Text('Crea una cuenta primero.'),
+                          );
                         }
                         _selectedAccountId ??= accounts.first.id;
 
@@ -109,7 +117,8 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                             children: [
                               PersonSelectorField(
                                 selectedPerson: _selectedPerson,
-                                onChanged: (person) => setState(() => _selectedPerson = person),
+                                onChanged: (person) =>
+                                    setState(() => _selectedPerson = person),
                               ),
                               const SizedBox(height: 16),
                               AmountInputField(
@@ -119,7 +128,8 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                               AccountSelectorField(
                                 selectedAccountId: _selectedAccountId,
                                 accounts: accounts,
-                                onChanged: (v) => setState(() => _selectedAccountId = v),
+                                onChanged: (v) =>
+                                    setState(() => _selectedAccountId = v),
                               ),
                               const SizedBox(height: 16),
                               LoanTypeSelectorField(
@@ -129,24 +139,34 @@ class _AddLoanPageState extends ConsumerState<AddLoanPage> {
                               const SizedBox(height: 16),
                               DueDateSelectorField(
                                 dueDate: _dueDate,
-                                onChanged: (date) => setState(() => _dueDate = date),
+                                onChanged: (date) =>
+                                    setState(() => _dueDate = date),
                               ),
                               const SizedBox(height: 32),
                               FilledButton(
                                 onPressed: _submit,
                                 style: FilledButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: const Text('Guardar Préstamo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              )
+                                child: const Text(
+                                  'Guardar Préstamo',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         );
                       },
-                      loading: () => const Center(child: CircularProgressIndicator()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (e, st) => Center(child: Text('Error: $e')),
                     ),
                   ),

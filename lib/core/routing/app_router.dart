@@ -180,7 +180,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
         ],
-        
       ),
       GoRoute(
         path: '/accounts',

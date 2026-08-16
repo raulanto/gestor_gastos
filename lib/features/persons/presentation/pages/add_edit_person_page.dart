@@ -9,10 +9,7 @@ import '../providers/persons_provider.dart';
 class AddEditPersonPage extends ConsumerStatefulWidget {
   final String? personId;
 
-  const AddEditPersonPage({
-    super.key,
-    this.personId,
-  });
+  const AddEditPersonPage({super.key, this.personId});
 
   @override
   ConsumerState<AddEditPersonPage> createState() => _AddEditPersonPageState();
@@ -22,7 +19,7 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  
+
   String? _photoPath;
   final ImagePicker _picker = ImagePicker();
 
@@ -117,9 +114,15 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    backgroundImage: _photoPath != null ? FileImage(File(_photoPath!)) : null,
+                    backgroundImage: _photoPath != null
+                        ? FileImage(File(_photoPath!))
+                        : null,
                     child: _photoPath == null
-                        ? Icon(Icons.add_a_photo, size: 40, color: theme.colorScheme.onSurfaceVariant)
+                        ? Icon(
+                            Icons.add_a_photo,
+                            size: 40,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          )
                         : null,
                   ),
                 ),
@@ -137,7 +140,9 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
                 decoration: InputDecoration(
                   labelText: 'Nombre',
                   prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -152,7 +157,9 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
                 decoration: InputDecoration(
                   labelText: 'Teléfono (Opcional)',
                   prefixIcon: const Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -161,11 +168,16 @@ class _AddEditPersonPageState extends ConsumerState<AddEditPersonPage> {
                 onPressed: _save,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
                 ),
-                child: const Text('Guardar Contacto', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Guardar Contacto',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),

@@ -23,7 +23,11 @@ class BudgetLocalDataSource {
       _cloningMonths.add(monthYear);
 
       try {
-        final checkMaps = await db.query('budgets', where: 'month_year = ?', whereArgs: [monthYear]);
+        final checkMaps = await db.query(
+          'budgets',
+          where: 'month_year = ?',
+          whereArgs: [monthYear],
+        );
         if (checkMaps.isEmpty) {
           // Intentar copiar del mes anterior
           final prevMonthYear = _getPreviousMonthYear(monthYear);
@@ -64,7 +68,7 @@ class BudgetLocalDataSource {
     if (parts.length != 2) return current;
     int year = int.parse(parts[0]);
     int month = int.parse(parts[1]);
-    
+
     month -= 1;
     if (month == 0) {
       month = 12;
@@ -95,43 +99,61 @@ class BudgetLocalDataSource {
     await db.delete('budgets', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<double> getAverageSpendForCategory(int categoryId, {int months = 3}) async {
+  Future<double> getAverageSpendForCategory(
+    int categoryId, {
+    int months = 3,
+  }) async {
     final db = await appDb.database;
     // Obtener la fecha de hace X meses
     final now = DateTime.now();
     final past = DateTime(now.year, now.month - months, 1);
     final pastIso = past.toIso8601String();
 
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT SUM(ts.amount) as total
       FROM transaction_splits ts
       JOIN transactions t ON ts.transaction_id = t.id
       WHERE ts.category_id = ? AND t.type = 'expense' AND t.date >= ?
-    ''', [categoryId, pastIso]);
+    ''',
+      [categoryId, pastIso],
+    );
 
     final total = (result.first['total'] as num?)?.toDouble() ?? 0.0;
     return total / months;
   }
 
-  Future<double> getActualSpendForCategory(int categoryId, String monthYear) async {
+  Future<double> getActualSpendForCategory(
+    int categoryId,
+    String monthYear,
+  ) async {
     final db = await appDb.database;
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT SUM(ts.amount) as total
       FROM transaction_splits ts
       JOIN transactions t ON ts.transaction_id = t.id
       WHERE ts.category_id = ? AND t.type = 'expense' AND t.date LIKE ?
-    ''', [categoryId, '$monthYear%']);
+    ''',
+      [categoryId, '$monthYear%'],
+    );
 
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 
-  Future<double> getActualSavingsForGoal(int savingsGoalId, String monthYear) async {
+  Future<double> getActualSavingsForGoal(
+    int savingsGoalId,
+    String monthYear,
+  ) async {
     final db = await appDb.database;
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT SUM(amount) as total
       FROM savings_transactions
       WHERE goal_id = ? AND type = 'deposit' AND date LIKE ?
-    ''', [savingsGoalId, '$monthYear%']);
+    ''',
+      [savingsGoalId, '$monthYear%'],
+    );
 
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;
   }

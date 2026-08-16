@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 
 class KpiCards extends StatelessWidget {
@@ -15,7 +16,12 @@ class KpiCards extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _buildSummaryCard(context, 'Ingresos', totalIncome, Colors.green),
+          child: _buildSummaryCard(
+            context,
+            'Ingresos',
+            totalIncome,
+            Colors.green,
+          ),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -25,7 +31,12 @@ class KpiCards extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context, String title, double amount, Color color) {
+  Widget _buildSummaryCard(
+    BuildContext context,
+    String title,
+    double amount,
+    Color color,
+  ) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
@@ -38,13 +49,29 @@ class KpiCards extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(title == 'Ingresos' ? Icons.arrow_upward : Icons.arrow_downward, color: color, size: 16),
+              Icon(
+                title == 'Ingresos' ? Icons.arrow_upward : Icons.arrow_downward,
+                color: color,
+                size: 16,
+              ),
               const SizedBox(width: 4),
-              Text(title, style: theme.textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          Text('\$${amount.toStringAsFixed(2)}', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: color)),
+          Text(
+            CurrencyUtils.formatAmount(amount),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
         ],
       ),
     );

@@ -24,7 +24,13 @@ class BudgetMonthSelector extends StatelessWidget {
             icon: Icon(Icons.chevron_left, color: theme.colorScheme.onPrimary),
             onPressed: onPrevMonth,
           ),
-          Text(displayMonth, style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+          Text(
+            displayMonth,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           IconButton(
             icon: Icon(Icons.chevron_right, color: theme.colorScheme.onPrimary),
             onPressed: onNextMonth,

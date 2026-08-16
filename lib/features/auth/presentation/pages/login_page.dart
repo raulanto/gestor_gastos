@@ -44,8 +44,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             right: 0,
             height: 350,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -72,8 +72,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
-                  child: Text('Ingresar', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.only(
+                    top: 24,
+                    left: 24,
+                    right: 24,
+                    bottom: 32,
+                  ),
+                  child: Text(
+                    'Ingresar',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -93,12 +104,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             const SizedBox(height: 24),
                             Text(
                               '¿Cuál es tu nombre?',
-                              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Dinos cómo te llamas para personalizar tu experiencia',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
                             const SizedBox(height: 32),
                             TextField(

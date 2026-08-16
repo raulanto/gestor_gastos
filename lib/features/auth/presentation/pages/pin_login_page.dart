@@ -21,7 +21,7 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
       if (_pin.length < 4) {
         _pin += digit;
       }
-      
+
       if (_pin.length == 4) {
         final savedPin = ref.read(pinProvider).value;
         if (savedPin == _pin) {
@@ -58,7 +58,9 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
           height: 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isFilled ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: isFilled
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
         );
       }),
@@ -83,7 +85,11 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
     );
   }
 
-  Widget _buildNumpadButton(String text, VoidCallback onTap, {bool isIcon = false}) {
+  Widget _buildNumpadButton(
+    String text,
+    VoidCallback onTap, {
+    bool isIcon = false,
+  }) {
     final theme = Theme.of(context);
     return Material(
       color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
@@ -118,8 +124,8 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
             right: 0,
             height: 350,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -146,8 +152,19 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
-                  child: Text('Bienvenido de nuevo', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.only(
+                    top: 24,
+                    left: 24,
+                    right: 24,
+                    bottom: 32,
+                  ),
+                  child: Text(
+                    'Bienvenido de nuevo',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -159,21 +176,32 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
                       ),
                     ),
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 32.0,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Icon(Icons.lock, size: 48, color: theme.colorScheme.primary),
+                          Icon(
+                            Icons.lock,
+                            size: 48,
+                            color: theme.colorScheme.primary,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Ingresa tu PIN',
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Desbloquea Gestor de Gastos',
-                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 32),
@@ -182,12 +210,19 @@ class _PinLoginPageState extends ConsumerState<PinLoginPage> {
                           if (_error.isNotEmpty)
                             Text(
                               _error,
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
                               textAlign: TextAlign.center,
                             )
                           else
-                            const SizedBox(height: 16), // Placeholder para mantener el tamaño
-                          const SizedBox(height: 48), // Espaciador antes del teclado
+                            const SizedBox(
+                              height: 16,
+                            ), // Placeholder para mantener el tamaño
+                          const SizedBox(
+                            height: 48,
+                          ), // Espaciador antes del teclado
                           _buildNumpad(),
                           const SizedBox(height: 24),
                         ],

@@ -20,27 +20,27 @@ class AuthLocalDataSource {
   Future<User> saveUser(String username) async {
     final db = await _appDatabase.database;
 
-    final existingUsers = await db.query('users', where: 'username = ?', whereArgs: [username]);
+    final existingUsers = await db.query(
+      'users',
+      where: 'username = ?',
+      whereArgs: [username],
+    );
     if (existingUsers.isNotEmpty) {
       return User.fromMap(existingUsers.first);
     }
 
-    final id = await db.insert(
-      'users',
-      {'username': username},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    final id = await db.insert('users', {
+      'username': username,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     return User(id: id, username: username);
   }
+
   Future<User> updateProfile(int id, String username, String? photoPath) async {
     final db = await _appDatabase.database;
     await db.update(
       'users',
-      {
-        'username': username,
-        'photo_path': photoPath,
-      },
+      {'username': username, 'photo_path': photoPath},
       where: 'id = ?',
       whereArgs: [id],
     );

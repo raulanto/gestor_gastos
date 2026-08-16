@@ -24,7 +24,11 @@ class LoanService {
 
   Future<int?> _getPrestamosCategoryId() async {
     final db = await _db.database;
-    final res = await db.query('categories', where: 'name = ?', whereArgs: ['Préstamos']);
+    final res = await db.query(
+      'categories',
+      where: 'name = ?',
+      whereArgs: ['Préstamos'],
+    );
     if (res.isNotEmpty) {
       return res.first['id'] as int;
     }
@@ -51,15 +55,18 @@ class LoanService {
     await _transactionNotifier.addTransaction(tx);
   }
 
-  Future<void> addLoanPayment(LoanPaymentEntity payment, LoanEntity loan) async {
+  Future<void> addLoanPayment(
+    LoanPaymentEntity payment,
+    LoanEntity loan,
+  ) async {
     // 1. Save payment
     await _loanRepository.addLoanPayment(payment);
 
-    // 2. Update loan status if fully paid? 
+    // 2. Update loan status if fully paid?
     // We calculate total paid
     final payments = await _loanRepository.getLoanPayments(loan.id!);
     final totalPaid = payments.fold<double>(0.0, (sum, p) => sum + p.amount);
-    
+
     if (totalPaid >= loan.amount && loan.status != 'paid') {
       await _loanRepository.updateLoan(loan.copyWith(status: 'paid'));
     }

@@ -21,17 +21,41 @@ class ThemeModeSelector extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _buildOption(context, 'Sistema', Icons.settings_system_daydream, ThemeMode.system, theme),
-          _buildOption(context, 'Claro', Icons.light_mode, ThemeMode.light, theme),
-          _buildOption(context, 'Oscuro', Icons.dark_mode, ThemeMode.dark, theme),
+          _buildOption(
+            context,
+            'Sistema',
+            Icons.settings_system_daydream,
+            ThemeMode.system,
+            theme,
+          ),
+          _buildOption(
+            context,
+            'Claro',
+            Icons.light_mode,
+            ThemeMode.light,
+            theme,
+          ),
+          _buildOption(
+            context,
+            'Oscuro',
+            Icons.dark_mode,
+            ThemeMode.dark,
+            theme,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildOption(BuildContext context, String title, IconData icon, ThemeMode value, ThemeData theme) {
+  Widget _buildOption(
+    BuildContext context,
+    String title,
+    IconData icon,
+    ThemeMode value,
+    ThemeData theme,
+  ) {
     final isSelected = currentMode == value;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => onChanged(value),
@@ -48,7 +72,7 @@ class ThemeModeSelector extends StatelessWidget {
                       color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -59,15 +83,19 @@ class ThemeModeSelector extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  icon, 
-                  size: 16, 
-                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant
+                  icon,
+                  size: 16,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   title,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ),
                 ),

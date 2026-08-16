@@ -1,10 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
+import 'package:flutter/material.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../settings/presentation/providers/notification_preferences_provider.dart';
 import '../presentation/providers/budgets_provider.dart';
 import '../../categories/presentation/providers/category_provider.dart';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 
-final budgetNotificationWatcherProvider = Provider<BudgetNotificationWatcher>((ref) {
+final budgetNotificationWatcherProvider = Provider<BudgetNotificationWatcher>((
+  ref,
+) {
   return BudgetNotificationWatcher(ref);
 });
 
@@ -22,37 +27,50 @@ class BudgetNotificationWatcher {
     }
 
     final monthYear = '${date.year}-${date.month.toString().padLeft(2, '0')}';
-    
+
     // 2. Obtener el presupuesto
     final budgetRepo = ref.read(budgetRepositoryProvider);
     final budgets = await budgetRepo.getBudgetsByMonth(monthYear);
-    final categoryBudget = budgets.where((b) => b.categoryId == categoryId).firstOrNull;
-    
-    if (categoryBudget == null) return; // No hay presupuesto configurado para esta categoría
+    final categoryBudget = budgets
+        .where((b) => b.categoryId == categoryId)
+        .firstOrNull;
+
+    if (categoryBudget == null)
+      return; // No hay presupuesto configurado para esta categoría
 
     // 3. Calcular lo gastado
-    final spent = await budgetRepo.getActualSpendForCategory(categoryId, monthYear);
+    final spent = await budgetRepo.getActualSpendForCategory(
+      categoryId,
+      monthYear,
+    );
     final percentage = spent / categoryBudget.amount;
 
     // 4. Evaluar umbrales y notificar
     final notificationService = ref.read(notificationServiceProvider);
-    
+
     // Obtener el nombre de la categoría
     final cats = ref.read(categoriesProvider).value ?? [];
-    final categoryName = cats.firstWhere((c) => c.id == categoryId, orElse: () => throw Exception('Categoría no encontrada')).name;
+    final categoryName = cats
+        .firstWhere(
+          (c) => c.id == categoryId,
+          orElse: () => throw Exception('Categoría no encontrada'),
+        )
+        .name;
 
     if (percentage >= 1.0) {
       await notificationService.showBudgetAlert(
         id: categoryId * 1000 + 1, // ID único por categoría y tipo de alerta
         title: 'Presupuesto Excedido',
-        body: 'Has gastado \$${spent.toStringAsFixed(2)} en $categoryName, superando tu límite de \$${categoryBudget.amount.toStringAsFixed(2)}.',
+        body:
+            'Has gastado ${CurrencyUtils.formatAmount(spent)} en $categoryName, superando tu límite de ${CurrencyUtils.formatAmount(categoryBudget.amount)}.',
         payload: '/budgets',
       );
     } else if (percentage >= categoryBudget.warningThreshold) {
       await notificationService.showBudgetAlert(
         id: categoryId * 1000 + 2,
         title: 'Atención: Presupuesto al ${(percentage * 100).toInt()}%',
-        body: 'Has gastado \$${spent.toStringAsFixed(2)} de \$${categoryBudget.amount.toStringAsFixed(2)} en $categoryName.',
+        body:
+            'Has gastado ${CurrencyUtils.formatAmount(spent)} de ${CurrencyUtils.formatAmount(categoryBudget.amount)} en $categoryName.',
         payload: '/budgets',
       );
     }

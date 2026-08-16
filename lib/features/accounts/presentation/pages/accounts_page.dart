@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,14 +26,18 @@ class AccountsPage extends ConsumerWidget {
               final account = accounts[index];
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Color(account.colorCode).withValues(alpha: 0.2),
+                  backgroundColor: Color(
+                    account.colorCode,
+                  ).withValues(alpha: 0.2),
                   child: Icon(
                     IconUtils.getIcon(account.iconCode),
                     color: Color(account.colorCode),
                   ),
                 ),
                 title: Text(account.name),
-                subtitle: Text('Saldo: \$${account.balance.toStringAsFixed(2)}'),
+                subtitle: Text(
+                  'Saldo: ${CurrencyUtils.formatAmount(account.balance)}',
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -41,14 +46,17 @@ class AccountsPage extends ConsumerWidget {
                       onPressed: () {
                         showDialog(
                           context: context,
-                          builder: (_) => AddEditAccountDialog(account: account),
+                          builder: (_) =>
+                              AddEditAccountDialog(account: account),
                         );
                       },
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        ref.read(accountsProvider.notifier).deleteAccount(account.id);
+                        ref
+                            .read(accountsProvider.notifier)
+                            .deleteAccount(account.id);
                       },
                     ),
                   ],

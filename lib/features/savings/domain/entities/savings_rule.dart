@@ -2,7 +2,8 @@ class SavingsRuleEntity {
   final int? id;
   final int goalId;
   final String ruleType; // 'round_up', 'fixed_percentage', 'scheduled'
-  final double value; // Can be a fixed amount, percentage, or unused (for round_up)
+  final double
+  value; // Can be a fixed amount, percentage, or unused (for round_up)
   final String status; // 'active', 'paused'
 
   SavingsRuleEntity({

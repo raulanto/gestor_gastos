@@ -32,11 +32,7 @@ class PersonLocalDataSource {
 
   Future<int> deletePerson(int id) async {
     final db = await _appDatabase.database;
-    return await db.delete(
-      'persons',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('persons', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<PersonEntity?> getPersonById(int id) async {

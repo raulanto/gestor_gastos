@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/home_summary_provider.dart';
@@ -23,15 +24,27 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pie_chart_outline, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              Icons.pie_chart_outline,
+              size: 48,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 16),
-            Text('No hay gastos registrados en este periodo', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+            Text(
+              'No hay gastos registrados en este periodo',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
           ],
         ),
       );
     }
 
-    final totalExpense = widget.categoryData.fold(0.0, (sum, item) => sum + item.amount);
+    final totalExpense = widget.categoryData.fold(
+      0.0,
+      (sum, item) => sum + item.amount,
+    );
 
     return Row(
       children: [
@@ -51,7 +64,9 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
                           touchedIndex = -1;
                           return;
                         }
-                        touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                        touchedIndex = pieTouchResponse
+                            .touchedSection!
+                            .touchedSectionIndex;
                       });
                     },
                   ),
@@ -66,7 +81,9 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    touchedIndex == -1 ? 'Total' : widget.categoryData[touchedIndex].name,
+                    touchedIndex == -1
+                        ? 'Total'
+                        : widget.categoryData[touchedIndex].name,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w600,
@@ -77,16 +94,22 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    touchedIndex == -1 
-                      ? '\$${totalExpense.toStringAsFixed(0)}'
-                      : '\$${widget.categoryData[touchedIndex].amount.toStringAsFixed(0)}',
+                    touchedIndex == -1
+                        ? CurrencyUtils.formatAmount(
+                            totalExpense,
+                            showDecimals: false,
+                          )
+                        : CurrencyUtils.formatAmount(
+                            widget.categoryData[touchedIndex].amount,
+                            showDecimals: false,
+                          ),
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -100,7 +123,7 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
               final data = widget.categoryData[index];
               final isTouched = index == touchedIndex;
               final percentage = (data.amount / totalExpense) * 100;
-              
+
               return GestureDetector(
                 onTap: () {
                   setState(() {
@@ -109,13 +132,20 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8.0,
+                    horizontal: 12.0,
+                  ),
                   decoration: BoxDecoration(
-                    color: isTouched ? Color(data.colorCode).withValues(alpha: 0.1) : Colors.transparent,
+                    color: isTouched
+                        ? Color(data.colorCode).withValues(alpha: 0.1)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isTouched ? Color(data.colorCode).withValues(alpha: 0.3) : Colors.transparent,
-                    )
+                      color: isTouched
+                          ? Color(data.colorCode).withValues(alpha: 0.3)
+                          : Colors.transparent,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -127,7 +157,9 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Color(data.colorCode).withValues(alpha: 0.4),
+                              color: Color(
+                                data.colorCode,
+                              ).withValues(alpha: 0.4),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -143,24 +175,33 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
                             Text(
                               data.name,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: isTouched ? FontWeight.bold : FontWeight.w500,
+                                fontWeight: isTouched
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               '${percentage.toStringAsFixed(1)}%',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.5,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                       Text(
-                        '\$${data.amount.toStringAsFixed(0)}',
+                        CurrencyUtils.formatAmount(
+                          data.amount,
+                          showDecimals: false,
+                        ),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isTouched ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                          color: isTouched
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -185,17 +226,24 @@ class _HomeCategoryChartState extends State<HomeCategoryChart> {
         value: data.amount,
         title: '',
         radius: radius,
-        badgeWidget: isTouched 
+        badgeWidget: isTouched
             ? Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)
-                  ]
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                    ),
+                  ],
                 ),
-                child: Icon(Icons.circle, size: 10, color: Color(data.colorCode)),
+                child: Icon(
+                  Icons.circle,
+                  size: 10,
+                  color: Color(data.colorCode),
+                ),
               )
             : null,
         badgePositionPercentageOffset: .98,

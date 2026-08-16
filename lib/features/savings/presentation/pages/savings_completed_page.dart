@@ -11,14 +11,16 @@ class SavingsCompletedPage extends ConsumerWidget {
     final savingsState = ref.watch(savingsGoalsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Metas Cumplidas'),
-      ),
+      appBar: AppBar(title: const Text('Metas Cumplidas')),
       body: savingsState.when(
         data: (goals) {
-          final completedGoals = goals.where((g) => g.status == 'completed').toList();
+          final completedGoals = goals
+              .where((g) => g.status == 'completed')
+              .toList();
           if (completedGoals.isEmpty) {
-            return const Center(child: Text('Aún no tienes metas de ahorro cumplidas.'));
+            return const Center(
+              child: Text('Aún no tienes metas de ahorro cumplidas.'),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),

@@ -65,7 +65,10 @@ class TransactionEntity {
     };
   }
 
-  factory TransactionEntity.fromMap(Map<String, dynamic> map, {List<TransactionSplit> splits = const []}) {
+  factory TransactionEntity.fromMap(
+    Map<String, dynamic> map, {
+    List<TransactionSplit> splits = const [],
+  }) {
     return TransactionEntity(
       id: map['id'],
       accountId: map['account_id'],

@@ -11,8 +11,10 @@ abstract class SavingsRepository {
 
   // Transactions
   Future<List<SavingsTransactionEntity>> getTransactionsByGoal(int goalId);
-  Future<SavingsTransactionEntity> createTransaction(SavingsTransactionEntity tx);
-  
+  Future<SavingsTransactionEntity> createTransaction(
+    SavingsTransactionEntity tx,
+  );
+
   // Rules
   Future<List<SavingsRuleEntity>> getRules();
   Future<List<SavingsRuleEntity>> getRulesByGoal(int goalId);

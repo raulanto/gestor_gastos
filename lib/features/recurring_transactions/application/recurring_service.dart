@@ -39,11 +39,14 @@ class RecurringService {
 
         // Si se actualizaron fechas, guardar en BD
         if (nextExec.toIso8601String() != rt.nextExecutionDate) {
-          await recurringRepo.updateNextExecutionDate(rt.id!, nextExec.toIso8601String());
+          await recurringRepo.updateNextExecutionDate(
+            rt.id!,
+            nextExec.toIso8601String(),
+          );
         }
       }
     }
-    
+
     // Invalidar para recargar la UI
     ref.invalidate(recurringTransactionsProvider);
     ref.invalidate(transactionsProvider);

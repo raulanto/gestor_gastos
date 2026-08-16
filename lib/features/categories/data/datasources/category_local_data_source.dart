@@ -40,10 +40,6 @@ class CategoryLocalDataSource {
     final db = await _appDatabase.database;
     // La DB está configurada con ON DELETE CASCADE, por lo que las
     // subcategorías asociadas también se borrarán automáticamente si es un padre.
-    await db.delete(
-      'categories',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
 import '../../../categories/domain/entities/category.dart';
@@ -16,7 +17,9 @@ class TransactionCategorySplits extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (transaction.splits.length <= 1 && transaction.categoryId != null) {
-      final cat = categories.where((c) => c.id == transaction.categoryId).firstOrNull;
+      final cat = categories
+          .where((c) => c.id == transaction.categoryId)
+          .firstOrNull;
       return ListTile(
         leading: Icon(
           cat != null ? IconUtils.getIcon(cat.iconCode) : Icons.category,
@@ -41,7 +44,9 @@ class TransactionCategorySplits extends StatelessWidget {
             ),
           ),
           ...transaction.splits.map((s) {
-            final cat = categories.where((c) => c.id == s.categoryId).firstOrNull;
+            final cat = categories
+                .where((c) => c.id == s.categoryId)
+                .firstOrNull;
             return ListTile(
               dense: true,
               leading: Icon(
@@ -50,8 +55,11 @@ class TransactionCategorySplits extends StatelessWidget {
               ),
               title: Text(cat?.name ?? 'Desconocida'),
               trailing: Text(
-                '\$${s.amount.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                CurrencyUtils.formatAmount(s.amount),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             );
           }),

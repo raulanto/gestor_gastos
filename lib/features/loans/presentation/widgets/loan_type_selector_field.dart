@@ -14,14 +14,14 @@ class LoanTypeSelectorField extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       decoration: const InputDecoration(
-        labelText: 'Tipo', 
+        labelText: 'Tipo',
         prefixIcon: Icon(Icons.category),
-        border: OutlineInputBorder()
+        border: OutlineInputBorder(),
       ),
       initialValue: type,
       items: const [
         DropdownMenuItem(
-          value: 'efectivo', 
+          value: 'efectivo',
           child: Row(
             children: [
               Icon(Icons.money, color: Colors.green),
@@ -31,7 +31,7 @@ class LoanTypeSelectorField extends StatelessWidget {
           ),
         ),
         DropdownMenuItem(
-          value: 'tarjeta', 
+          value: 'tarjeta',
           child: Row(
             children: [
               Icon(Icons.credit_card, color: Colors.blue),

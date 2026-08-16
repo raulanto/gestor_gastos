@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -22,6 +24,7 @@ import '../widgets/transaction_split_list.dart';
 import '../widgets/transaction_date_selector.dart';
 import '../widgets/transaction_note_image_input.dart';
 import '../widgets/category_picker_sheet.dart';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionId;
@@ -41,7 +44,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   File? _receiptImage;
   String _transactionType = 'expense';
   DateTime _selectedDate = DateTime.now();
-  
+
   bool _isSplitMode = false;
   List<TransactionSplit> _splits = [];
   final TextEditingController _noteController = TextEditingController();
@@ -103,9 +106,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           _expression = value;
         } else {
           final lastChar = _expression[_expression.length - 1];
-          if ((value == '+' || value == '-' || value == '.') && 
+          if ((value == '+' || value == '-' || value == '.') &&
               (lastChar == '+' || lastChar == '-' || lastChar == '.')) {
-            return; 
+            return;
           }
           _expression += value;
         }
@@ -117,12 +120,15 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     try {
       String exp = _expression.replaceAll(' ', '');
       List<String> numbers = exp.split(RegExp(r'[+-]'));
-      List<String> operators = exp.split(RegExp(r'[0-9.]+')).where((e) => e.isNotEmpty).toList();
+      List<String> operators = exp
+          .split(RegExp(r'[0-9.]+'))
+          .where((e) => e.isNotEmpty)
+          .toList();
 
       if (numbers.isNotEmpty && numbers[0].isEmpty) {
-         numbers.removeAt(0);
-         numbers[0] = '-${numbers[0]}';
-         operators.removeAt(0);
+        numbers.removeAt(0);
+        numbers[0] = '-${numbers[0]}';
+        operators.removeAt(0);
       }
 
       double result = double.parse(numbers[0]);
@@ -134,7 +140,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
           result -= nextNum;
         }
       }
-      
+
       _expression = result.toStringAsFixed(2);
       if (_expression.endsWith('.00')) {
         _expression = _expression.substring(0, _expression.length - 3);
@@ -155,7 +161,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     if (!mounted) return;
 
     final fileName = path.basename(pickedFile.path);
-    final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+    final savedImage = await File(
+      pickedFile.path,
+    ).copy('${appDir.path}/$fileName');
     if (!mounted) return;
 
     final previousImage = _receiptImage;
@@ -171,87 +179,118 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     double amount = 0;
     Category? selectedCat;
     final categoriesState = ref.read(categoriesProvider);
-    
-    await showDialog(context: context, builder: (ctx) {
-      return StatefulBuilder(builder: (context, setStateSB) {
-        return AlertDialog(
-          title: const Text('Añadir División'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Monto'),
-                onChanged: (val) => amount = double.tryParse(val) ?? 0,
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setStateSB) {
+            return AlertDialog(
+              title: const Text('Añadir División'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(labelText: 'Monto'),
+                    onChanged: (val) => amount = double.tryParse(val) ?? 0,
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    onPressed: () {
+                      if (categoriesState.value != null) {
+                        showCategoryPickerSheet(
+                          context: context,
+                          categories: categoriesState.value!,
+                          onSelected: (cat) {
+                            setStateSB(() => selectedCat = cat);
+                          },
+                        );
+                      }
+                    },
+                    child: Text(
+                      selectedCat == null
+                          ? 'Seleccionar Categoría'
+                          : selectedCat!.name,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () {
-                  if (categoriesState.value != null) {
-                    showCategoryPickerSheet(
-                      context: context,
-                      categories: categoriesState.value!,
-                      onSelected: (cat) {
-                        setStateSB(() => selectedCat = cat);
-                      },
-                    );
-                  }
-                },
-                child: Text(selectedCat == null ? 'Seleccionar Categoría' : selectedCat!.name),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar')
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (selectedCat != null && amount > 0) {
-                  setState(() {
-                    _splits.add(TransactionSplit(categoryId: selectedCat!.id, amount: amount));
-                  });
-                  Navigator.pop(ctx);
-                }
-              },
-              child: const Text('Añadir')
-            )
-          ]
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedCat != null && amount > 0) {
+                      setState(() {
+                        _splits.add(
+                          TransactionSplit(
+                            categoryId: selectedCat!.id,
+                            amount: amount,
+                          ),
+                        );
+                      });
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  child: const Text('Añadir'),
+                ),
+              ],
+            );
+          },
         );
-      });
-    });
+      },
+    );
   }
 
   Future<void> _saveTransaction() async {
-    _evaluateExpression(); 
+    _evaluateExpression();
     final amount = double.tryParse(_expression);
-    
+
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ingrese un monto válido')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Ingrese un monto válido')));
       return;
     }
-    
+
     if (_selectedAccountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seleccione una cuenta')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Seleccione una cuenta')));
       return;
     }
 
     if (_isSplitMode) {
       if (_splits.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Añada al menos una división')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Añada al menos una división')),
+        );
         return;
       }
-      final totalSplits = _splits.fold<double>(0, (sum, item) => sum + item.amount);
+      final totalSplits = _splits.fold<double>(
+        0,
+        (sum, item) => sum + item.amount,
+      );
       if ((totalSplits - amount).abs() > 0.01) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('La suma de las divisiones (\$${totalSplits.toStringAsFixed(2)}) no coincide con el total (\$${amount.toStringAsFixed(2)})'))
+          SnackBar(
+            content: Text(
+              'La suma de las divisiones (${CurrencyUtils.formatAmount(totalSplits)}) no coincide con el total (${CurrencyUtils.formatAmount(amount)})',
+            ),
+          ),
         );
         return;
       }
     } else {
       if (_selectedCategoryId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Seleccione una categoría')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Seleccione una categoría')),
+        );
         return;
       }
     }
@@ -261,7 +300,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       parsedId = int.tryParse(widget.transactionId!);
       if (parsedId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ID de transacción inválido, no se puede guardar')),
+          const SnackBar(
+            content: Text('ID de transacción inválido, no se puede guardar'),
+          ),
         );
         return;
       }
@@ -280,13 +321,17 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     );
 
     if (parsedId == null) {
-      await ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
+      await ref
+          .read(transactionsProvider.notifier)
+          .addTransaction(newTransaction);
     } else {
-      await ref.read(transactionsProvider.notifier).updateTransaction(newTransaction);
+      await ref
+          .read(transactionsProvider.notifier)
+          .updateTransaction(newTransaction);
     }
-    
+
     ref.invalidate(accountsProvider);
-    
+
     if (mounted) {
       context.pop();
     }
@@ -326,7 +371,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
     Category? selectedCategory;
     if (_selectedCategoryId != null && categoriesState.value != null) {
-      selectedCategory = categoriesState.value!.where((c) => c.id == _selectedCategoryId).firstOrNull;
+      selectedCategory = categoriesState.value!
+          .where((c) => c.id == _selectedCategoryId)
+          .firstOrNull;
     }
 
     return Scaffold(
@@ -339,8 +386,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             right: 0,
             height: 350,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -366,7 +413,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -375,8 +425,13 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        widget.transactionId == null ? 'Añadir Gasto' : 'Editar Gasto',
-                        style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                        widget.transactionId == null
+                            ? 'Añadir Gasto'
+                            : 'Editar Gasto',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -386,16 +441,21 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   curve: Curves.easeInOut,
                   child: MediaQuery.of(context).viewInsets.bottom == 0
                       ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 16.0,
+                          ),
                           child: Column(
                             children: [
                               TransactionTypeSelector(
                                 transactionType: _transactionType,
-                                onChanged: (val) => setState(() => _transactionType = val),
+                                onChanged: (val) =>
+                                    setState(() => _transactionType = val),
                               ),
                               const SizedBox(height: 24),
                               GestureDetector(
-                                onTap: () => setState(() => _showKeyboard = true),
+                                onTap: () =>
+                                    setState(() => _showKeyboard = true),
                                 child: Text(
                                   '\$$_expression',
                                   style: theme.textTheme.displayLarge?.copyWith(
@@ -434,94 +494,113 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   accountsState.when(
-                    data: (accounts) => TransactionAccountSelector(
-                      selectedAccountId: _selectedAccountId,
-                      accounts: accounts,
-                      onChanged: (val) => setState(() => _selectedAccountId = val),
+                                    data: (accounts) =>
+                                        TransactionAccountSelector(
+                                          selectedAccountId: _selectedAccountId,
+                                          accounts: accounts,
+                                          onChanged: (val) => setState(
+                                            () => _selectedAccountId = val,
+                                          ),
+                                        ),
+                                    loading: () =>
+                                        const CircularProgressIndicator(),
+                                    error: (e, st) => Text('Error: $e'),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Dividir Gasto (Splits)'),
+                                      Switch(
+                                        value: _isSplitMode,
+                                        onChanged: (val) => setState(() {
+                                          _isSplitMode = val;
+                                          if (!val) _splits.clear();
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  if (!_isSplitMode)
+                                    TransactionCategorySelector(
+                                      selectedCategory: selectedCategory,
+                                      categories: categoriesState.value,
+                                      onSelected: (cat) => setState(
+                                        () => _selectedCategoryId = cat.id,
+                                      ),
+                                    )
+                                  else
+                                    TransactionSplitList(
+                                      splits: _splits,
+                                      categories: categoriesState.value,
+                                      onAddSplit: _addSplitDialog,
+                                      onRemoveSplit: (s) =>
+                                          setState(() => _splits.remove(s)),
+                                    ),
+
+                                  const SizedBox(height: 16),
+
+                                  TransactionDateSelector(
+                                    selectedDate: _selectedDate,
+                                    onChanged: (date) =>
+                                        setState(() => _selectedDate = date),
+                                  ),
+
+                                  const SizedBox(height: 16),
+
+                                  TransactionNoteImageInput(
+                                    noteController: _noteController,
+                                    onNoteChanged: (val) => _note = val,
+                                    receiptImage: _receiptImage,
+                                    onPickImage: _pickImage,
+                                    onClearImage: () {
+                                      final old = _receiptImage;
+                                      setState(() => _receiptImage = null);
+                                      old?.delete().catchError((_) => old);
+                                    },
+                                  ),
+                                  const SizedBox(height: 32),
+                                  FilledButton(
+                                    onPressed: _saveTransaction,
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Guardar',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          child:
+                              (_showKeyboard &&
+                                  MediaQuery.of(context).viewInsets.bottom == 0)
+                              ? CustomNumericKeyboard(
+                                  onKeyPressed: _onKeyPressed,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
                     ),
-                    loading: () => const CircularProgressIndicator(),
-                    error: (e, st) => Text('Error: $e'),
                   ),
-                  const SizedBox(height: 16),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Dividir Gasto (Splits)'),
-                      Switch(
-                        value: _isSplitMode,
-                        onChanged: (val) => setState(() {
-                          _isSplitMode = val;
-                          if (!val) _splits.clear();
-                        }),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  if (!_isSplitMode)
-                    TransactionCategorySelector(
-                      selectedCategory: selectedCategory,
-                      categories: categoriesState.value,
-                      onSelected: (cat) => setState(() => _selectedCategoryId = cat.id),
-                    )
-                  else
-                    TransactionSplitList(
-                      splits: _splits,
-                      categories: categoriesState.value,
-                      onAddSplit: _addSplitDialog,
-                      onRemoveSplit: (s) => setState(() => _splits.remove(s)),
-                    ),
-
-                  const SizedBox(height: 16),
-                  
-                  TransactionDateSelector(
-                    selectedDate: _selectedDate,
-                    onChanged: (date) => setState(() => _selectedDate = date),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  TransactionNoteImageInput(
-                    noteController: _noteController,
-                    onNoteChanged: (val) => _note = val,
-                    receiptImage: _receiptImage,
-                    onPickImage: _pickImage,
-                    onClearImage: () {
-                      final old = _receiptImage;
-                      setState(() => _receiptImage = null);
-                      old?.delete().catchError((_) => old);
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  FilledButton(
-                    onPressed: _saveTransaction,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text('Guardar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          child: (_showKeyboard && MediaQuery.of(context).viewInsets.bottom == 0)
-              ? CustomNumericKeyboard(
-                  onKeyPressed: _onKeyPressed,
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
-    ),
-  ),
-),
+                ),
               ],
             ),
           ),

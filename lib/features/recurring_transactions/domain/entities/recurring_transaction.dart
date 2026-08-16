@@ -33,10 +33,7 @@ class RecurringTransactionSplit {
 
   // Convertir a un split normal para cuando se genera la transacción real
   TransactionSplit toTransactionSplit() {
-    return TransactionSplit(
-      categoryId: categoryId,
-      amount: amount,
-    );
+    return TransactionSplit(categoryId: categoryId, amount: amount);
   }
 }
 
@@ -48,7 +45,8 @@ class RecurringTransactionEntity {
   final String? name;
   final String? note;
   final String type; // 'expense', 'income'
-  final String periodicity; // 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'
+  final String
+  periodicity; // 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'
   final String nextExecutionDate;
   final String status; // 'active', 'paused'
   final List<RecurringTransactionSplit> splits;
@@ -82,7 +80,10 @@ class RecurringTransactionEntity {
     };
   }
 
-  factory RecurringTransactionEntity.fromMap(Map<String, dynamic> map, {List<RecurringTransactionSplit> splits = const []}) {
+  factory RecurringTransactionEntity.fromMap(
+    Map<String, dynamic> map, {
+    List<RecurringTransactionSplit> splits = const [],
+  }) {
     return RecurringTransactionEntity(
       id: map['id'],
       amount: map['amount'],

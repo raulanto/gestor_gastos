@@ -28,9 +28,15 @@ class ChartTypeSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildOption(BuildContext context, String title, IconData icon, int value, ThemeData theme) {
+  Widget _buildOption(
+    BuildContext context,
+    String title,
+    IconData icon,
+    int value,
+    ThemeData theme,
+  ) {
     final isSelected = chartType == value;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => onChanged(value),
@@ -47,7 +53,7 @@ class ChartTypeSelector extends StatelessWidget {
                       color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -58,15 +64,19 @@ class ChartTypeSelector extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  icon, 
-                  size: 18, 
-                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant
+                  icon,
+                  size: 18,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   title,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ),
                 ),

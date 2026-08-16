@@ -56,7 +56,11 @@ class BackupService {
         if (backupData.containsKey(table)) {
           final List<dynamic> rows = backupData[table];
           for (final dynamic row in rows) {
-            await txn.insert(table, Map<String, dynamic>.from(row), conflictAlgorithm: ConflictAlgorithm.replace);
+            await txn.insert(
+              table,
+              Map<String, dynamic>.from(row),
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
           }
         }
       }

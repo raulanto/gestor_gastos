@@ -7,7 +7,9 @@ import '../../data/repositories/category_repository_impl.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 
-final categoryLocalDataSourceProvider = Provider<CategoryLocalDataSource>((ref) {
+final categoryLocalDataSourceProvider = Provider<CategoryLocalDataSource>((
+  ref,
+) {
   final db = ref.watch(appDatabaseProvider);
   return CategoryLocalDataSource(db);
 });
@@ -17,9 +19,10 @@ final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
   return CategoryRepositoryImpl(localDataSource);
 });
 
-final categoriesProvider = AsyncNotifierProvider<CategoriesNotifier, List<Category>>(() {
-  return CategoriesNotifier();
-});
+final categoriesProvider =
+    AsyncNotifierProvider<CategoriesNotifier, List<Category>>(() {
+      return CategoriesNotifier();
+    });
 
 class CategoriesNotifier extends AsyncNotifier<List<Category>> {
   late CategoryRepository _repository;

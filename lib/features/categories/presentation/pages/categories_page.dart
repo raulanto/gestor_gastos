@@ -19,25 +19,37 @@ class CategoriesPage extends ConsumerWidget {
             return const Center(child: Text('No hay categorías configuradas.'));
           }
 
-          final mainCategories = categories.where((c) => c.parentId == null).toList();
-          final subCategories = categories.where((c) => c.parentId != null).toList();
+          final mainCategories = categories
+              .where((c) => c.parentId == null)
+              .toList();
+          final subCategories = categories
+              .where((c) => c.parentId != null)
+              .toList();
 
           return ListView.builder(
             itemCount: mainCategories.length,
             itemBuilder: (context, index) {
               final mainCategory = mainCategories[index];
-              final children = subCategories.where((c) => c.parentId == mainCategory.id).toList();
+              final children = subCategories
+                  .where((c) => c.parentId == mainCategory.id)
+                  .toList();
 
               final editButton = IconButton(
                 icon: const Icon(Icons.edit, color: Colors.blue),
                 onPressed: () {
-                  showDialog(context: context, builder: (_) => AddEditCategoryDialog(category: mainCategory));
+                  showDialog(
+                    context: context,
+                    builder: (_) =>
+                        AddEditCategoryDialog(category: mainCategory),
+                  );
                 },
               );
               final deleteButton = IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
-                  ref.read(categoriesProvider.notifier).deleteCategory(mainCategory.id);
+                  ref
+                      .read(categoriesProvider.notifier)
+                      .deleteCategory(mainCategory.id);
                 },
               );
 
@@ -49,8 +61,13 @@ class CategoriesPage extends ConsumerWidget {
               if (children.isEmpty) {
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Color(mainCategory.colorCode).withValues(alpha: 0.2),
-                    child: Icon(IconUtils.getIcon(mainCategory.iconCode), color: Color(mainCategory.colorCode)),
+                    backgroundColor: Color(
+                      mainCategory.colorCode,
+                    ).withValues(alpha: 0.2),
+                    child: Icon(
+                      IconUtils.getIcon(mainCategory.iconCode),
+                      color: Color(mainCategory.colorCode),
+                    ),
                   ),
                   title: Text(mainCategory.name),
                   trailing: mainActions,
@@ -60,18 +77,32 @@ class CategoriesPage extends ConsumerWidget {
               return ExpansionTile(
                 controlAffinity: ListTileControlAffinity.leading,
                 leading: CircleAvatar(
-                  backgroundColor: Color(mainCategory.colorCode).withValues(alpha: 0.2),
-                  child: Icon(IconUtils.getIcon(mainCategory.iconCode), color: Color(mainCategory.colorCode)),
+                  backgroundColor: Color(
+                    mainCategory.colorCode,
+                  ).withValues(alpha: 0.2),
+                  child: Icon(
+                    IconUtils.getIcon(mainCategory.iconCode),
+                    color: Color(mainCategory.colorCode),
+                  ),
                 ),
                 title: Text(mainCategory.name),
                 trailing: mainActions,
                 children: children.map((child) {
                   return ListTile(
-                    contentPadding: const EdgeInsets.only(left: 72.0, right: 16.0),
+                    contentPadding: const EdgeInsets.only(
+                      left: 72.0,
+                      right: 16.0,
+                    ),
                     leading: CircleAvatar(
-                      backgroundColor: Color(child.colorCode).withValues(alpha: 0.2),
+                      backgroundColor: Color(
+                        child.colorCode,
+                      ).withValues(alpha: 0.2),
                       radius: 16,
-                      child: Icon(IconUtils.getIcon(child.iconCode), color: Color(child.colorCode), size: 18),
+                      child: Icon(
+                        IconUtils.getIcon(child.iconCode),
+                        color: Color(child.colorCode),
+                        size: 18,
+                      ),
                     ),
                     title: Text(child.name),
                     trailing: Row(
@@ -80,13 +111,19 @@ class CategoriesPage extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
-                            showDialog(context: context, builder: (_) => AddEditCategoryDialog(category: child));
+                            showDialog(
+                              context: context,
+                              builder: (_) =>
+                                  AddEditCategoryDialog(category: child),
+                            );
                           },
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {
-                            ref.read(categoriesProvider.notifier).deleteCategory(child.id);
+                            ref
+                                .read(categoriesProvider.notifier)
+                                .deleteCategory(child.id);
                           },
                         ),
                       ],
@@ -102,7 +139,10 @@ class CategoriesPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(context: context, builder: (_) => const AddEditCategoryDialog());
+          showDialog(
+            context: context,
+            builder: (_) => const AddEditCategoryDialog(),
+          );
         },
         child: const Icon(Icons.add),
       ),

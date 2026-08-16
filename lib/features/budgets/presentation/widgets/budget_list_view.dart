@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,70 +66,110 @@ class BudgetListView extends ConsumerWidget {
             }
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: color.withValues(alpha: 0.2),
-                          child: Icon(iconData, color: color),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                              Text('\$${item.actualAmount.toStringAsFixed(2)} / \$${b.amount.toStringAsFixed(2)}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                            ],
-                          ),
-                        ),
-                        PopupMenuButton<String>(
-                          icon: Icon(Icons.more_vert, color: theme.colorScheme.onSurfaceVariant),
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              _showEditBudgetDialog(context, ref, b, monthYearKey);
-                            } else if (value == 'delete') {
-                              ref.read(budgetRepositoryProvider).deleteBudget(b.id!);
-                              ref.invalidate(monthlyBudgetsProvider(monthYearKey));
-                              ref.invalidate(globalBudgetProvider(monthYearKey));
-                            }
-                          },
-                          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                            const PopupMenuItem<String>(
-                              value: 'edit',
-                              child: Text('Editar Límite'),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: color.withValues(alpha: 0.2),
+                        child: Icon(iconData, color: color),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            const PopupMenuItem<String>(
-                              value: 'delete',
-                              child: Text('Eliminar', style: TextStyle(color: Colors.red)),
+                            Text(
+                              '${CurrencyUtils.formatAmount(item.actualAmount)} / ${CurrencyUtils.formatAmount(b.amount)}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Consumido', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                        Text('${(prog * 100).toStringAsFixed(0)}%', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: barColor)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: prog.clamp(0.0, 1.0),
-                        minHeight: 8,
-                        backgroundColor: barColor.withValues(alpha: 0.15),
-                        valueColor: AlwaysStoppedAnimation<Color>(barColor),
                       ),
+                      PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _showEditBudgetDialog(
+                              context,
+                              ref,
+                              b,
+                              monthYearKey,
+                            );
+                          } else if (value == 'delete') {
+                            ref
+                                .read(budgetRepositoryProvider)
+                                .deleteBudget(b.id!);
+                            ref.invalidate(
+                              monthlyBudgetsProvider(monthYearKey),
+                            );
+                            ref.invalidate(globalBudgetProvider(monthYearKey));
+                          }
+                        },
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<String>>[
+                              const PopupMenuItem<String>(
+                                value: 'edit',
+                                child: Text('Editar Límite'),
+                              ),
+                              const PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Text(
+                                  'Eliminar',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Consumido',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      Text(
+                        '${(prog * 100).toStringAsFixed(0)}%',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: barColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: prog.clamp(0.0, 1.0),
+                      minHeight: 8,
+                      backgroundColor: barColor.withValues(alpha: 0.15),
+                      valueColor: AlwaysStoppedAnimation<Color>(barColor),
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
             );
           },
         );
@@ -138,8 +179,15 @@ class BudgetListView extends ConsumerWidget {
     );
   }
 
-  void _showEditBudgetDialog(BuildContext context, WidgetRef ref, BudgetEntity budget, String monthYearKey) {
-    final controller = TextEditingController(text: budget.amount.toStringAsFixed(2));
+  void _showEditBudgetDialog(
+    BuildContext context,
+    WidgetRef ref,
+    BudgetEntity budget,
+    String monthYearKey,
+  ) {
+    final controller = TextEditingController(
+      text: budget.amount.toStringAsFixed(2),
+    );
     showDialog(
       context: context,
       builder: (context) {
@@ -148,7 +196,10 @@ class BudgetListView extends ConsumerWidget {
           content: TextField(
             controller: controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Monto Límite', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'Monto Límite',
+              border: OutlineInputBorder(),
+            ),
           ),
           actions: [
             TextButton(
@@ -160,7 +211,9 @@ class BudgetListView extends ConsumerWidget {
                 final newAmount = double.tryParse(controller.text);
                 if (newAmount != null && newAmount > 0) {
                   final updatedBudget = budget.copyWith(amount: newAmount);
-                  await ref.read(budgetRepositoryProvider).updateBudget(updatedBudget);
+                  await ref
+                      .read(budgetRepositoryProvider)
+                      .updateBudget(updatedBudget);
                   ref.invalidate(monthlyBudgetsProvider(monthYearKey));
                   ref.invalidate(globalBudgetProvider(monthYearKey));
                   if (context.mounted) Navigator.of(context).pop();

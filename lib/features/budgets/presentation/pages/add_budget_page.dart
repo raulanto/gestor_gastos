@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -47,7 +48,7 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Sugerencia basada en promedio de últimos 3 meses: \$${avg.toStringAsFixed(2)}',
+            'Sugerencia basada en promedio de últimos 3 meses: ${CurrencyUtils.formatAmount(avg)}',
           ),
         ),
       );
@@ -119,8 +120,8 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
             right: 0,
             height: 250,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -146,7 +147,10 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -156,7 +160,10 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                       const SizedBox(width: 8),
                       Text(
                         'Nuevo Presupuesto',
-                        style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -178,10 +185,11 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                         children: [
                           BudgetTypeSelector(
                             isSavings: _isSavings,
-                            onChanged: (val) => setState(() => _isSavings = val),
+                            onChanged: (val) =>
+                                setState(() => _isSavings = val),
                           ),
                           const SizedBox(height: 24),
-                          
+
                           if (!_isSavings)
                             BudgetCategorySelector(
                               selectedCategory: selectedCategory,
@@ -194,21 +202,24 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                               data: (goals) => BudgetSavingsGoalSelector(
                                 selectedGoalId: _selectedSavingsGoalId,
                                 goals: goals,
-                                onChanged: (val) =>
-                                    setState(() => _selectedSavingsGoalId = val),
+                                onChanged: (val) => setState(
+                                  () => _selectedSavingsGoalId = val,
+                                ),
                               ),
-                              loading: () => const Center(child: CircularProgressIndicator()),
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                               error: (e, st) => Text('Error: $e'),
                             ),
-                          
+
                           const SizedBox(height: 16),
-                          
+
                           BudgetAmountInput(
                             controller: _amountController,
                             isSavings: _isSavings,
                             onSuggestAmount: _suggestAmount,
                           ),
-                          
+
                           const SizedBox(height: 24),
                           Text(
                             'Avisarme al llegar al ${(_warningThreshold * 100).toInt()}%',
@@ -226,7 +237,7 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                               setState(() => _warningThreshold = val);
                             },
                           ),
-                          
+
                           const SizedBox(height: 32),
                           FilledButton(
                             onPressed: _save,
@@ -236,7 +247,13 @@ class _AddBudgetPageState extends ConsumerState<AddBudgetPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: const Text('Guardar Presupuesto', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            child: const Text(
+                              'Guardar Presupuesto',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),

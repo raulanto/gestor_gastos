@@ -27,13 +27,23 @@ class TransactionCategorySelector extends StatelessWidget {
         );
       },
       child: InputDecorator(
-        decoration: const InputDecoration(labelText: 'Categoría', border: OutlineInputBorder()),
+        decoration: const InputDecoration(
+          labelText: 'Categoría',
+          border: OutlineInputBorder(),
+        ),
         child: Row(
           children: [
             if (selectedCategory != null)
-              Icon(IconUtils.getIcon(selectedCategory!.iconCode), color: Color(selectedCategory!.colorCode)),
+              Icon(
+                IconUtils.getIcon(selectedCategory!.iconCode),
+                color: Color(selectedCategory!.colorCode),
+              ),
             const SizedBox(width: 8),
-            Text(selectedCategory != null ? selectedCategory!.name : 'Seleccionar Categoría'),
+            Text(
+              selectedCategory != null
+                  ? selectedCategory!.name
+                  : 'Seleccionar Categoría',
+            ),
           ],
         ),
       ),

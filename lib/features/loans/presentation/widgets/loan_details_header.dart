@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/loan.dart';
@@ -33,11 +34,15 @@ class LoanDetailsHeader extends StatelessWidget {
           CircleAvatar(
             radius: 32,
             backgroundColor: theme.colorScheme.primaryContainer,
-            backgroundImage: loan.person?.photoPath != null 
-                ? FileImage(File(loan.person!.photoPath!)) 
+            backgroundImage: loan.person?.photoPath != null
+                ? FileImage(File(loan.person!.photoPath!))
                 : null,
-            child: loan.person?.photoPath == null 
-                ? Icon(Icons.person, size: 36, color: theme.colorScheme.onPrimaryContainer)
+            child: loan.person?.photoPath == null
+                ? Icon(
+                    Icons.person,
+                    size: 36,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  )
                 : null,
           ),
           const SizedBox(width: 20),
@@ -47,16 +52,38 @@ class LoanDetailsHeader extends StatelessWidget {
               children: [
                 Text(
                   loan.personName ?? 'Desconocido',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 12),
-                LoanDetailRow(icon: Icons.attach_money, label: 'Monto total', value: '\$${loan.amount.toStringAsFixed(2)}'),
+                LoanDetailRow(
+                  icon: Icons.attach_money,
+                  label: 'Monto total',
+                  value: CurrencyUtils.formatAmount(loan.amount),
+                ),
                 const SizedBox(height: 8),
-                LoanDetailRow(icon: Icons.category, label: 'Tipo', value: loan.type),
+                LoanDetailRow(
+                  icon: Icons.category,
+                  label: 'Tipo',
+                  value: loan.type,
+                ),
                 const SizedBox(height: 8),
-                LoanDetailRow(icon: Icons.calendar_today, label: 'Fecha préstamo', value: DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.date))),
+                LoanDetailRow(
+                  icon: Icons.calendar_today,
+                  label: 'Fecha préstamo',
+                  value: DateFormat(
+                    'dd/MM/yyyy',
+                  ).format(DateTime.parse(loan.date)),
+                ),
                 const SizedBox(height: 8),
-                LoanDetailRow(icon: Icons.event_available, label: 'Fecha a pagar', value: DateFormat('dd/MM/yyyy').format(DateTime.parse(loan.dueDate))),
+                LoanDetailRow(
+                  icon: Icons.event_available,
+                  label: 'Fecha a pagar',
+                  value: DateFormat(
+                    'dd/MM/yyyy',
+                  ).format(DateTime.parse(loan.dueDate)),
+                ),
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 12),
@@ -67,14 +94,26 @@ class LoanDetailsHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Abonado', style: theme.textTheme.bodySmall),
-                        Text('\$${totalPaid.toStringAsFixed(2)}', style: theme.textTheme.titleMedium?.copyWith(color: Colors.green, fontWeight: FontWeight.bold)),
+                        Text(
+                          CurrencyUtils.formatAmount(totalPaid),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text('Restante', style: theme.textTheme.bodySmall),
-                        Text('\$${remaining > 0 ? remaining.toStringAsFixed(2) : '0.00'}', style: theme.textTheme.titleMedium?.copyWith(color: isPaid ? Colors.grey : Colors.red, fontWeight: FontWeight.bold)),
+                        Text(
+                          '\$${remaining > 0 ? remaining.toStringAsFixed(2) : '0.00'}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: isPaid ? Colors.grey : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ],

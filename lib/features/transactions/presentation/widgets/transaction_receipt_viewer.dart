@@ -13,7 +13,10 @@ class TransactionReceiptViewer extends StatelessWidget {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text('Recibo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          child: Text(
+            'Recibo',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
         GestureDetector(
           onTap: () {

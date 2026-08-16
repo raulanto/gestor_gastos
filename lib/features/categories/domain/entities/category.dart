@@ -3,7 +3,8 @@ class Category {
   final String name;
   final int iconCode;
   final int colorCode;
-  final int? parentId; // null si es categoría principal, ID del padre si es subcategoría
+  final int?
+  parentId; // null si es categoría principal, ID del padre si es subcategoría
 
   const Category({
     required this.id,

@@ -44,15 +44,15 @@ class NotificationSettingsPage extends ConsumerWidget {
     final prefsState = ref.watch(notificationPreferenceNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notificaciones'),
-      ),
+      appBar: AppBar(title: const Text('Notificaciones')),
       body: prefsState.when(
         data: (prefs) {
           if (prefs.isEmpty) {
-            return const Center(child: Text('No hay preferencias configuradas.'));
+            return const Center(
+              child: Text('No hay preferencias configuradas.'),
+            );
           }
-          
+
           return ListView.builder(
             itemCount: prefs.length,
             itemBuilder: (context, index) {
@@ -62,8 +62,9 @@ class NotificationSettingsPage extends ConsumerWidget {
                 subtitle: Text(_getSubtitleForType(pref.type)),
                 value: pref.isEnabled,
                 onChanged: (val) {
-                  ref.read(notificationPreferenceNotifierProvider.notifier)
-                     .updatePreference(pref.copyWith(isEnabled: val));
+                  ref
+                      .read(notificationPreferenceNotifierProvider.notifier)
+                      .updatePreference(pref.copyWith(isEnabled: val));
                 },
               );
             },

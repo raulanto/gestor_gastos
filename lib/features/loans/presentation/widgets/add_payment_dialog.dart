@@ -24,7 +24,9 @@ class _AddPaymentDialogState extends ConsumerState<AddPaymentDialog> {
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController(text: widget.remaining.toStringAsFixed(2));
+    _amountController = TextEditingController(
+      text: widget.remaining.toStringAsFixed(2),
+    );
   }
 
   @override
@@ -37,22 +39,29 @@ class _AddPaymentDialogState extends ConsumerState<AddPaymentDialog> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: 24, right: 24, top: 24,
+        left: 24,
+        right: 24,
+        top: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Registrar Abono', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text(
+            'Registrar Abono',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
-              labelText: 'Monto a abonar', 
+              labelText: 'Monto a abonar',
               prefixText: '\$',
-              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
             ),
             autofocus: true,
           ),
@@ -60,7 +69,10 @@ class _AddPaymentDialogState extends ConsumerState<AddPaymentDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed: () {
@@ -71,7 +83,9 @@ class _AddPaymentDialogState extends ConsumerState<AddPaymentDialog> {
                       amount: val,
                       date: DateTime.now().toIso8601String(),
                     );
-                    ref.read(loansProvider.notifier).addPayment(payment, widget.loan);
+                    ref
+                        .read(loansProvider.notifier)
+                        .addPayment(payment, widget.loan);
                     ref.invalidate(loanPaymentsProvider(widget.loan.id!));
                     Navigator.pop(context);
                   }

@@ -20,18 +20,22 @@ class TransactionDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transaction = ref.watch(transactionByIdProvider(transactionId));
-    
+
     if (transaction == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Transacción no encontrada')),
-        body: const Center(child: Text('La transacción no existe o fue eliminada')),
+        body: const Center(
+          child: Text('La transacción no existe o fue eliminada'),
+        ),
       );
     }
-    
+
     final accountsState = ref.watch(accountsProvider);
     final categoriesState = ref.watch(categoriesProvider);
 
-    final account = accountsState.value?.where((a) => a.id == transaction.accountId).firstOrNull;
+    final account = accountsState.value
+        ?.where((a) => a.id == transaction.accountId)
+        .firstOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -50,16 +54,29 @@ class TransactionDetailsPage extends ConsumerWidget {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text('Eliminar Transacción'),
-                  content: const Text('¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer.'),
+                  content: const Text(
+                    '¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer.',
+                  ),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text(
+                        'Eliminar',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                   ],
                 ),
               );
 
               if (confirm == true && transaction.id != null) {
-                await ref.read(transactionsProvider.notifier).removeTransaction(transaction.id!);
+                await ref
+                    .read(transactionsProvider.notifier)
+                    .removeTransaction(transaction.id!);
                 ref.invalidate(accountsProvider); // Para actualizar balance
                 if (context.mounted) {
                   context.pop();
@@ -77,8 +94,7 @@ class TransactionDetailsPage extends ConsumerWidget {
             TransactionAmountHeader(transaction: transaction),
             const SizedBox(height: 32),
 
-            if (account != null)
-              TransactionAccountTile(account: account),
+            if (account != null) TransactionAccountTile(account: account),
             const Divider(),
 
             TransactionCategorySplits(
@@ -89,10 +105,12 @@ class TransactionDetailsPage extends ConsumerWidget {
 
             if (transaction.note != null && transaction.note!.isNotEmpty)
               TransactionNoteTile(note: transaction.note!),
-              
+
             if (transaction.receiptImagePath != null) ...[
               const Divider(),
-              TransactionReceiptViewer(receiptImagePath: transaction.receiptImagePath!),
+              TransactionReceiptViewer(
+                receiptImagePath: transaction.receiptImagePath!,
+              ),
             ],
           ],
         ),

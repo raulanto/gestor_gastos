@@ -14,8 +14,8 @@ class LoansBackground extends ConsumerWidget {
       right: 0,
       height: 350,
       child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+        duration: const Duration(milliseconds: 500),
+
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage(ref.watch(appBackgroundProvider)),

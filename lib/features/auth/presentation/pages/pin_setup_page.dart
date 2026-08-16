@@ -84,7 +84,9 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
           height: 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isFilled ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: isFilled
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
         );
       }),
@@ -109,7 +111,11 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     );
   }
 
-  Widget _buildNumpadButton(String text, VoidCallback onTap, {bool isIcon = false}) {
+  Widget _buildNumpadButton(
+    String text,
+    VoidCallback onTap, {
+    bool isIcon = false,
+  }) {
     final theme = Theme.of(context);
     return Material(
       color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
@@ -134,7 +140,9 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final title = _isConfirming ? 'Confirma tu PIN' : 'Crea tu PIN';
-    final subtitle = _isConfirming ? 'Vuelve a ingresarlo' : 'Protege tu información';
+    final subtitle = _isConfirming
+        ? 'Vuelve a ingresarlo'
+        : 'Protege tu información';
     final currentPin = _isConfirming ? _confirmPin : _pin;
 
     return Scaffold(
@@ -147,8 +155,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
             right: 0,
             height: 350,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -175,8 +183,19 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 32),
-                  child: Text('Seguridad', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.only(
+                    top: 24,
+                    left: 24,
+                    right: 24,
+                    bottom: 32,
+                  ),
+                  child: Text(
+                    'Seguridad',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -188,21 +207,32 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                       ),
                     ),
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 32.0,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Icon(Icons.lock_outline, size: 48, color: theme.colorScheme.primary),
+                          Icon(
+                            Icons.lock_outline,
+                            size: 48,
+                            color: theme.colorScheme.primary,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             title,
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             subtitle,
-                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 32),
@@ -211,12 +241,17 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                           if (_error.isNotEmpty)
                             Text(
                               _error,
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
                               textAlign: TextAlign.center,
                             )
                           else
                             const SizedBox(height: 16),
-                          const SizedBox(height: 48), // Espaciador antes del teclado
+                          const SizedBox(
+                            height: 48,
+                          ), // Espaciador antes del teclado
                           _buildNumpad(),
                           const SizedBox(height: 24),
                         ],

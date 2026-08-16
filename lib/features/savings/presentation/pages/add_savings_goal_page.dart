@@ -17,7 +17,7 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
   String _name = '';
   double _targetAmount = 0.0;
   DateTime? _deadline;
-  
+
   bool _isProtected = false;
   bool _deductFromBalance = true;
   int _priority = 0;
@@ -25,7 +25,7 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: Stack(
@@ -36,8 +36,8 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
             right: 0,
             height: 250,
             child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
+              duration: const Duration(milliseconds: 500),
+
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(ref.watch(appBackgroundProvider)),
@@ -63,7 +63,10 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
                       IconButton(
@@ -73,7 +76,10 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                       const SizedBox(width: 8),
                       Text(
                         'Nueva Meta de Ahorro',
-                        style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -98,7 +104,8 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                               labelText: 'Nombre de la Meta (ej. Viaje)',
                               prefixIcon: Icon(Icons.title),
                             ),
-                            validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Requerido' : null,
                             onSaved: (v) => _name = v!,
                           ),
                           const SizedBox(height: 16),
@@ -107,33 +114,46 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                               labelText: 'Monto Objetivo',
                               prefixIcon: Icon(Icons.attach_money),
                             ),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            validator: (v) => v == null || double.tryParse(v) == null ? 'Monto inválido' : null,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validator: (v) =>
+                                v == null || double.tryParse(v) == null
+                                ? 'Monto inválido'
+                                : null,
                             onSaved: (v) => _targetAmount = double.parse(v!),
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             decoration: const InputDecoration(
                               labelText: 'Prioridad (Reglas Automáticas)',
-                              helperText: 'Menor número = mayor prioridad (ej. 1 se procesa antes que 2)',
+                              helperText:
+                                  'Menor número = mayor prioridad (ej. 1 se procesa antes que 2)',
                               prefixIcon: Icon(Icons.low_priority),
                             ),
                             keyboardType: TextInputType.number,
                             initialValue: '0',
-                            onSaved: (v) => _priority = int.tryParse(v ?? '0') ?? 0,
+                            onSaved: (v) =>
+                                _priority = int.tryParse(v ?? '0') ?? 0,
                           ),
                           const SizedBox(height: 16),
                           SwitchListTile(
                             title: const Text('Proteger Meta'),
-                            subtitle: const Text('Pedir confirmación extra antes de retirar fondos'),
+                            subtitle: const Text(
+                              'Pedir confirmación extra antes de retirar fondos',
+                            ),
                             value: _isProtected,
-                            onChanged: (val) => setState(() => _isProtected = val),
+                            onChanged: (val) =>
+                                setState(() => _isProtected = val),
                           ),
                           SwitchListTile(
                             title: const Text('Vincular con Saldo Real'),
-                            subtitle: const Text('Restar los ahorros del saldo disponible de tu cuenta'),
+                            subtitle: const Text(
+                              'Restar los ahorros del saldo disponible de tu cuenta',
+                            ),
                             value: _deductFromBalance,
-                            onChanged: (val) => setState(() => _deductFromBalance = val),
+                            onChanged: (val) =>
+                                setState(() => _deductFromBalance = val),
                           ),
                           const SizedBox(height: 32),
                           FilledButton(
@@ -150,7 +170,9 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                                   priority: _priority,
                                   deductFromBalance: _deductFromBalance,
                                 );
-                                ref.read(savingsGoalsProvider.notifier).addGoal(newGoal);
+                                ref
+                                    .read(savingsGoalsProvider.notifier)
+                                    .addGoal(newGoal);
                                 context.pop();
                               }
                             },
@@ -160,8 +182,14 @@ class _AddSavingsGoalPageState extends ConsumerState<AddSavingsGoalPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: const Text('Guardar Meta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          )
+                            child: const Text(
+                              'Guardar Meta',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),

@@ -11,4 +11,6 @@ class PeriodViewNotifier extends Notifier<PeriodView> {
   }
 }
 
-final periodViewProvider = NotifierProvider<PeriodViewNotifier, PeriodView>(PeriodViewNotifier.new);
+final periodViewProvider = NotifierProvider<PeriodViewNotifier, PeriodView>(
+  PeriodViewNotifier.new,
+);

@@ -12,12 +12,7 @@ class LoanPaymentEntity {
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'loan_id': loanId,
-      'amount': amount,
-      'date': date,
-    };
+    return {'id': id, 'loan_id': loanId, 'amount': amount, 'date': date};
   }
 
   factory LoanPaymentEntity.fromMap(Map<String, dynamic> map) {

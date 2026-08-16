@@ -3,21 +3,28 @@ import '../../../../core/database/app_database.dart';
 import '../../domain/entities/notification_preference.dart';
 import '../../data/repositories/notification_preference_repository.dart';
 
-final notificationPreferenceRepositoryProvider = Provider<NotificationPreferenceRepository>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return NotificationPreferenceRepository(db);
-});
+final notificationPreferenceRepositoryProvider =
+    Provider<NotificationPreferenceRepository>((ref) {
+      final db = ref.watch(appDatabaseProvider);
+      return NotificationPreferenceRepository(db);
+    });
 
-final notificationPreferencesProvider = FutureProvider<List<NotificationPreference>>((ref) async {
-  final repo = ref.watch(notificationPreferenceRepositoryProvider);
-  return await repo.getPreferences();
-});
+final notificationPreferencesProvider =
+    FutureProvider<List<NotificationPreference>>((ref) async {
+      final repo = ref.watch(notificationPreferenceRepositoryProvider);
+      return await repo.getPreferences();
+    });
 
-final notificationPreferenceNotifierProvider = AsyncNotifierProvider<NotificationPreferenceNotifier, List<NotificationPreference>>(() {
-  return NotificationPreferenceNotifier();
-});
+final notificationPreferenceNotifierProvider =
+    AsyncNotifierProvider<
+      NotificationPreferenceNotifier,
+      List<NotificationPreference>
+    >(() {
+      return NotificationPreferenceNotifier();
+    });
 
-class NotificationPreferenceNotifier extends AsyncNotifier<List<NotificationPreference>> {
+class NotificationPreferenceNotifier
+    extends AsyncNotifier<List<NotificationPreference>> {
   @override
   Future<List<NotificationPreference>> build() async {
     final repo = ref.watch(notificationPreferenceRepositoryProvider);

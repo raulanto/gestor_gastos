@@ -34,7 +34,8 @@ class LoanRepositoryImpl implements LoanRepository {
   @override
   Future<LoanEntity?> getLoanById(int id) async {
     final db = await _appDatabase.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      '''
       SELECT 
         l.*, 
         p.name as person_name_joined, 
@@ -43,7 +44,9 @@ class LoanRepositoryImpl implements LoanRepository {
       FROM loans l
       LEFT JOIN persons p ON l.person_id = p.id
       WHERE l.id = ?
-    ''', [id]);
+    ''',
+      [id],
+    );
     if (maps.isNotEmpty) {
       return LoanEntity.fromMap(maps.first);
     }
@@ -70,11 +73,7 @@ class LoanRepositoryImpl implements LoanRepository {
   @override
   Future<void> deleteLoan(int id) async {
     final db = await _appDatabase.database;
-    await db.delete(
-      'loans',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('loans', where: 'id = ?', whereArgs: [id]);
   }
 
   @override
@@ -99,10 +98,6 @@ class LoanRepositoryImpl implements LoanRepository {
   @override
   Future<void> deleteLoanPayment(int paymentId) async {
     final db = await _appDatabase.database;
-    await db.delete(
-      'loan_payments',
-      where: 'id = ?',
-      whereArgs: [paymentId],
-    );
+    await db.delete('loan_payments', where: 'id = ?', whereArgs: [paymentId]);
   }
 }

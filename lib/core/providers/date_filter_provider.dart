@@ -12,4 +12,6 @@ class SelectedMonthNotifier extends Notifier<DateTime> {
   }
 }
 
-final selectedMonthProvider = NotifierProvider<SelectedMonthNotifier, DateTime>(SelectedMonthNotifier.new);
+final selectedMonthProvider = NotifierProvider<SelectedMonthNotifier, DateTime>(
+  SelectedMonthNotifier.new,
+);

@@ -9,7 +9,8 @@ class AddEditAccountDialog extends ConsumerStatefulWidget {
   const AddEditAccountDialog({super.key, this.account});
 
   @override
-  ConsumerState<AddEditAccountDialog> createState() => _AddEditAccountDialogState();
+  ConsumerState<AddEditAccountDialog> createState() =>
+      _AddEditAccountDialogState();
 }
 
 class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
@@ -40,9 +41,12 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.account?.name ?? '');
-    _balanceController = TextEditingController(text: widget.account?.balance.toStringAsFixed(2) ?? '');
+    _balanceController = TextEditingController(
+      text: widget.account?.balance.toStringAsFixed(2) ?? '',
+    );
     _selectedIcon = widget.account?.iconCode ?? _availableIcons.first.codePoint;
-    _selectedColor = widget.account?.colorCode ?? _availableColors.first.toARGB32();
+    _selectedColor =
+        widget.account?.colorCode ?? _availableColors.first.toARGB32();
   }
 
   @override
@@ -57,7 +61,9 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
     final balance = double.tryParse(_balanceController.text) ?? 0.0;
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ingrese un nombre')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Ingrese un nombre')));
       return;
     }
 
@@ -88,13 +94,21 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nombre', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                labelText: 'Nombre',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _balanceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Saldo Inicial', border: OutlineInputBorder()),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Saldo Inicial',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
             const Text('Icono', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -107,8 +121,15 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
                 return InkWell(
                   onTap: () => setState(() => _selectedIcon = icon.codePoint),
                   child: CircleAvatar(
-                    backgroundColor: isSelected ? Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
-                    child: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey),
+                    backgroundColor: isSelected
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Colors.transparent,
+                    child: Icon(
+                      icon,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                    ),
                   ),
                 );
               }).toList(),
@@ -122,14 +143,20 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
               children: _availableColors.map((color) {
                 final isSelected = color.toARGB32() == _selectedColor;
                 return InkWell(
-                  onTap: () => setState(() => _selectedColor = color.toARGB32()),
+                  onTap: () =>
+                      setState(() => _selectedColor = color.toARGB32()),
                   child: Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
-                      border: isSelected ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3) : null,
+                      border: isSelected
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 3,
+                            )
+                          : null,
                     ),
                   ),
                 );
@@ -143,10 +170,7 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: _save,
-          child: const Text('Guardar'),
-        ),
+        ElevatedButton(onPressed: _save, child: const Text('Guardar')),
       ],
     );
   }

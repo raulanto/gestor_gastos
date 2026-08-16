@@ -24,7 +24,9 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
   void setThemeMode(ThemeMode mode) {
     state = mode;
-    ref.read(sharedPreferencesProvider).setString(_themeModeKey, mode.toString());
+    ref
+        .read(sharedPreferencesProvider)
+        .setString(_themeModeKey, mode.toString());
   }
 }
 
@@ -95,13 +97,17 @@ class AppBackgroundNotifier extends Notifier<String> {
   void previousBackground() {
     int currentIndex = availableBackgrounds.indexOf(state);
     if (currentIndex == -1) currentIndex = 0;
-    int prevIndex = (currentIndex - 1 + availableBackgrounds.length) % availableBackgrounds.length;
+    int prevIndex =
+        (currentIndex - 1 + availableBackgrounds.length) %
+        availableBackgrounds.length;
     final newBg = availableBackgrounds[prevIndex];
     state = newBg;
     ref.read(sharedPreferencesProvider).setString(_bgKey, newBg);
   }
 }
 
-final appBackgroundProvider = NotifierProvider<AppBackgroundNotifier, String>(() {
-  return AppBackgroundNotifier();
-});
+final appBackgroundProvider = NotifierProvider<AppBackgroundNotifier, String>(
+  () {
+    return AppBackgroundNotifier();
+  },
+);

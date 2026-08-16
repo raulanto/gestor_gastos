@@ -35,7 +35,9 @@ class SavingsGoalsNotifier extends AsyncNotifier<List<SavingsGoalEntity>> {
     final repo = ref.read(savingsRepositoryProvider);
     await repo.updateGoal(goal);
     final list = state.value ?? [];
-    state = AsyncValue.data(list.map((e) => e.id == goal.id ? goal : e).toList());
+    state = AsyncValue.data(
+      list.map((e) => e.id == goal.id ? goal : e).toList(),
+    );
   }
 
   Future<void> deleteGoal(int id) async {
@@ -46,14 +48,24 @@ class SavingsGoalsNotifier extends AsyncNotifier<List<SavingsGoalEntity>> {
   }
 }
 
-final savingsGoalsProvider = AsyncNotifierProvider<SavingsGoalsNotifier, List<SavingsGoalEntity>>(SavingsGoalsNotifier.new);
+final savingsGoalsProvider =
+    AsyncNotifierProvider<SavingsGoalsNotifier, List<SavingsGoalEntity>>(
+      SavingsGoalsNotifier.new,
+    );
 
-final savingsGoalTransactionsProvider = FutureProvider.family<List<SavingsTransactionEntity>, int>((ref, goalId) async {
-  final repo = ref.watch(savingsRepositoryProvider);
-  return repo.getTransactionsByGoal(goalId);
-});
+final savingsGoalTransactionsProvider =
+    FutureProvider.family<List<SavingsTransactionEntity>, int>((
+      ref,
+      goalId,
+    ) async {
+      final repo = ref.watch(savingsRepositoryProvider);
+      return repo.getTransactionsByGoal(goalId);
+    });
 
-final savingsGoalByIdProvider = Provider.family<SavingsGoalEntity?, String>((ref, id) {
+final savingsGoalByIdProvider = Provider.family<SavingsGoalEntity?, String>((
+  ref,
+  id,
+) {
   final goals = ref.watch(savingsGoalsProvider);
   final parsedId = int.tryParse(id);
   if (parsedId == null) return null;

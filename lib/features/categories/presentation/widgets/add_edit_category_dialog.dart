@@ -9,7 +9,8 @@ class AddEditCategoryDialog extends ConsumerStatefulWidget {
   const AddEditCategoryDialog({super.key, this.category});
 
   @override
-  ConsumerState<AddEditCategoryDialog> createState() => _AddEditCategoryDialogState();
+  ConsumerState<AddEditCategoryDialog> createState() =>
+      _AddEditCategoryDialogState();
 }
 
 class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
@@ -46,8 +47,10 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name ?? '');
-    _selectedIcon = widget.category?.iconCode ?? _availableIcons.first.codePoint;
-    _selectedColor = widget.category?.colorCode ?? _availableColors.first.toARGB32();
+    _selectedIcon =
+        widget.category?.iconCode ?? _availableIcons.first.codePoint;
+    _selectedColor =
+        widget.category?.colorCode ?? _availableColors.first.toARGB32();
     _selectedParentId = widget.category?.parentId;
   }
 
@@ -61,13 +64,19 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ingrese un nombre')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Ingrese un nombre')));
       return;
     }
 
     // A category cannot be its own parent
     if (widget.category != null && widget.category!.id == _selectedParentId) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Una categoría no puede ser padre de sí misma')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Una categoría no puede ser padre de sí misma'),
+        ),
+      );
       return;
     }
 
@@ -92,7 +101,9 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
     final categoriesState = ref.watch(categoriesProvider);
 
     return AlertDialog(
-      title: Text(widget.category == null ? 'Nueva Categoría' : 'Editar Categoría'),
+      title: Text(
+        widget.category == null ? 'Nueva Categoría' : 'Editar Categoría',
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -100,27 +111,39 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nombre', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                labelText: 'Nombre',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
-            
+
             // Parent Selector
             categoriesState.when(
               data: (categories) {
                 // Solo permitimos elegir como padre a categorías principales
-                final mainCategories = categories.where((c) => c.parentId == null && c.id != widget.category?.id).toList();
-                
+                final mainCategories = categories
+                    .where(
+                      (c) => c.parentId == null && c.id != widget.category?.id,
+                    )
+                    .toList();
+
                 if (mainCategories.isEmpty) return const SizedBox.shrink();
 
                 return DropdownButtonFormField<int?>(
-                  decoration: const InputDecoration(labelText: 'Categoría Padre (Opcional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Categoría Padre (Opcional)',
+                    border: OutlineInputBorder(),
+                  ),
                   initialValue: _selectedParentId,
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('Ninguna (Principal)')),
-                    ...mainCategories.map((c) => DropdownMenuItem(
-                      value: c.id,
-                      child: Text(c.name),
-                    ))
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Ninguna (Principal)'),
+                    ),
+                    ...mainCategories.map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    ),
                   ],
                   onChanged: (val) => setState(() => _selectedParentId = val),
                 );
@@ -128,7 +151,10 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
-            if (categoriesState.value?.any((c) => c.parentId == null && c.id != widget.category?.id) == true)
+            if (categoriesState.value?.any(
+                  (c) => c.parentId == null && c.id != widget.category?.id,
+                ) ==
+                true)
               const SizedBox(height: 16),
 
             const Text('Icono', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -141,8 +167,15 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
                 return InkWell(
                   onTap: () => setState(() => _selectedIcon = icon.codePoint),
                   child: CircleAvatar(
-                    backgroundColor: isSelected ? Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
-                    child: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey),
+                    backgroundColor: isSelected
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Colors.transparent,
+                    child: Icon(
+                      icon,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                    ),
                   ),
                 );
               }).toList(),
@@ -156,14 +189,20 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
               children: _availableColors.map((color) {
                 final isSelected = color.toARGB32() == _selectedColor;
                 return InkWell(
-                  onTap: () => setState(() => _selectedColor = color.toARGB32()),
+                  onTap: () =>
+                      setState(() => _selectedColor = color.toARGB32()),
                   child: Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
-                      border: isSelected ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3) : null,
+                      border: isSelected
+                          ? Border.all(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              width: 3,
+                            )
+                          : null,
                     ),
                   ),
                 );
@@ -177,10 +216,7 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
-        ElevatedButton(
-          onPressed: _save,
-          child: const Text('Guardar'),
-        ),
+        ElevatedButton(onPressed: _save, child: const Text('Guardar')),
       ],
     );
   }

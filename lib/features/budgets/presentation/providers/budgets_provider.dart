@@ -20,48 +20,60 @@ class BudgetProgress {
 
   BudgetProgress({required this.budget, required this.actualAmount});
 
-  double get progressPercentage => budget.amount > 0 ? actualAmount / budget.amount : 0.0;
+  double get progressPercentage =>
+      budget.amount > 0 ? actualAmount / budget.amount : 0.0;
 }
 
-final monthlyBudgetsProvider = FutureProvider.family<List<BudgetProgress>, String>((ref, monthYear) async {
-  ref.watch(transactionsProvider);
-  final repo = ref.watch(budgetRepositoryProvider);
-  final budgets = await repo.getBudgetsByMonth(monthYear);
-  
-  List<BudgetProgress> progressList = [];
-  for (var b in budgets) {
-    double actual = 0.0;
-    if (b.categoryId != null) {
-      actual = await repo.getActualSpendForCategory(b.categoryId!, monthYear);
-    } else if (b.savingsGoalId != null) {
-      actual = await repo.getActualSavingsForGoal(b.savingsGoalId!, monthYear);
-    }
-    progressList.add(BudgetProgress(budget: b, actualAmount: actual));
-  }
-  
-  return progressList;
-});
+final monthlyBudgetsProvider =
+    FutureProvider.family<List<BudgetProgress>, String>((ref, monthYear) async {
+      ref.watch(transactionsProvider);
+      final repo = ref.watch(budgetRepositoryProvider);
+      final budgets = await repo.getBudgetsByMonth(monthYear);
 
-final globalBudgetProvider = FutureProvider.family<Map<String, double>, String>((ref, monthYear) async {
-  final progressList = await ref.watch(monthlyBudgetsProvider(monthYear).future);
-  
-  double totalBudgeted = 0.0;
-  double totalSpent = 0.0;
-  double totalAvailable = 0.0;
-  
-  for (var p in progressList) {
-    if (p.budget.categoryId != null) {
-      totalBudgeted += p.budget.amount;
-      totalSpent += p.actualAmount;
-      if (p.budget.amount > p.actualAmount) {
-        totalAvailable += (p.budget.amount - p.actualAmount);
+      List<BudgetProgress> progressList = [];
+      for (var b in budgets) {
+        double actual = 0.0;
+        if (b.categoryId != null) {
+          actual = await repo.getActualSpendForCategory(
+            b.categoryId!,
+            monthYear,
+          );
+        } else if (b.savingsGoalId != null) {
+          actual = await repo.getActualSavingsForGoal(
+            b.savingsGoalId!,
+            monthYear,
+          );
+        }
+        progressList.add(BudgetProgress(budget: b, actualAmount: actual));
+      }
+
+      return progressList;
+    });
+
+final globalBudgetProvider = FutureProvider.family<Map<String, double>, String>(
+  (ref, monthYear) async {
+    final progressList = await ref.watch(
+      monthlyBudgetsProvider(monthYear).future,
+    );
+
+    double totalBudgeted = 0.0;
+    double totalSpent = 0.0;
+    double totalAvailable = 0.0;
+
+    for (var p in progressList) {
+      if (p.budget.categoryId != null) {
+        totalBudgeted += p.budget.amount;
+        totalSpent += p.actualAmount;
+        if (p.budget.amount > p.actualAmount) {
+          totalAvailable += (p.budget.amount - p.actualAmount);
+        }
       }
     }
-  }
-  
-  return {
-    'budgeted': totalBudgeted,
-    'spent': totalSpent,
-    'available': totalAvailable,
-  };
-});
+
+    return {
+      'budgeted': totalBudgeted,
+      'spent': totalSpent,
+      'available': totalAvailable,
+    };
+  },
+);

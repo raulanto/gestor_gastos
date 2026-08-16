@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/transaction.dart';
 
@@ -11,7 +12,9 @@ class TransactionAmountHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final isExpense = transaction.type == 'expense';
     final amountColor = isExpense ? Colors.red : Colors.green;
-    final typeLabel = isExpense ? 'Gasto' : (transaction.type == 'income' ? 'Ingreso' : 'Transferencia');
+    final typeLabel = isExpense
+        ? 'Gasto'
+        : (transaction.type == 'income' ? 'Ingreso' : 'Transferencia');
 
     return Center(
       child: Column(
@@ -22,7 +25,7 @@ class TransactionAmountHeader extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '\$${transaction.amount.toStringAsFixed(2)}',
+            CurrencyUtils.formatAmount(transaction.amount),
             style: theme.textTheme.displayMedium?.copyWith(
               color: amountColor,
               fontWeight: FontWeight.bold,

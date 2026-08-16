@@ -25,7 +25,8 @@ class IconUtils {
     Icons.calendar_today.codePoint: Icons.calendar_today,
     Icons.shopping_bag_outlined.codePoint: Icons.shopping_bag_outlined,
     Icons.swap_horiz.codePoint: Icons.swap_horiz,
-    Icons.account_balance_wallet_outlined.codePoint: Icons.account_balance_wallet_outlined,
+    Icons.account_balance_wallet_outlined.codePoint:
+        Icons.account_balance_wallet_outlined,
   };
 
   static IconData getIcon(int codePoint) {

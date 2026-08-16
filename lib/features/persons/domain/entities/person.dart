@@ -4,20 +4,10 @@ class PersonEntity {
   final String? phone;
   final String? photoPath;
 
-  PersonEntity({
-    this.id,
-    required this.name,
-    this.phone,
-    this.photoPath,
-  });
+  PersonEntity({this.id, required this.name, this.phone, this.photoPath});
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'phone': phone,
-      'photo_path': photoPath,
-    };
+    return {'id': id, 'name': name, 'phone': phone, 'photo_path': photoPath};
   }
 
   factory PersonEntity.fromMap(Map<String, dynamic> map) {

@@ -31,12 +31,16 @@ class LoansContent extends StatelessWidget {
             children: [
               if (activeLoans.isNotEmpty) ...[
                 const SectionTitle('Activos'),
-                ...activeLoans.map((loan) => LoanCard(loan: loan, isActive: true)),
+                ...activeLoans.map(
+                  (loan) => LoanCard(loan: loan, isActive: true),
+                ),
                 const SizedBox(height: 16),
               ],
               if (paidLoans.isNotEmpty) ...[
                 const SectionTitle('Liquidados'),
-                ...paidLoans.map((loan) => LoanCard(loan: loan, isActive: false)),
+                ...paidLoans.map(
+                  (loan) => LoanCard(loan: loan, isActive: false),
+                ),
               ],
             ],
           );

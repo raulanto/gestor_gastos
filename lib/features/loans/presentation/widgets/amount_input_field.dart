@@ -9,9 +9,9 @@ class AmountInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       decoration: const InputDecoration(
-        labelText: 'Monto', 
-        prefixIcon: Icon(Icons.attach_money), 
-        border: OutlineInputBorder()
+        labelText: 'Monto',
+        prefixIcon: Icon(Icons.attach_money),
+        border: OutlineInputBorder(),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       validator: (v) {

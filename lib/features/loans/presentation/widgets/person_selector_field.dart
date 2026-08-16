@@ -16,7 +16,9 @@ class PersonSelectorField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        final person = await context.push<PersonEntity?>('/persons?select=true');
+        final person = await context.push<PersonEntity?>(
+          '/persons?select=true',
+        );
         if (person != null) {
           onChanged(person);
         }

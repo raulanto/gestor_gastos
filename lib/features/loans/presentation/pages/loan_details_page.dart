@@ -1,3 +1,4 @@
+import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -22,12 +23,14 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
     if (loan == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Préstamo no encontrado')),
-        body: const Center(child: Text('El préstamo no existe o fue eliminado')),
+        body: const Center(
+          child: Text('El préstamo no existe o fue eliminado'),
+        ),
       );
     }
-    
+
     final paymentsAsync = ref.watch(loanPaymentsProvider(loan.id!));
-    
+
     return Scaffold(
       appBar: AppBar(title: const Text('Detalles del Préstamo')),
       body: paymentsAsync.when(
@@ -46,7 +49,10 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
                 isPaid: isPaid,
               ),
               const SizedBox(height: 24),
-              const Text('Historial de Abonos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Historial de Abonos',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               if (payments.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -55,8 +61,12 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
               for (final p in payments)
                 ListTile(
                   leading: const Icon(Icons.payment, color: Colors.green),
-                  title: Text('\$${p.amount.toStringAsFixed(2)}'),
-                  subtitle: Text(DateFormat('dd/MM/yyyy hh:mm a').format(DateTime.parse(p.date))),
+                  title: Text(CurrencyUtils.formatAmount(p.amount)),
+                  subtitle: Text(
+                    DateFormat(
+                      'dd/MM/yyyy hh:mm a',
+                    ).format(DateTime.parse(p.date)),
+                  ),
                 ),
               const SizedBox(height: 24),
               if (!isPaid)
@@ -78,9 +88,10 @@ class _LoanDetailsPageState extends ConsumerState<LoanDetailsPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) => AddPaymentDialog(remaining: remaining, loan: loan),
     );
   }
 }
-

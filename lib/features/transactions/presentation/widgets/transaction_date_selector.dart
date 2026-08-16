@@ -25,12 +25,17 @@ class TransactionDateSelector extends StatelessWidget {
         }
       },
       child: InputDecorator(
-        decoration: const InputDecoration(labelText: 'Fecha', border: OutlineInputBorder()),
+        decoration: const InputDecoration(
+          labelText: 'Fecha',
+          border: OutlineInputBorder(),
+        ),
         child: Row(
           children: [
             const Icon(Icons.calendar_today),
             const SizedBox(width: 8),
-            Text("${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}"),
+            Text(
+              "${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}",
+            ),
           ],
         ),
       ),

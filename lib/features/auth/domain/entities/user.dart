@@ -3,11 +3,7 @@ class User {
   final String username;
   final String? photoPath;
 
-  const User({
-    required this.id,
-    required this.username,
-    this.photoPath,
-  });
+  const User({required this.id, required this.username, this.photoPath});
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
@@ -18,11 +14,6 @@ class User {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'username': username,
-      'photo_path': photoPath,
-    };
+    return {'id': id, 'username': username, 'photo_path': photoPath};
   }
 }
-

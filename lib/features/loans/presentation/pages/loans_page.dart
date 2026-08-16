@@ -22,9 +22,7 @@ class LoansPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const LoansHeader(),
-              Expanded(
-                child: LoansContent(loansAsync: loansAsync),
-              ),
+              Expanded(child: LoansContent(loansAsync: loansAsync)),
             ],
           ),
         ],

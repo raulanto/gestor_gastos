@@ -9,7 +9,8 @@ class EditSavingsGoalDialog extends ConsumerStatefulWidget {
   const EditSavingsGoalDialog({super.key, required this.goal});
 
   @override
-  ConsumerState<EditSavingsGoalDialog> createState() => _EditSavingsGoalDialogState();
+  ConsumerState<EditSavingsGoalDialog> createState() =>
+      _EditSavingsGoalDialogState();
 }
 
 class _EditSavingsGoalDialogState extends ConsumerState<EditSavingsGoalDialog> {
@@ -42,16 +43,23 @@ class _EditSavingsGoalDialogState extends ConsumerState<EditSavingsGoalDialog> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: const InputDecoration(labelText: 'Nombre de la Meta'),
-                validator: (v) => v == null || v.isEmpty ? 'El nombre es obligatorio' : null,
+                decoration: const InputDecoration(
+                  labelText: 'Nombre de la Meta',
+                ),
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'El nombre es obligatorio' : null,
                 onSaved: (v) => _name = v ?? '',
               ),
               const SizedBox(height: 16),
               TextFormField(
                 initialValue: _targetAmount.toStringAsFixed(2),
                 decoration: const InputDecoration(labelText: 'Monto Objetivo'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (v) => v == null || double.tryParse(v) == null ? 'Monto inválido' : null,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (v) => v == null || double.tryParse(v) == null
+                    ? 'Monto inválido'
+                    : null,
                 onSaved: (v) => _targetAmount = double.parse(v!),
               ),
               const SizedBox(height: 16),
@@ -95,8 +103,10 @@ class _EditSavingsGoalDialogState extends ConsumerState<EditSavingsGoalDialog> {
                 deductFromBalance: _deductFromBalance,
                 priority: _priority,
               );
-              
-              await ref.read(savingsGoalsProvider.notifier).updateGoal(updatedGoal);
+
+              await ref
+                  .read(savingsGoalsProvider.notifier)
+                  .updateGoal(updatedGoal);
               if (context.mounted) {
                 Navigator.pop(context, updatedGoal);
               }

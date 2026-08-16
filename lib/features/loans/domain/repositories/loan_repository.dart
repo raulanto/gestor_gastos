@@ -7,7 +7,7 @@ abstract class LoanRepository {
   Future<int> createLoan(LoanEntity loan);
   Future<void> updateLoan(LoanEntity loan);
   Future<void> deleteLoan(int id);
-  
+
   Future<List<LoanPaymentEntity>> getLoanPayments(int loanId);
   Future<int> addLoanPayment(LoanPaymentEntity payment);
   Future<void> deleteLoanPayment(int paymentId);
