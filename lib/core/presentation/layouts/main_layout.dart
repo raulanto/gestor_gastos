@@ -39,39 +39,19 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       extendBody: true,
       body: widget.navigationShell,
       bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  borderRadius: BorderRadius.circular(40),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildNavItem(Icons.home, Icons.home_outlined, 0),
-                    const SizedBox(width: 4),
-                    _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 1),
-                    const SizedBox(width: 4),
-                    _buildNavItem(Icons.handshake, Icons.handshake_outlined, 4),
-                    const SizedBox(width: 4),
-                    _buildNavItem(Icons.savings, Icons.savings_outlined, 2),
-                    const SizedBox(width: 4),
-                    _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 3),
-                  ],
-                ),
-              ),
+              _buildNavItem(Icons.home, Icons.home_outlined, 'Inicio', 0),
+              _buildNavItem(Icons.autorenew, Icons.autorenew_outlined, 'Recurrentes', 1),
+              _buildNavItem(Icons.handshake, Icons.handshake_outlined, 'Préstamos', 4),
+              _buildNavItem(Icons.savings, Icons.savings_outlined, 'Ahorros', 2),
+              _buildNavItem(Icons.pie_chart, Icons.pie_chart_outline, 'Presupuestos', 3),
             ],
           ),
         ),
@@ -82,27 +62,43 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   Widget _buildNavItem(
     IconData selectedIcon,
     IconData unselectedIcon,
+    String label,
     int index,
   ) {
     final isSelected = widget.navigationShell.currentIndex == index;
     final theme = Theme.of(context);
+    final selectedColor = theme.colorScheme.onSurface;
+    final unselectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+
     return GestureDetector(
       onTap: () => _goBranch(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutQuint,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Icon(
-          isSelected ? selectedIcon : unselectedIcon,
-          size: 24,
-          color: isSelected
-              ? theme.colorScheme.onSurface
-              : theme.colorScheme.surface.withValues(alpha: 0.5),
-        ),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutQuint,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            decoration: BoxDecoration(
+              color: isSelected ? selectedColor : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              isSelected ? selectedIcon : unselectedIcon,
+              size: 26,
+              color: isSelected ? theme.colorScheme.surface : unselectedColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: isSelected ? selectedColor : unselectedColor,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }
