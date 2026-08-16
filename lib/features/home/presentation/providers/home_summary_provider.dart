@@ -56,20 +56,18 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
   final categories = categoriesAsync.value ?? [];
 
   List<TransactionEntity> txs = [];
-  
+  final now = DateTime.now();
+
   for (var t in allTransactions) {
     final date = DateTime.parse(t.date);
     bool include = false;
     if (periodView == PeriodView.day) {
-      final referenceDate = (selectedMonth.year == DateTime.now().year && selectedMonth.month == DateTime.now().month) 
-          ? DateTime.now() 
-          : DateTime(selectedMonth.year, selectedMonth.month, 1);
-      include = date.year == referenceDate.year && date.month == referenceDate.month && date.day == referenceDate.day;
+      // "Hoy" siempre se refiere al día real, independientemente del mes
+      // que se haya navegado con las flechas del header.
+      include = date.year == now.year && date.month == now.month && date.day == now.day;
     } else if (periodView == PeriodView.week) {
-      final referenceDate = (selectedMonth.year == DateTime.now().year && selectedMonth.month == DateTime.now().month) 
-          ? DateTime.now() 
-          : DateTime(selectedMonth.year, selectedMonth.month, 1);
-      final weekStart = referenceDate.subtract(Duration(days: referenceDate.weekday - 1));
+      // "Semana" siempre se refiere a la semana actual (lunes-domingo real).
+      final weekStart = now.subtract(Duration(days: now.weekday - 1));
       include = date.isAfter(weekStart.subtract(const Duration(days: 1))) && date.isBefore(weekStart.add(const Duration(days: 7)));
     } else if (periodView == PeriodView.month) {
       include = date.year == selectedMonth.year && date.month == selectedMonth.month;

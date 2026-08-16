@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/providers/date_filter_provider.dart';
+import '../providers/period_view_provider.dart';
 
 import '../../../auth/presentation/providers/auth_provider.dart';
 
@@ -27,7 +28,13 @@ class HomeHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final selectedMonth = ref.watch(selectedMonthProvider);
+    final periodView = ref.watch(periodViewProvider);
     final user = ref.watch(authNotifierProvider).value;
+
+    // "Hoy" y "Semana" siempre apuntan al día/semana real, así que navegar
+    // de mes no tiene efecto en esas vistas.
+    final monthNavEnabled =
+        periodView == PeriodView.month || periodView == PeriodView.year;
 
     String monthStr = DateFormat('MMMM yyyy').format(selectedMonth);
     monthStr = monthStr[0].toUpperCase() + monthStr.substring(1);
@@ -102,40 +109,50 @@ class HomeHeader extends ConsumerWidget {
                           IconButton(
                             icon: Icon(
                               Icons.chevron_left,
-                              color: theme.colorScheme.onPrimary,
+                              color: theme.colorScheme.onPrimary.withValues(
+                                alpha: monthNavEnabled ? 1.0 : 0.3,
+                              ),
                             ),
-                            onPressed: () {
-                              ref
-                                  .read(selectedMonthProvider.notifier)
-                                  .updateMonth(
-                                    DateTime(
-                                      selectedMonth.year,
-                                      selectedMonth.month - 1,
-                                    ),
-                                  );
-                            },
+                            onPressed: !monthNavEnabled
+                                ? null
+                                : () {
+                                    ref
+                                        .read(selectedMonthProvider.notifier)
+                                        .updateMonth(
+                                          DateTime(
+                                            selectedMonth.year,
+                                            selectedMonth.month - 1,
+                                          ),
+                                        );
+                                  },
                           ),
                           Text(
                             monthStr,
                             style: theme.textTheme.titleSmall?.copyWith(
-                              color: theme.colorScheme.onPrimary,
+                              color: theme.colorScheme.onPrimary.withValues(
+                                alpha: monthNavEnabled ? 1.0 : 0.3,
+                              ),
                             ),
                           ),
                           IconButton(
                             icon: Icon(
                               Icons.chevron_right,
-                              color: theme.colorScheme.onPrimary,
+                              color: theme.colorScheme.onPrimary.withValues(
+                                alpha: monthNavEnabled ? 1.0 : 0.3,
+                              ),
                             ),
-                            onPressed: () {
-                              ref
-                                  .read(selectedMonthProvider.notifier)
-                                  .updateMonth(
-                                    DateTime(
-                                      selectedMonth.year,
-                                      selectedMonth.month + 1,
-                                    ),
-                                  );
-                            },
+                            onPressed: !monthNavEnabled
+                                ? null
+                                : () {
+                                    ref
+                                        .read(selectedMonthProvider.notifier)
+                                        .updateMonth(
+                                          DateTime(
+                                            selectedMonth.year,
+                                            selectedMonth.month + 1,
+                                          ),
+                                        );
+                                  },
                           ),
                         ],
                       ),

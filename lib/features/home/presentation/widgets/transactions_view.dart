@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 
 import '../../../transactions/domain/entities/transaction.dart';
 import '../providers/home_summary_provider.dart';
+import '../providers/period_view_provider.dart';
 import '../../../accounts/presentation/providers/account_provider.dart';
+import '../../../../core/providers/date_filter_provider.dart';
 import '../../../../core/theme/theme_provider.dart';
 
 import 'home_header.dart';
@@ -24,11 +26,54 @@ class TransactionsView extends ConsumerStatefulWidget {
 }
 
 class _TransactionsViewState extends ConsumerState<TransactionsView> {
+  static const int _pageSize = 30;
+
   int _chartType = 0; // 0 = Flujo, 1 = Categorías
   bool _isBalanceMinimized = false;
   bool _showCharts = false;
 
   int? _selectedAccountId;
+  int _visibleCount = _pageSize;
+  bool _hasMore = false;
+
+  late final ScrollController _scrollController;
+
+  // Caché para evitar recalcular filtros y agrupaciones en cada frame de animación
+  List<TransactionEntity>? _cachedTransactions;
+  int? _cachedSelectedAccountId;
+  int? _cachedVisibleCount;
+  Map<String, List<TransactionEntity>> _cachedGroupedTransactions = {};
+  List<TransactionEntity> _cachedVisibleTxs = [];
+  bool _cachedHasMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 400) {
+      if (_hasMore) {
+        setState(() {
+          _visibleCount += _pageSize;
+        });
+      }
+    }
+  }
+
+  void _resetPagination() {
+    _visibleCount = _pageSize;
+  }
 
   void _toggleBalanceMinimized() {
     setState(() {
@@ -42,46 +87,71 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
     final accountsState = ref.watch(accountsProvider);
     final theme = Theme.of(context);
 
+    // Reiniciar la paginación cuando cambia el período mostrado, para no
+    // arrastrar un tope de visibilidad calculado sobre otro conjunto de datos.
+    ref.listen(selectedMonthProvider, (prev, next) {
+      if (prev != next) setState(_resetPagination);
+    });
+    ref.listen(periodViewProvider, (prev, next) {
+      if (prev != next) setState(_resetPagination);
+    });
+
     return SafeArea(
       bottom: false,
       child: summaryState.when(
         data: (summary) {
-          // Grouping for the transaction list
-          Map<String, List<TransactionEntity>> groupedTransactions = {};
-          final now = DateTime.now();
-          for (var t in summary.transactions) {
-            // Filtrar aportaciones/retiros de metas de ahorro (no tienen categoría ni splits)
-            if (t.categoryId == null && t.splits.isEmpty) {
-              continue;
-            }
+          // Filtrar por cuenta y descartar aportaciones/retiros de metas de
+          // ahorro (no tienen categoría ni splits) antes de paginar.
+          if (_cachedTransactions != summary.transactions ||
+              _cachedSelectedAccountId != _selectedAccountId ||
+              _cachedVisibleCount != _visibleCount) {
+            
+            final filteredTxs = summary.transactions.where((t) {
+              if (t.categoryId == null && t.splits.isEmpty) return false;
+              if (_selectedAccountId != null &&
+                  _selectedAccountId != -1 &&
+                  t.accountId != _selectedAccountId) {
+                return false;
+              }
+              return true;
+            }).toList();
 
-            if (_selectedAccountId != null &&
-                _selectedAccountId != -1 &&
-                t.accountId != _selectedAccountId) {
-              continue;
-            }
+            _cachedHasMore = _visibleCount < filteredTxs.length;
+            _cachedVisibleTxs = filteredTxs.take(_visibleCount).toList();
 
-            final date = DateTime.parse(t.date);
-            final diff = DateTime(
-              now.year,
-              now.month,
-              now.day,
-            ).difference(DateTime(date.year, date.month, date.day)).inDays;
+            // Agrupación por fecha, cargada de forma incremental al desplazar.
+            final Map<String, List<TransactionEntity>> groupedTransactions = {};
+            final now = DateTime.now();
+            final today = DateTime(now.year, now.month, now.day);
+            
+            for (var t in _cachedVisibleTxs) {
+              final date = DateTime.parse(t.date);
+              final diff = today.difference(DateTime(date.year, date.month, date.day)).inDays;
 
-            String key;
-            if (diff == 0) {
-              key = 'HOY';
-            } else if (diff == 1) {
-              key = 'AYER';
-            } else {
-              key = DateFormat('dd MMM').format(date).toUpperCase();
-            }
+              String key;
+              if (diff == 0) {
+                key = 'HOY';
+              } else if (diff == 1) {
+                key = 'AYER';
+              } else {
+                key = DateFormat('dd MMM').format(date).toUpperCase();
+              }
 
-            if (!groupedTransactions.containsKey(key)) {
-              groupedTransactions[key] = [];
+              if (!groupedTransactions.containsKey(key)) {
+                groupedTransactions[key] = [];
+              }
+              groupedTransactions[key]!.add(t);
             }
-            groupedTransactions[key]!.add(t);
+            
+            _cachedTransactions = summary.transactions;
+            _cachedSelectedAccountId = _selectedAccountId;
+            _cachedVisibleCount = _visibleCount;
+            _cachedGroupedTransactions = groupedTransactions;
           }
+
+          _hasMore = _cachedHasMore;
+          final hasMore = _cachedHasMore;
+          final groupedTransactions = _cachedGroupedTransactions;
 
           return Stack(
             children: [
@@ -96,15 +166,15 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                     ? MediaQuery.of(context).size.height
                     : 350,
                 child: AnimatedContainer(
-  duration: const Duration(milliseconds: 500),
-  
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(ref.watch(appBackgroundProvider)),
-                        fit: BoxFit.cover,
-                      ),
+                  duration: const Duration(milliseconds: 500),
+
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(ref.watch(appBackgroundProvider)),
+                      fit: BoxFit.cover,
                     ),
-                    child: AnimatedContainer(
+                  ),
+                  child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -120,9 +190,9 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                         ],
                       ),
                     ),
-                    ),
                   ),
                 ),
+              ),
               // Restaurar al deslizar hacia arriba
               if (_isBalanceMinimized)
                 Positioned.fill(
@@ -137,9 +207,13 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                     onHorizontalDragEnd: (details) {
                       if (details.primaryVelocity != null) {
                         if (details.primaryVelocity! > 0) {
-                          ref.read(appBackgroundProvider.notifier).previousBackground();
+                          ref
+                              .read(appBackgroundProvider.notifier)
+                              .previousBackground();
                         } else if (details.primaryVelocity! < 0) {
-                          ref.read(appBackgroundProvider.notifier).nextBackground();
+                          ref
+                              .read(appBackgroundProvider.notifier)
+                              .nextBackground();
                         }
                       }
                     },
@@ -163,6 +237,7 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                     topRight: Radius.circular(32),
                   ),
                   child: CustomScrollView(
+                    controller: _scrollController,
                     slivers: [
                       SliverToBoxAdapter(
                         child: Padding(
@@ -176,10 +251,13 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                               ),
                               const SizedBox(height: 32),
                               InkWell(
-                                onTap: () => setState(() => _showCharts = !_showCharts),
+                                onTap: () =>
+                                    setState(() => _showCharts = !_showCharts),
                                 borderRadius: BorderRadius.circular(8),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -187,10 +265,14 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                                       Text(
                                         'Análisis',
                                         style: theme.textTheme.titleMedium
-                                            ?.copyWith(fontWeight: FontWeight.bold),
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                       Icon(
-                                        _showCharts ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                        _showCharts
+                                            ? Icons.keyboard_arrow_up
+                                            : Icons.keyboard_arrow_down,
                                         color: theme.colorScheme.primary,
                                       ),
                                     ],
@@ -201,34 +283,41 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                                 duration: const Duration(milliseconds: 300),
                                 curve: Curves.easeInOut,
                                 alignment: Alignment.topCenter,
-                                child: _showCharts 
-                                  ? Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        const SizedBox(height: 16),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                          child: ChartTypeSelector(
-                                            chartType: _chartType,
-                                            onChanged: (val) {
-                                              setState(() {
-                                                _chartType = val;
-                                              });
-                                            },
+                                child: _showCharts
+                                    ? Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          const SizedBox(height: 16),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                            ),
+                                            child: ChartTypeSelector(
+                                              chartType: _chartType,
+                                              onChanged: (val) {
+                                                setState(() {
+                                                  _chartType = val;
+                                                });
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        SizedBox(
-                                          height: 200,
-                                          child: _chartType == 0
-                                              ? HomeChart(chartData: summary.chartData)
-                                              : HomeCategoryChart(
-                                                  categoryData: summary.categoryExpenses,
-                                                ),
-                                        ),
-                                      ],
-                                    )
-                                  : const SizedBox.shrink(),
+                                          const SizedBox(height: 16),
+                                          SizedBox(
+                                            height: 200,
+                                            child: _chartType == 0
+                                                ? HomeChart(
+                                                    chartData:
+                                                        summary.chartData,
+                                                  )
+                                                : HomeCategoryChart(
+                                                    categoryData: summary
+                                                        .categoryExpenses,
+                                                  ),
+                                          ),
+                                        ],
+                                      )
+                                    : const SizedBox.shrink(),
                               ),
                               const SizedBox(height: 32),
                               Row(
@@ -294,9 +383,10 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                                           size: 20,
                                         ),
                                         tooltip: 'Filtrar por cuenta',
-                                        onSelected: (val) => setState(
-                                          () => _selectedAccountId = val,
-                                        ),
+                                        onSelected: (val) => setState(() {
+                                          _selectedAccountId = val;
+                                          _resetPagination();
+                                        }),
                                         itemBuilder: (context) {
                                           final items = <PopupMenuEntry<int>>[
                                             const PopupMenuItem(
@@ -327,6 +417,22 @@ class _TransactionsViewState extends ConsumerState<TransactionsView> {
                         ),
                       ),
                       TransactionList(groupedTransactions: groupedTransactions),
+                      if (hasMore)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24.0),
+                            child: Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       const SliverPadding(
                         padding: EdgeInsets.only(bottom: 100),
                       ),
