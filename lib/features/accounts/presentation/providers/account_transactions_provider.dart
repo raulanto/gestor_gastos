@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/providers/transaction_provider.dart';
+import '../../../categories/presentation/providers/category_provider.dart';
 import 'package:intl/intl.dart';
 import '../../../home/presentation/providers/period_view_provider.dart';
+import '../../../home/presentation/providers/home_summary_provider.dart' show CategoryExpenseData;
 import '../../../../core/providers/date_filter_provider.dart';
 
 class AccountDateFilterNotifier extends Notifier<Map<int, PeriodView>> {
@@ -24,12 +26,14 @@ class AccountTransactionsSummary {
   final double totalIncome;
   final double totalExpense;
   final Map<String, Map<String, double>> chartData;
+  final List<CategoryExpenseData> categoryExpenses;
 
   AccountTransactionsSummary({
     required this.transactions,
     required this.totalIncome,
     required this.totalExpense,
     required this.chartData,
+    required this.categoryExpenses,
   });
 }
 
@@ -39,9 +43,16 @@ final accountTransactionsSummaryProvider =
       accountId,
     ) {
       final transactionsAsync = ref.watch(transactionsProvider);
+      final categoriesAsync = ref.watch(categoriesProvider);
       final filterMap = ref.watch(accountDateFilterProvider);
       final filter = filterMap[accountId] ?? PeriodView.month;
       final selectedMonth = ref.watch(selectedMonthProvider);
+
+      if (transactionsAsync is AsyncLoading || categoriesAsync is AsyncLoading) {
+        return const AsyncValue.loading();
+      }
+
+      final categories = categoriesAsync.value ?? [];
 
       return transactionsAsync.whenData((allTransactions) {
         var accountTxs = allTransactions
@@ -90,6 +101,7 @@ final accountTransactionsSummaryProvider =
 
         double totalIncome = 0;
         double totalExpense = 0;
+        Map<int, double> catExpMap = {};
 
         // Grouping for chart
         Map<String, Map<String, double>> chartData = {};
@@ -99,6 +111,9 @@ final accountTransactionsSummaryProvider =
             totalIncome += tx.amount;
           } else if (tx.type == 'expense') {
             totalExpense += tx.amount;
+            if (tx.categoryId != null) {
+              catExpMap[tx.categoryId!] = (catExpMap[tx.categoryId!] ?? 0) + tx.amount;
+            }
           }
 
           final date = DateTime.parse(tx.date);
@@ -126,11 +141,23 @@ final accountTransactionsSummaryProvider =
           }
         }
 
+        List<CategoryExpenseData> categoryExpenses = catExpMap.entries.map((e) {
+          final cat = categories.where((c) => c.id == e.key).firstOrNull;
+          return CategoryExpenseData(
+            categoryId: e.key,
+            name: cat?.name ?? 'Desconocida',
+            colorCode: cat?.colorCode ?? 0xFF9E9E9E,
+            amount: e.value,
+          );
+        }).toList();
+        categoryExpenses.sort((a, b) => b.amount.compareTo(a.amount));
+
         return AccountTransactionsSummary(
           transactions: filteredTxs,
           totalIncome: totalIncome,
           totalExpense: totalExpense,
           chartData: chartData,
+          categoryExpenses: categoryExpenses,
         );
       });
     });
