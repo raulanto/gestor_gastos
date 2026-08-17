@@ -37,8 +37,10 @@ class CategoriesPage extends ConsumerWidget {
               final editButton = IconButton(
                 icon: const Icon(Icons.edit, color: Colors.blue),
                 onPressed: () {
-                  showDialog(
+                  showModalBottomSheet(
                     context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
                     builder: (_) =>
                         AddEditCategoryDialog(category: mainCategory),
                   );
@@ -111,8 +113,10 @@ class CategoriesPage extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
-                            showDialog(
+                            showModalBottomSheet(
                               context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
                               builder: (_) =>
                                   AddEditCategoryDialog(category: child),
                             );
@@ -139,8 +143,10 @@ class CategoriesPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
+          showModalBottomSheet(
             context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
             builder: (_) => const AddEditCategoryDialog(),
           );
         },

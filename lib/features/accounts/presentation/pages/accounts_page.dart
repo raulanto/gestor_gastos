@@ -44,8 +44,10 @@ class AccountsPage extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
                       onPressed: () {
-                        showDialog(
+                        showModalBottomSheet(
                           context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
                           builder: (_) =>
                               AddEditAccountDialog(account: account),
                         );
@@ -73,8 +75,10 @@ class AccountsPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
+          showModalBottomSheet(
             context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
             builder: (_) => const AddEditAccountDialog(),
           );
         },

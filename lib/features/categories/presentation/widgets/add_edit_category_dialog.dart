@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/category.dart';
 import '../providers/category_provider.dart';
+import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class AddEditCategoryDialog extends ConsumerStatefulWidget {
   final Category? category;
@@ -19,18 +20,7 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
   late int _selectedColor;
   int? _selectedParentId;
 
-  final List<IconData> _availableIcons = [
-    Icons.category,
-    Icons.shopping_cart,
-    Icons.fastfood,
-    Icons.directions_car,
-    Icons.home,
-    Icons.health_and_safety,
-    Icons.flight,
-    Icons.computer,
-    Icons.movie,
-    Icons.pets,
-  ];
+  late final List<IconData> _availableIcons = IconUtils.allIcons;
 
   final List<Color> _availableColors = [
     Colors.blue,
@@ -99,16 +89,45 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
   @override
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider);
+    final theme = Theme.of(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return AlertDialog(
-      title: Text(
-        widget.category == null ? 'Nueva Categoría' : 'Editar Categoría',
+    return Container(
+      padding: EdgeInsets.only(
+        top: 16,
+        left: 24,
+        right: 24,
+        bottom: bottomInset + 24,
       ),
-      content: SingleChildScrollView(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              widget.category == null ? 'Nueva Categoría' : 'Editar Categoría',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -151,38 +170,51 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
             ),
-            if (categoriesState.value?.any(
-                  (c) => c.parentId == null && c.id != widget.category?.id,
-                ) ==
-                true)
-              const SizedBox(height: 16),
-
-            const Text('Icono', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _availableIcons.map((icon) {
-                final isSelected = icon.codePoint == _selectedIcon;
-                return InkWell(
-                  onTap: () => setState(() => _selectedIcon = icon.codePoint),
-                  child: CircleAvatar(
-                    backgroundColor: isSelected
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : Colors.transparent,
-                    child: Icon(
-                      icon,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey,
-                    ),
-                  ),
-                );
-              }).toList(),
+            const SizedBox(height: 24),
+            Text('Icono', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Container(
+              height: 140,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(8),
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: _availableIcons.map((icon) {
+                    final isSelected = icon.codePoint == _selectedIcon;
+                    final selectedColorObj = Color(_selectedColor);
+                    return InkWell(
+                      onTap: () => setState(() => _selectedIcon = icon.codePoint),
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSelected
+                              ? selectedColorObj.withValues(alpha: 0.2)
+                              : Colors.transparent,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 28,
+                          color: isSelected
+                              ? selectedColorObj
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            const Text('Color', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: 24),
+            Text('Color', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -208,16 +240,25 @@ class _AddEditCategoryDialogState extends ConsumerState<AddEditCategoryDialog> {
                 );
               }).toList(),
             ),
+            const SizedBox(height: 32),
+            SizedBox(
+              height: 50,
+              child: FilledButton(
+                onPressed: _save,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Guardar Categoría',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(onPressed: _save, child: const Text('Guardar')),
-      ],
     );
   }
 }

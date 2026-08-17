@@ -25,9 +25,27 @@ class IconUtils {
     Icons.calendar_today.codePoint: Icons.calendar_today,
     Icons.shopping_bag_outlined.codePoint: Icons.shopping_bag_outlined,
     Icons.swap_horiz.codePoint: Icons.swap_horiz,
-    Icons.account_balance_wallet_outlined.codePoint:
-        Icons.account_balance_wallet_outlined,
+    Icons.account_balance_wallet_outlined.codePoint: Icons.account_balance_wallet_outlined,
+    Icons.school.codePoint: Icons.school,
+    Icons.restaurant.codePoint: Icons.restaurant,
+    Icons.local_cafe.codePoint: Icons.local_cafe,
+    Icons.train.codePoint: Icons.train,
+    Icons.fitness_center.codePoint: Icons.fitness_center,
+    Icons.sports_esports.codePoint: Icons.sports_esports,
+    Icons.checkroom.codePoint: Icons.checkroom,
+    Icons.local_grocery_store.codePoint: Icons.local_grocery_store,
+    Icons.medical_services.codePoint: Icons.medical_services,
+    Icons.subscriptions.codePoint: Icons.subscriptions,
+    Icons.wifi.codePoint: Icons.wifi,
+    Icons.water_drop.codePoint: Icons.water_drop,
+    Icons.bolt.codePoint: Icons.bolt,
+    Icons.local_gas_station.codePoint: Icons.local_gas_station,
+    Icons.phone_iphone.codePoint: Icons.phone_iphone,
+    Icons.child_care.codePoint: Icons.child_care,
+    Icons.card_giftcard.codePoint: Icons.card_giftcard,
   };
+
+  static List<IconData> get allIcons => _iconMap.values.toList();
 
   static IconData getIcon(int codePoint) {
     return _iconMap[codePoint] ?? Icons.help_outline;
