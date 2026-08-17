@@ -4,7 +4,7 @@ void addImport(String path, String importLine) {
   final file = File(path);
   var content = file.readAsStringSync();
   if (!content.contains(importLine)) {
-    content = importLine + '\n' + content;
+    content = '$importLine\n$content';
     file.writeAsStringSync(content);
   }
 }

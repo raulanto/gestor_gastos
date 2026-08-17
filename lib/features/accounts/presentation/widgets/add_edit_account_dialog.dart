@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/account.dart';
 import '../providers/account_provider.dart';
-import 'package:gestor_gastos/core/utils/icon_utils.dart';
 
 class AddEditAccountDialog extends ConsumerStatefulWidget {
   final Account? account;
@@ -20,7 +19,14 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
   late int _selectedIcon;
   late int _selectedColor;
 
-  late final List<IconData> _availableIcons = IconUtils.allIcons;
+  final List<IconData> _availableIcons = [
+    Icons.account_balance_wallet,
+    Icons.account_balance,
+    Icons.credit_card,
+    Icons.savings,
+    Icons.money,
+    Icons.wallet,
+  ];
 
   final List<Color> _availableColors = [
     Colors.blue,
@@ -80,149 +86,132 @@ class _AddEditAccountDialogState extends ConsumerState<AddEditAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return Container(
+    return Padding(
       padding: EdgeInsets.only(
-        top: 16,
-        left: 24,
-        right: 24,
-        bottom: bottomInset + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
+      child: Container(
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              widget.account == null ? 'Nueva Cuenta' : 'Editar Cuenta',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 24),
+              Text(
+                widget.account == null ? 'Nueva Cuenta' : 'Editar Cuenta',
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nombre de la cuenta',
+                  prefixIcon: const Icon(Icons.title),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _balanceController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+              const SizedBox(height: 16),
+              TextField(
+                controller: _balanceController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Saldo Inicial',
+                  prefixIcon: const Icon(Icons.attach_money),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
               ),
-              decoration: const InputDecoration(
-                labelText: 'Saldo Inicial',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text('Icono', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8),
-                child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  alignment: WrapAlignment.center,
-                  children: _availableIcons.map((icon) {
-                    final isSelected = icon.codePoint == _selectedIcon;
-                    final selectedColorObj = Color(_selectedColor);
-                    return InkWell(
-                      onTap: () => setState(() => _selectedIcon = icon.codePoint),
-                      borderRadius: BorderRadius.circular(24),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isSelected
-                              ? selectedColorObj.withValues(alpha: 0.2)
-                              : Colors.transparent,
-                        ),
-                        child: Icon(
-                          icon,
-                          size: 28,
-                          color: isSelected
-                              ? selectedColorObj
-                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                        ),
+              const SizedBox(height: 24),
+              const Text('Icono', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: _availableIcons.map((icon) {
+                  final isSelected = icon.codePoint == _selectedIcon;
+                  return InkWell(
+                    onTap: () => setState(() => _selectedIcon = icon.codePoint),
+                    borderRadius: BorderRadius.circular(24),
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: isSelected
+                          ? Color(_selectedColor).withValues(alpha: 0.2)
+                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      child: Icon(
+                        icon,
+                        color: isSelected
+                            ? Color(_selectedColor)
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text('Color', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _availableColors.map((color) {
-                final isSelected = color.toARGB32() == _selectedColor;
-                return InkWell(
-                  onTap: () =>
-                      setState(() => _selectedColor = color.toARGB32()),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              width: 3,
-                            )
-                          : null,
                     ),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              height: 50,
-              child: FilledButton(
-                onPressed: _save,
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Guardar Cuenta',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                  );
+                }).toList(),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              const Text('Color', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: _availableColors.map((color) {
+                  final isSelected = color.toARGB32() == _selectedColor;
+                  return InkWell(
+                    onTap: () =>
+                        setState(() => _selectedColor = color.toARGB32()),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border: isSelected
+                            ? Border.all(
+                                color: theme.colorScheme.onSurface,
+                                width: 3,
+                              )
+                            : null,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _save,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  backgroundColor: Color(_selectedColor),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Guardar Cuenta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
         ),
       ),
     );

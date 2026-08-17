@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:gestor_gastos/core/utils/currency_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/theme_provider.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +23,6 @@ import '../widgets/transaction_split_list.dart';
 import '../widgets/transaction_date_selector.dart';
 import '../widgets/transaction_note_image_input.dart';
 import '../widgets/category_picker_sheet.dart';
-import 'package:gestor_gastos/core/utils/currency_utils.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   final String? transactionId;

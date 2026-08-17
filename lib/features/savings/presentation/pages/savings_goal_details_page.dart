@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:confetti/confetti.dart';
 import '../../domain/entities/savings_goal.dart';
 import '../providers/savings_provider.dart';
-import '../widgets/edit_savings_goal_dialog.dart';
 import '../widgets/savings_goal_header.dart';
 import '../widgets/savings_transaction_form.dart';
 import '../widgets/savings_transaction_list.dart';

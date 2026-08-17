@@ -61,8 +61,9 @@ class _SavingsTransactionFormState
               if (v == null || v.isEmpty) return 'Requerido';
               final val = double.tryParse(v);
               if (val == null || val <= 0) return 'Monto inválido';
-              if (!widget.isDeposit && val > widget.savedAmount)
+              if (!widget.isDeposit && val > widget.savedAmount) {
                 return 'Saldo insuficiente';
+              }
               return null;
             },
             onSaved: (v) => _amount = double.parse(v!),
@@ -70,8 +71,9 @@ class _SavingsTransactionFormState
           const SizedBox(height: 16),
           accountsState.when(
             data: (accounts) {
-              if (accounts.isEmpty)
+              if (accounts.isEmpty) {
                 return const Text('No hay cuentas disponibles.');
+              }
               // Si solo hay una cuenta, seleccionarla por defecto
               if (_selectedAccountId == null && accounts.isNotEmpty) {
                 _selectedAccountId = accounts.first.id;
@@ -113,8 +115,9 @@ class _SavingsTransactionFormState
               prefixIcon: const Icon(Icons.notes),
             ),
             validator: (v) {
-              if (!widget.isDeposit && (v == null || v.length < 5))
+              if (!widget.isDeposit && (v == null || v.length < 5)) {
                 return 'Debe justificar el retiro (>5 caracteres)';
+              }
               return null;
             },
             onSaved: (v) => _reason = v ?? '',
