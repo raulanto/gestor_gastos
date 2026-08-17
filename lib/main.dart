@@ -7,6 +7,8 @@ import 'core/routing/app_router.dart';
 import 'core/theme/theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/home_widget/home_widget_data_provider.dart';
+import 'core/home_widget/home_widget_service.dart';
 import 'package:workmanager/workmanager.dart';
 import 'core/background/background_task_handler.dart';
 
@@ -40,11 +42,66 @@ void main() async {
   );
 }
 
-class MyApp extends ConsumerWidget {
+/// Resuelve el color primario del tema claro para el [colorSchemeName] dado,
+/// sin construir el [ThemeData] completo. Se usa para mantener el widget de
+/// balance general sincronizado con el mismo color que ve el usuario en la
+/// app, incluso cuando el cambio de tema ocurre sin nuevos datos financieros.
+Color _resolvePrimaryColor(String colorSchemeName) {
+  if (colorSchemeName == 'original') {
+    const textTheme = TextTheme();
+    return MaterialTheme(textTheme).light().colorScheme.primary;
+  }
+  final scheme = FlexScheme.values.firstWhere(
+    (e) => e.toString() == colorSchemeName,
+    orElse: () => FlexScheme.materialBaseline,
+  );
+  return FlexThemeData.light(
+    scheme: scheme,
+    useMaterial3: true,
+    fontFamily: 'SFProRounded',
+  ).colorScheme.primary;
+}
+
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  ProviderSubscription<AsyncValue<HomeWidgetSnapshotData>>?
+  _homeWidgetSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeWidgetSubscription =
+        ref.listenManual<AsyncValue<HomeWidgetSnapshotData>>(
+          homeWidgetSnapshotDataProvider,
+          (previous, next) {
+            next.whenData((data) {
+              HomeWidgetService.updateSnapshot(
+                backgroundAsset: data.backgroundAsset,
+                primaryColor: _resolvePrimaryColor(data.colorSchemeName),
+                balance: data.balance,
+                income: data.income,
+                expense: data.expense,
+              );
+            });
+          },
+          fireImmediately: true,
+        );
+  }
+
+  @override
+  void dispose() {
+    _homeWidgetSubscription?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
     final colorSchemeName = ref.watch(colorSchemeProvider);
